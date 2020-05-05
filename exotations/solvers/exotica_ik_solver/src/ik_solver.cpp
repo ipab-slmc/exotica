@@ -58,6 +58,7 @@ void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
     lambda_ = parameters_.RegularizationRate;
     th_stepinc_ = parameters_.ThresholdRegularizationIncrease;
     th_stepdec_ = parameters_.ThresholdRegularizationDecrease;
+    regmax_ = parameters_.MaximumRegularization;
 
     th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
 
@@ -115,7 +116,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
             if (J_decomposition_.info() != Eigen::Success)
             {
                 IncreaseRegularization();
-                if (lambda_ > parameters_.MaximumRegularization)
+                if (lambda_ > regmax_)
                 {
                     WARNING("Divergence in Cholesky decomposition :-(");
                     prob_->termination_criterion = TerminationCriterion::Divergence;
@@ -146,7 +147,9 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
             steplength_ = alpha_space_(ai);
             Eigen::VectorXd q_tmp = q_ - steplength_ * qd_;
             prob_->Update(q_tmp);
-            if (prob_->GetScalarCost() < error_)
+            error_ = prob_->GetScalarCost();
+
+            if (error_ < error_prev_)
             {
                 q_ = q_tmp;
                 qd_ *= steplength_;
@@ -185,11 +188,11 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         if (steplength_ <= th_stepinc_)
         {
             IncreaseRegularization();
-            // if (lambda_ == regmax_)
-            // {
-            //     prob_->termination_criterion = TerminationCriterion::Divergence;
-            //     break;
-            // }
+            if (lambda_ == regmax_)
+            {
+                prob_->termination_criterion = TerminationCriterion::Divergence;
+                break;
+            }
         }
     }
 
@@ -197,10 +200,6 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
     if (i == GetNumberOfMaxIterations())
     {
         prob_->termination_criterion = TerminationCriterion::IterationLimit;
-    }
-    else
-    {
-        if (debug_) PrintDebug(i);
     }
 
     if (debug_)

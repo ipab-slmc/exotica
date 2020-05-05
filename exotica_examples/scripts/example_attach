@@ -27,11 +27,11 @@ ompl = exo.Setup.load_solver(
     '{exotica_examples}/resources/configs/example_manipulate_ompl.xml')
 
 # Plan 3 end poses
-ik.get_problem().set_rho('Position1', 1e3)
+ik.get_problem().set_rho('Position1', 1e2)
 ik.get_problem().set_rho('Position2', 0)
 goal_pose = [ik.solve()[0].tolist()]
 ik.get_problem().set_rho('Position1', 0)
-ik.get_problem().set_rho('Position2', 1e3)
+ik.get_problem().set_rho('Position2', 1e2)
 goal_pose.append(ik.solve()[0].tolist())
 goal_pose.append([0]*len(goal_pose[0]))
 start_pose = [[0]*len(goal_pose[0]), goal_pose[0], goal_pose[1]]

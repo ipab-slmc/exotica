@@ -64,6 +64,7 @@ private:
     Eigen::MatrixXd cost_jacobian_;                ///< Jacobian, used during optimisation
     Eigen::MatrixXd J_pseudo_inverse_;             ///< Jacobian pseudo-inverse, used during optimisation
     double error_;                                 ///< Error, used during optimisation
+    double error_prev_;                            ///< Error at previous iteration, used during optimisation
     Eigen::LLT<Eigen::MatrixXd> J_decomposition_;  ///< Cholesky decomposition for the weighted pseudo-inverse
     Eigen::MatrixXd J_tmp_;                        ///< Temporary variable for inverse computation
 
@@ -71,11 +72,11 @@ private:
     double th_stop_;  ///< Gradient convergence threshold
 
     // Regularization
-    double regmin_ = 1e-9;      //!< Minimum regularization (will not decrease lower)
-    double regmax_ = 1e9;       //!< Maximum regularization (to exit by divergence)
-    double regfactor_ = 10.;    //!< Factor by which the regularization gets increased/decreased
-    double th_stepdec_ = 0.5;   //!< Step-length threshold used to decrease regularization
-    double th_stepinc_ = 0.01;  //!< Step-length threshold used to increase regularization
+    double regmin_ = 1e-9;     //!< Minimum regularization (will not decrease lower)
+    double regmax_ = 1e9;      //!< Maximum regularization (to exit by divergence)
+    double regfactor_ = 10.;   //!< Factor by which the regularization gets increased/decreased
+    double th_stepdec_ = 0.5;  //!< Step-length threshold used to decrease regularization
+    double th_stepinc_ = 0.1;  //!< Step-length threshold used to increase regularization
 
     void IncreaseRegularization()
     {

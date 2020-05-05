@@ -58,6 +58,7 @@ void IKSolver::SpecifyProblem(PlanningProblemPtr pointer)
     lambda_ = parameters_.RegularizationRate;
     th_stepinc_ = parameters_.ThresholdRegularizationIncrease;
     th_stepdec_ = parameters_.ThresholdRegularizationDecrease;
+    regmax_ = parameters_.MaximumRegularization;
 
     th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
 
@@ -91,6 +92,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         prob_->Update(q_);
         error_ = prob_->GetScalarCost();
         prob_->SetCostEvolution(i, error_);
+        error_prev_ = error_;
 
         // Absolute function tolerance check
         if (error_ < parameters_.Tolerance)
@@ -103,15 +105,30 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         cost_jacobian_.noalias() = prob_->cost.S * prob_->cost.jacobian;
 
         // Weighted Regularized Pseudo-Inverse
-        //   J_pseudo_inverse_ = W_inv_ * cost_jacobian_.transpose() * ( cost_jacobian_ * W_inv_ * cost_jacobian_.transpose() + C_ ).inverse();
+        //   J_pseudo_inverse_ = W_inv_ * cost_jacobian_.transpose() * ( cost_jacobian_ * W_inv_ * cost_jacobian_.transpose() + lambda_ * I ).inverse();
 
-        J_tmp_.noalias() = cost_jacobian_ * W_inv_ * cost_jacobian_.transpose();
-        J_tmp_.diagonal().array() += lambda_;  // Add regularisation
-        J_decomposition_.compute(J_tmp_);
-        if (J_decomposition_.info() != Eigen::Success)
+        bool decomposition_ok = false;
+        while (!decomposition_ok)
         {
-            ThrowPretty("Error during matrix decomposition of J_tmp_ (lambda=" << lambda_ << "):\n"
-                                                                               << J_tmp_);
+            J_tmp_.noalias() = cost_jacobian_ * W_inv_ * cost_jacobian_.transpose();
+            J_tmp_.diagonal().array() += lambda_;  // Add regularisation
+            J_decomposition_.compute(J_tmp_);
+            if (J_decomposition_.info() != Eigen::Success)
+            {
+                IncreaseRegularization();
+                if (lambda_ > regmax_)
+                {
+                    WARNING("Divergence in Cholesky decomposition :-(");
+                    prob_->termination_criterion = TerminationCriterion::Divergence;
+                    break;
+                }
+                // ThrowPretty("Error during matrix decomposition of J_tmp_ (lambda=" << lambda_ << "):\n"
+                //                                                                 << J_tmp_);
+            }
+            else
+            {
+                decomposition_ok = true;
+            }
         }
         J_tmp_.noalias() = J_decomposition_.solve(Eigen::MatrixXd::Identity(prob_->cost.length_jacobian, prob_->cost.length_jacobian));  // Inverse
         J_pseudo_inverse_.noalias() = W_inv_ * cost_jacobian_.transpose() * J_tmp_;
@@ -130,7 +147,9 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
             steplength_ = alpha_space_(ai);
             Eigen::VectorXd q_tmp = q_ - steplength_ * qd_;
             prob_->Update(q_tmp);
-            if (prob_->GetScalarCost() < error_)
+            error_ = prob_->GetScalarCost();
+
+            if (error_ < error_prev_)
             {
                 q_ = q_tmp;
                 qd_ *= steplength_;
@@ -155,7 +174,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // Check gradient tolerance (convergence)
-        if (step_ < parameters_.GradientToleranceConvergenceThreshold)
+        if (stop_ < parameters_.GradientToleranceConvergenceThreshold)
         {
             prob_->termination_criterion = TerminationCriterion::GradientTolerance;
             break;
@@ -178,13 +197,9 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
     }
 
     // Check if we ran out of iterations
-    if (i == GetNumberOfMaxIterations() - 1)
+    if (i == GetNumberOfMaxIterations())
     {
         prob_->termination_criterion = TerminationCriterion::IterationLimit;
-    }
-    else
-    {
-        if (debug_) PrintDebug(i);
     }
 
     if (debug_)
@@ -192,13 +207,13 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         switch (prob_->termination_criterion)
         {
             case TerminationCriterion::GradientTolerance:
-                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << stop_ << " < " << parameters_.GradientToleranceConvergenceThreshold << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached convergence (" << std::scientific << stop_ << " < " << parameters_.GradientToleranceConvergenceThreshold << ")");
                 break;
             case TerminationCriterion::FunctionTolerance:
-                HIGHLIGHT_NAMED("IKSolver", "Reached absolute function tolerance (" << error_ << " < " << parameters_.Tolerance << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached absolute function tolerance (" << std::scientific << error_ << " < " << parameters_.Tolerance << ")");
                 break;
             case TerminationCriterion::StepTolerance:
-                HIGHLIGHT_NAMED("IKSolver", "Reached step tolerance (" << step_ << " < " << parameters_.StepToleranceConvergenceThreshold << ")");
+                HIGHLIGHT_NAMED("IKSolver", "Reached step tolerance (" << std::scientific << step_ << " < " << parameters_.StepToleranceConvergenceThreshold << ")");
                 break;
             case TerminationCriterion::Divergence:
                 WARNING_NAMED("IKSolver", "Regularization exceeds maximum regularization: " << lambda_ << " > " << regmax_);

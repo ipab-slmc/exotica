@@ -13,27 +13,28 @@
   </PlanningScene>
   <Maps>
     <EffFrame Name="Position1">
-      <Type>RPY</Type>
       <EndEffector>
           <Frame Link="lwr_arm_6_link" BaseOffset="0.6 -0.3 0.5 0 0 0 1" LinkOffset="0 0 0.2 0.7071067811865476 0  0.7071067811865475 0"/>
       </EndEffector>
     </EffFrame>
     <EffFrame Name="Position2">
-      <Type>RPY</Type>
       <EndEffector>
           <Frame Link="lwr_arm_6_link" BaseOffset="0.6 0.3 0.5 0 0 0 1" LinkOffset="0 0 0.2 0.7071067811865476 0  0.7071067811865475 0"/>
       </EndEffector>
     </EffFrame>
+    <JointLimit Name="JointLimit"/>
+    <JointPose Name="JointPose"/>
   </Maps>
 
   <Cost>
+    <Task Task="JointLimit"/>
+    <Task Task="JointPose"/>
     <Task Task="Position1"/>
     <Task Task="Position2"/>
   </Cost>
 
   <W> 7 6 5 4 3 2 1 </W>
   <StartState>0 0 0 0 0 0 0</StartState>
-  <NominalState>0 0 0 0 0 0 0</NominalState>
 </UnconstrainedEndPoseProblem>
 
 </ExampleConfig>

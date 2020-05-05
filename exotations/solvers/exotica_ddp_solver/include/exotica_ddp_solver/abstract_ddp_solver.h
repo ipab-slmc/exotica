@@ -54,6 +54,26 @@ public:
 
     Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const override;
 
+    const std::vector<Eigen::MatrixXd>& get_Vxx() const;
+    const std::vector<Eigen::VectorXd>& get_Vx() const;
+    const std::vector<Eigen::MatrixXd>& get_Qxx() const;
+    const std::vector<Eigen::MatrixXd>& get_Qux() const;
+    const std::vector<Eigen::MatrixXd>& get_Quu() const;
+    const std::vector<Eigen::VectorXd>& get_Qx() const;
+    const std::vector<Eigen::VectorXd>& get_Qu() const;
+    const std::vector<Eigen::MatrixXd>& get_K() const;
+    const std::vector<Eigen::VectorXd>& get_k() const;
+
+    const std::vector<Eigen::VectorXd>& get_X_try() const;
+    const std::vector<Eigen::VectorXd>& get_U_try() const;
+
+    const std::vector<Eigen::VectorXd>& get_X_ref() const;
+    const std::vector<Eigen::VectorXd>& get_U_ref() const;
+
+    const std::vector<Eigen::MatrixXd>& get_Quu_inv() const;
+    const std::vector<Eigen::MatrixXd>& get_fx() const;
+    const std::vector<Eigen::MatrixXd>& get_fu() const;
+
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;  ///< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;          ///< Shared pointer to the dynamics solver.

@@ -296,4 +296,20 @@ Eigen::VectorXd AbstractDDPSolver::GetFeedbackControl(Eigen::VectorXdRefConst x,
     return u.cwiseMax(dynamics_solver_->get_control_limits().col(0)).cwiseMin(dynamics_solver_->get_control_limits().col(1));
 }
 
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Vxx() const { return Vxx_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_Vx() const { return Vx_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Qxx() const { return Qxx_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Qux() const { return Qux_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Quu() const { return Quu_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_Qx() const { return Qx_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_Qu() const { return Qu_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_K() const { return K_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_k() const { return k_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_X_try() const { return X_try_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_U_try() const { return U_try_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_X_ref() const { return X_ref_; }
+const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_U_ref() const { return U_ref_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Quu_inv() const { return Quu_inv_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fx() const { return fx_; }
+const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fu() const { return fu_; }
 }  // namespace exotica

@@ -64,6 +64,7 @@ private:
     Eigen::MatrixXd cost_jacobian_;                ///< Jacobian, used during optimisation
     Eigen::MatrixXd J_pseudo_inverse_;             ///< Jacobian pseudo-inverse, used during optimisation
     double error_;                                 ///< Error, used during optimisation
+    double error_prev_;                            ///< Error at previous iteration, used during optimisation
     Eigen::LLT<Eigen::MatrixXd> J_decomposition_;  ///< Cholesky decomposition for the weighted pseudo-inverse
     Eigen::MatrixXd J_tmp_;                        ///< Temporary variable for inverse computation
 

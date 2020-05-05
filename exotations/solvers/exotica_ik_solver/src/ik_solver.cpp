@@ -91,6 +91,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         prob_->Update(q_);
         error_ = prob_->GetScalarCost();
         prob_->SetCostEvolution(i, error_);
+        error_prev_ = error_;
 
         // Absolute function tolerance check
         if (error_ < parameters_.Tolerance)
@@ -103,7 +104,7 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         cost_jacobian_.noalias() = prob_->cost.S * prob_->cost.jacobian;
 
         // Weighted Regularized Pseudo-Inverse
-        //   J_pseudo_inverse_ = W_inv_ * cost_jacobian_.transpose() * ( cost_jacobian_ * W_inv_ * cost_jacobian_.transpose() + C_ ).inverse();
+        //   J_pseudo_inverse_ = W_inv_ * cost_jacobian_.transpose() * ( cost_jacobian_ * W_inv_ * cost_jacobian_.transpose() + lambda_ * I ).inverse();
 
         bool decomposition_ok = false;
         while (!decomposition_ok)

@@ -100,4 +100,15 @@ int JointPose::TaskSpaceDim()
 {
     return joint_map_.size();
 }
+
+const std::vector<int>& JointPose::get_joint_map() const
+{
+    return joint_map_;
+}
+
+const Eigen::VectorXd& JointPose::get_joint_ref() const
+{
+    return joint_ref_;
+}
+
 }  // namespace exotica

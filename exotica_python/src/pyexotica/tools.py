@@ -48,7 +48,8 @@ def check_whether_trajectory_is_collision_free_by_subsampling(scene, trajectory,
             if not scene.is_state_valid(True):
                 return False
     end_time = time()
-    debug and print("Trajectory transition collision check took", end_time - start_time)
+    if debug:
+           print("Trajectory transition collision check took", end_time - start_time)
     return True
 
 

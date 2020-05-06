@@ -108,6 +108,7 @@ add_library(${PROJECT_NAME}
   src/visualization_moveit.cpp
   src/visualization_meshcat.cpp
   src/scene.cpp
+  src/collision_scene.cpp
   src/trajectory.cpp
   src/property.cpp
   src/kinematic_tree.cpp

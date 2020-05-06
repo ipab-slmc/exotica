@@ -148,7 +148,8 @@ public:
     /// @param o2 Name of the frame of the other collision object (e.g., base_link_collision_0)
     /// @return true The two objects are allowed to collide.
     /// @return false The two objects are excluded, e.g., by an ACM.
-    virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { ThrowPretty("Not implemented!"); }
+    virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self);
+
     /// \brief Checks if the whole robot is valid (collision only).
     /// @param self Indicate if self collision check is required.
     /// @return True, if the state is collision free..

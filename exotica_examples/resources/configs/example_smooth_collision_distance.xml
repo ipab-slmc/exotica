@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
-    <AICOSolver Name="MySolver" Debug="1"/>
+    <AICOSolver Name="MySolver" Debug="0"/>
 
     <UnconstrainedTimeIndexedProblem Name="MyProblem">
         <PlanningScene>
@@ -23,7 +23,7 @@
                 <JointRef>2.16939 1.313509 -2.2954 1.94413 -0.276843 0.567194 0</JointRef>
             </JointPose>
             <SmoothCollisionDistance Name="Collision">
-                <Debug>1</Debug>
+                <Debug>0</Debug>
                 <WorldMargin>0.2</WorldMargin>
                 <CheckSelfCollision>0</CheckSelfCollision>
             </SmoothCollisionDistance>

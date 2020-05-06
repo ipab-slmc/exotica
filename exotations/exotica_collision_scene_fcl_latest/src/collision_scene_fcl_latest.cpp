@@ -31,6 +31,10 @@
 #include <exotica_core/factory.h>
 #include <exotica_core/scene.h>
 
+#include <eigen_conversions/eigen_kdl.h>
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
+
 REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionSceneFCLLatest)
 
 #define CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS

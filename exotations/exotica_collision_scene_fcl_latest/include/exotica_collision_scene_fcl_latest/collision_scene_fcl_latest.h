@@ -37,10 +37,6 @@
 
 #include <fcl/fcl.h>  // FCL 0.6 as provided by fcl_catkin
 
-#include <eigen_conversions/eigen_kdl.h>
-#include <geometric_shapes/mesh_operations.h>
-#include <geometric_shapes/shape_operations.h>
-
 namespace exotica
 {
 class CollisionSceneFCLLatest : public CollisionScene

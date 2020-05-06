@@ -68,9 +68,9 @@ void ControlLimitedDDPSolver::BackwardPass()
         // State regularization
         Vxx_[t + 1].diagonal().array() += lambda_;
 
-        Qxx_[t].noalias() = dt_ * dt_ * prob_->GetStateCostHessian(t) + fx_[t].transpose() * Vxx_[t + 1] * fx_[t];
-        Quu_[t].noalias() = dt_ * dt_ * prob_->GetControlCostHessian(t) + fu_[t].transpose() * Vxx_[t + 1] * fu_[t];
-        // Qux_[t].noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian()  // TODO: Reactivate once we have costs that depend on both x and u!
+        Qxx_[t].noalias() = dt_ * prob_->GetStateCostHessian(t) + fx_[t].transpose() * Vxx_[t + 1] * fx_[t];
+        Quu_[t].noalias() = dt_ * prob_->GetControlCostHessian(t) + fu_[t].transpose() * Vxx_[t + 1] * fu_[t];
+        // Qux_[t].noalias() = dt_ * prob_->GetStateControlCostHessian()  // TODO: Reactivate once we have costs that depend on both x and u!
         Qux_[t].noalias() = fu_[t].transpose() * Vxx_[t + 1] * fx_[t];
 
         if (parameters_.UseSecondOrderDynamics && dynamics_solver_->get_has_second_order_derivatives())

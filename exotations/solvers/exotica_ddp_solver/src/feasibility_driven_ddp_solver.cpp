@@ -551,9 +551,9 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
         const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
         const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
-        Qxx_[t].noalias() = dt_ * dt_ * prob_->GetStateCostHessian(t);
-        Qxu_[t].noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian().transpose();
-        Quu_[t].noalias() = dt_ * dt_ * prob_->GetControlCostHessian(t);
+        Qxx_[t].noalias() = dt_ * prob_->GetStateCostHessian(t);
+        Qxu_[t].noalias() = dt_ * prob_->GetStateControlCostHessian().transpose();
+        Quu_[t].noalias() = dt_ * prob_->GetControlCostHessian(t);
         Qx_[t].noalias() = dt_ * prob_->GetStateCostJacobian(t);
         Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t);
 

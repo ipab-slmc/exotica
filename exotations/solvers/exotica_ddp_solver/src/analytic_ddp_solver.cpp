@@ -77,11 +77,11 @@ void AnalyticDDPSolver::BackwardPass()
         Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t);  // Eq. 20(b)            (1,NU)^T => (NU,1)
         Qu_[t].noalias() += fu_[t].transpose() * Vx_[t + 1];        //                      (NU,NDX)*(NDX,1) => (NU,1)
 
-        Qxx_[t].noalias() = dt_ * dt_ * prob_->GetStateCostHessian(t);    // Eq. 20(c)        (NDX,NDX)^T => (NDX,NDX)
-        Qxx_[t].noalias() += fx_[t].transpose() * Vxx_[t + 1] * fx_[t];   //                  + (NDX,NDX)^T*(NDX,NDX)*(NDX,NDX)
-        Quu_[t].noalias() = dt_ * dt_ * prob_->GetControlCostHessian(t);  // Eq. 20(d)        (NU,NU)^T
-        Quu_[t].noalias() += fu_[t].transpose() * Vxx_[t + 1] * fu_[t];   //                  + (NDX,NU)^T*(NDX,NDX)*(NDX,NU)
-        // Qux_[t].noalias() = dt_ * dt_ * prob_->GetStateControlCostHessian();          // Eq. 20(e)        (NU,NDX)
+        Qxx_[t].noalias() = dt_ * prob_->GetStateCostHessian(t);         // Eq. 20(c)        (NDX,NDX)^T => (NDX,NDX)
+        Qxx_[t].noalias() += fx_[t].transpose() * Vxx_[t + 1] * fx_[t];  //                  + (NDX,NDX)^T*(NDX,NDX)*(NDX,NDX)
+        Quu_[t].noalias() = dt_ * prob_->GetControlCostHessian(t);       // Eq. 20(d)        (NU,NU)^T
+        Quu_[t].noalias() += fu_[t].transpose() * Vxx_[t + 1] * fu_[t];  //                  + (NDX,NU)^T*(NDX,NDX)*(NDX,NU)
+        // Qux_[t].noalias() = dt_ * prob_->GetStateControlCostHessian();          // Eq. 20(e)        (NU,NDX)
         // NB: This assumes that Lux is always 0.
         Qux_[t].noalias() = fu_[t].transpose() * Vxx_[t + 1] * fx_[t];  //                  + (NDX,NU)^T*(NDX,NDX) =>(NU,NDX)
 
@@ -90,11 +90,11 @@ void AnalyticDDPSolver::BackwardPass()
         {
             Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_[t + 1].data(), NDX_);
 
-            Qxx_[t] += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_ * dt_;
+            Qxx_[t] += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_;
 
-            Quu_[t] += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_) * dt_ * dt_;
+            Quu_[t] += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_) * dt_;
 
-            Qux_[t] += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_) * dt_ * dt_;  // transpose?
+            Qux_[t] += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_) * dt_;  // transpose?
         }
 
         // Control regularization for numerical stability

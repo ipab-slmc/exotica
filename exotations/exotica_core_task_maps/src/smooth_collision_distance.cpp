@@ -79,7 +79,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
         Eigen::MatrixXd J_a(6, scene_->GetKinematicTree().GetNumControlledJoints()), J_b(6, scene_->GetKinematicTree().GetNumControlledJoints());
         for (const auto& proxy : proxies)
         {
-            bool is_robot_to_robot = (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
+            bool is_robot_to_robot = (proxy.e1 != nullptr && proxy.e2 != nullptr) && (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
             double& margin = is_robot_to_robot ? robot_margin_ : world_margin_;
 
             if (proxy.distance < margin)
@@ -90,11 +90,27 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                 if (updateJacobian)
                 {
                     // Jacobian
-                    arel = KDL::Frame(proxy.e1->frame.Inverse(KDL::Vector(proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
-                    brel = KDL::Frame(proxy.e2->frame.Inverse(KDL::Vector(proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
+                    if (proxy.e1 != nullptr)
+                    {
+                        arel = KDL::Frame(proxy.e1->frame.Inverse(KDL::Vector(proxy.contact1.x(), proxy.contact1.y(), proxy.contact1.z())));
+                        J_a = scene_->GetKinematicTree().Jacobian(proxy.e1, arel, nullptr, KDL::Frame());
+                    }
+                    else
+                    {
+                        arel.Identity();
+                        J_a.setZero();
+                    }
 
-                    J_a = scene_->GetKinematicTree().Jacobian(proxy.e1, arel, nullptr, KDL::Frame());
-                    J_b = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr, KDL::Frame());
+                    if (proxy.e2 != nullptr)
+                    {
+                        brel = KDL::Frame(proxy.e2->frame.Inverse(KDL::Vector(proxy.contact2.x(), proxy.contact2.y(), proxy.contact2.z())));
+                        J_b = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr, KDL::Frame());
+                    }
+                    else
+                    {
+                        brel.Identity();
+                        J_b.setZero();
+                    }
 
                     if (!linear_)
                     {

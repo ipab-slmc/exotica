@@ -3,6 +3,7 @@
     <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <RegularizationRate>0.01</RegularizationRate>
     </ControlLimitedDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">

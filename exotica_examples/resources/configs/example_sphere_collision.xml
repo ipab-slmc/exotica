@@ -1,19 +1,14 @@
 <?xml version="1.0" ?>
 <PlannerDemoConfig>
-
   <AICOSolver Name="MySolver" />
 
   <UnconstrainedTimeIndexedProblem Name="MyProblem">
-
     <PlanningScene>
       <Scene>
         <JointGroup>arm</JointGroup>
         <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
         <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
-        <Links>
-          <Link Name="Target" Transform="0.6 0.3 0.5"/>
-        </Links>
         <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
         <Trajectories>
           <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
@@ -30,26 +25,26 @@
         <Precision>0.1</Precision>
         <ReferenceFrame>exotica/world_frame</ReferenceFrame>
         <EndEffector>
-            <Frame Link="lwr_arm_7_link" Radius="0.1" Group="Robot" />
-            <Frame Link="lwr_arm_6_link" Radius="0.1" Group="Robot" />
-            <Frame Link="lwr_arm_5_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
-            <Frame Link="lwr_arm_5_link" Radius="0.1" Group="Robot" />
-            <Frame Link="lwr_arm_4_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
-            <Frame Link="lwr_arm_4_link" Radius="0.1" Group="Robot" />
-            <Frame Link="lwr_arm_3_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
-            <Frame Link="lwr_arm_3_link" Radius="0.1" Group="Robot" />
-            <Frame Link="lwr_arm_2_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
-            <Frame Link="lwr_arm_2_link" Radius="0.1" Group="Robot" />
-            <Frame Link="lwr_arm_1_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
-            <Frame Link="lwr_arm_1_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_7_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_6_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_5_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
+          <Frame Link="lwr_arm_5_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_4_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
+          <Frame Link="lwr_arm_4_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_3_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
+          <Frame Link="lwr_arm_3_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_2_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
+          <Frame Link="lwr_arm_2_link" Radius="0.1" Group="Robot" />
+          <Frame Link="lwr_arm_1_link" Radius="0.1" Group="Robot" LinkOffset="0 0 0.1" />
+          <Frame Link="lwr_arm_1_link" Radius="0.1" Group="Robot" />
 
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 -0.3 0" />
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 -0.2 0" />
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 -0.1 0" />
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 0 0" />
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 0.1 0" />
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 0.2 0" />
-            <Frame Link="Obstacle" Radius="0.15" Group="Obstacle"  LinkOffset="0 0.3 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 -0.3 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 -0.2 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 -0.1 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 0 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 0.1 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 0.2 0" />
+          <Frame Link="Obstacle" Radius="0.15" Group="Obstacle" LinkOffset="0 0.3 0" />
         </EndEffector>
       </SphereCollision>
     </Maps>
@@ -58,7 +53,7 @@
       <Task Task="Pose" Rho="1e4"/>
       <Task Task="Collision" Rho="1e1"/>
     </Cost>
-   
+
     <T>100</T>
     <tau>0.03</tau>
     <Wrate>1e3</Wrate>

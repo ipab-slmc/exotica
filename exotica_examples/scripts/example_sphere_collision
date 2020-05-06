@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import pyexotica as exo
 from pyexotica.publish_trajectory import *
 import signal
@@ -39,5 +39,6 @@ for t in range(0, problem.T - 1):
     problem.set_rho('Pose', 0.0, t)
 
 solution = solver.solve()
+print("Solved in", solver.get_planning_time())
 
 publish_trajectory(solution, problem.T * problem.tau, problem)

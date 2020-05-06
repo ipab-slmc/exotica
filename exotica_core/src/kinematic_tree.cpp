@@ -1263,4 +1263,12 @@ bool KinematicTree::DoesLinkWithNameExist(std::string name) const
     // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and model_tree_
     return tree_map_.find(name) != tree_map_.end();
 }
+
+std::shared_ptr<KinematicElement> KinematicTree::FindKinematicElementByName(const std::string& frame_name)
+{
+    auto it = tree_map_.find(frame_name);
+    if (it == tree_map_.end()) ThrowPretty("KinematicElement does not exist:" << frame_name);
+
+    return it->second.lock();
+}
 }  // namespace exotica

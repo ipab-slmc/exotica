@@ -1330,6 +1330,7 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("get_random_controlled_state", &KinematicTree::GetRandomControlledState);
     kinematic_tree.def("get_num_model_joints", &KinematicTree::GetNumModelJoints);
     kinematic_tree.def("get_num_controlled_joints", &KinematicTree::GetNumControlledJoints);
+    kinematic_tree.def("find_kinematic_element_by_name", &KinematicTree::FindKinematicElementByName);
 
     // joints and links that describe the full state of the robot
     kinematic_tree.def("get_model_link_names", &KinematicTree::GetModelLinkNames);

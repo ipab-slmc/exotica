@@ -217,6 +217,7 @@ public:
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetTreeMap() const { return tree_map_; }
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetCollisionTreeMap() const { return collision_tree_map_; }
     bool DoesLinkWithNameExist(std::string name) const;  //!< Checks whether a link with this name exists in any of the trees
+    std::shared_ptr<KinematicElement> FindKinematicElementByName(const std::string& frame_name);
 
     const std::vector<std::weak_ptr<KinematicElement>>& GetControlledJoints() const { return controlled_joints_; }
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetControlledJointsMap() const { return controlled_joints_map_; }

@@ -40,6 +40,9 @@
 #include <exotica_core/tools/timer.h>
 #include <exotica_core/tools/uncopyable.h>
 #include <exotica_core/version.h>
+
+#include <geometric_shapes/shapes.h>
+#include <octomap/OcTree.h>
 #include <std_msgs/ColorRGBA.h>
 
 /**
@@ -83,6 +86,10 @@ inline std_msgs::ColorRGBA GetColor(const Eigen::Vector4d& rgba)
    */
 void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
              Eigen::VectorXd& vert);
+
+std::shared_ptr<octomap::OcTree> LoadOctree(const std::string& file_path);
+
+std::shared_ptr<shapes::Shape> LoadOctreeAsShape(const std::string& file_path);
 
 void SaveMatrix(std::string file_name,
                 const Eigen::Ref<const Eigen::MatrixXd> mat);

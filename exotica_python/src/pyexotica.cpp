@@ -679,6 +679,8 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("parse_int", &ParseInt);
     tools.def("parse_int_list", &ParseIntList);
     tools.def("load_obj", [](const std::string& path) { Eigen::VectorXi tri; Eigen::VectorXd vert; LoadOBJ(LoadFile(path), tri, vert); return py::make_tuple(tri, vert); });
+    tools.def("load_octree", &LoadOctree);
+    tools.def("load_octree_as_shape", &LoadOctreeAsShape);
     tools.def("save_matrix", &SaveMatrix);
     tools.def("VectorTransform", &Eigen::VectorTransform);
     tools.def("IdentityTransform", &Eigen::IdentityTransform);
@@ -1478,6 +1480,10 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("mergeVertices", &shapes::Mesh::mergeVertices)
         .def_readonly("vertex_count", &shapes::Mesh::vertex_count)
         .def_readonly("triangle_count", &shapes::Mesh::triangle_count);
+
+    py::class_<shapes::OcTree, shapes::Shape, std::shared_ptr<shapes::OcTree>>(module, "OcTree")
+        .def(py::init())
+        .def(py::init<const std::shared_ptr<const octomap::OcTree>&>());
 
     py::enum_<shapes::ShapeType>(module, "ShapeType")
         .value("UNKNOWN_SHAPE", shapes::ShapeType::UNKNOWN_SHAPE)

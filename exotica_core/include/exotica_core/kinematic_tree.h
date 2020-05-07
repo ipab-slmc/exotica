@@ -280,6 +280,7 @@ private:
     std::vector<tf::StampedTransform> debug_tree_;
     std::vector<tf::StampedTransform> debug_frames_;
     ros::Publisher shapes_pub_;
+    ros::Publisher octomap_pub_;
     bool debug_scene_changed_;
     visualization_msgs::MarkerArray marker_array_msg_;
     std::string name_;

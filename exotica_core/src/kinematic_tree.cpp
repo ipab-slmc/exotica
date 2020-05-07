@@ -36,6 +36,8 @@
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_model/robot_model.h>
+#include <octomap_msgs/Octomap.h>
+#include <octomap_msgs/conversions.h>
 #include <tf_conversions/tf_kdl.h>
 #include <kdl/frames_io.hpp>
 #include <kdl_parser/kdl_parser.hpp>
@@ -149,6 +151,7 @@ void KinematicTree::Instantiate(const std::string& joint_group, robot_model::Rob
     if (Server::IsRos())
     {
         shapes_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 1, true);
+        octomap_pub_ = Server::Advertise<octomap_msgs::Octomap>(name_ + (name_ == "" ? "" : "/") + "OctoMap", 1, true);
         debug_scene_changed_ = true;
         // Clear scene
         visualization_msgs::MarkerArray msg;
@@ -757,16 +760,29 @@ void KinematicTree::PublishFrames()
                 }
                 else if (tree_[i].lock()->shape && (!tree_[i].lock()->closest_robot_link.lock() || !tree_[i].lock()->closest_robot_link.lock()->is_robot_link))
                 {
-                    visualization_msgs::Marker mrk;
-                    shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
-                    mrk.action = visualization_msgs::Marker::ADD;
-                    mrk.frame_locked = true;
-                    mrk.id = i;
-                    mrk.ns = "CollisionObjects";
-                    mrk.color = GetColor(tree_[i].lock()->color);
-                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
-                    mrk.pose.orientation.w = 1.0;
-                    marker_array_msg_.markers.push_back(mrk);
+                    if (tree_[i].lock()->shape->type != shapes::ShapeType::OCTREE)
+                    {
+                        visualization_msgs::Marker mrk;
+                        shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
+                        mrk.action = visualization_msgs::Marker::ADD;
+                        mrk.frame_locked = true;
+                        mrk.id = i;
+                        mrk.ns = "CollisionObjects";
+                        mrk.color = GetColor(tree_[i].lock()->color);
+                        mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                        mrk.pose.orientation.w = 1.0;
+                        marker_array_msg_.markers.push_back(mrk);
+                    }
+                    else
+                    {
+                        // OcTree needs separate handling as it's not supported in constructMarkerFromShape
+                        // NB: This only supports a single OctoMap in the KinematicTree as we only have one publisher!
+                        octomap::OcTree my_octomap = *std::static_pointer_cast<const shapes::OcTree>(tree_[i].lock()->shape)->octree.get();
+                        octomap_msgs::Octomap octomap_msg;
+                        octomap_msgs::binaryMapToMsg(my_octomap, octomap_msg);
+                        octomap_msg.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                        octomap_pub_.publish(octomap_msg);
+                    }
                 }
             }
             shapes_pub_.publish(marker_array_msg_);

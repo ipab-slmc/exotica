@@ -97,7 +97,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                     }
                     else
                     {
-                        arel.Identity();
+                        arel = arel.Identity();
                         J_a.setZero();
                     }
 
@@ -108,7 +108,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                     }
                     else
                     {
-                        brel.Identity();
+                        brel = brel.Identity();
                         J_b.setZero();
                     }
 

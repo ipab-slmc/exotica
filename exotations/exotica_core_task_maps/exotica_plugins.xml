@@ -66,6 +66,9 @@
   <class name="exotica/CollisionDistance" type="exotica::CollisionDistance" base_class_type="exotica::TaskMap">
     <description>Collision distance</description>
   </class>
+  <class name="exotica/VariableSizeCollisionDistance" type="exotica::VariableSizeCollisionDistance" base_class_type="exotica::TaskMap">
+    <description>Fixed-size collision distance task map. Size of dimension to be set a priori. If more CollisionProxies are returned, they will be dropped.</description>
+  </class>
   <class name="exotica/SumOfPenetrations" type="exotica::SumOfPenetrations" base_class_type="exotica::TaskMap">
     <description>Sum of collision penetrations</description>
   </class>

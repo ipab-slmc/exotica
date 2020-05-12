@@ -1,0 +1,5 @@
+class VariableSizeCollisionDistance
+
+extend <exotica_core/task_map>
+Optional int Dimension = 20;
+Optional double WorldMargin = 0.1;

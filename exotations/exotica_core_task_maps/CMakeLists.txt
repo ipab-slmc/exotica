@@ -43,6 +43,7 @@ AddInitializer(
   manipulability
 
   collision_distance
+  variable_size_collision_distance
   smooth_collision_distance
   sum_of_penetrations
 )
@@ -83,6 +84,7 @@ set(SOURCES
     src/sphere_collision.cpp
     src/collision_check.cpp
     src/collision_distance.cpp
+    src/variable_size_collision_distance.cpp
     src/smooth_collision_distance.cpp
     src/sum_of_penetrations.cpp
     src/quasi_static.cpp

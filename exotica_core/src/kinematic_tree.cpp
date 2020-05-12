@@ -1116,7 +1116,11 @@ void KinematicTree::ResetJointLimits()
         {
             auto& ControlledJoint = controlled_joints_map_.at(vars[i]);
             int index = ControlledJoint.lock()->control_id;
-            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_, model_->getVariableBounds(vars[i]).max_velocity_, model_->getVariableBounds(vars[i]).max_acceleration_};
+
+            // Last element should be model_->getVariableBounds(vars[i]).max_acceleration_, but the URDF-parser
+            // in ros_control seems to skip over parsing acceleration limits (https://github.com/ros-controls/ros_control/issues/350#issuecomment-411670354)
+            // Set to infinity as a work around
+            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_, model_->getVariableBounds(vars[i]).max_velocity_, inf};
         }
     }
 

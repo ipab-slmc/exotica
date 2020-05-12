@@ -318,7 +318,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     }
     model_tree_[0]->is_robot_link = false;
 
-    joint_limits_ = Eigen::MatrixXd::Zero(num_controlled_joints_, 2);
+    joint_limits_ = Eigen::MatrixXd::Zero(num_controlled_joints_, 4);
     ResetJointLimits();
 
     // Create random distributions for state sampling
@@ -967,7 +967,7 @@ void KinematicTree::SetJointLimitsLower(Eigen::VectorXdRefConst lower_in)
     {
         for (unsigned int i = 0; i < num_controlled_joints_; ++i)
         {
-            controlled_joints_[i].lock()->joint_limits[0] = lower_in(i);
+            controlled_joints_[i].lock()->joint_limits[LIMIT_POSITION_LOWER] = lower_in(i);
         }
     }
     else
@@ -984,12 +984,65 @@ void KinematicTree::SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in)
     {
         for (unsigned int i = 0; i < num_controlled_joints_; ++i)
         {
-            controlled_joints_[i].lock()->joint_limits[1] = upper_in(i);
+            controlled_joints_[i].lock()->joint_limits[LIMIT_POSITION_UPPER] = upper_in(i);
         }
     }
     else
     {
         ThrowPretty("Got " << upper_in.rows() << " but " << num_controlled_joints_ << " expected.");
+    }
+
+    UpdateJointLimits();
+}
+
+void KinematicTree::SetJointLimitsVelocity(Eigen::VectorXdRefConst velocity_in)
+{
+    if (velocity_in.rows() == num_controlled_joints_)
+    {
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+        {
+            controlled_joints_[i].lock()->joint_limits[LIMIT_VELOCITY] = velocity_in(i);
+        }
+    }
+    else
+    {
+        ThrowPretty("Got " << velocity_in.rows() << " but " << num_controlled_joints_ << " expected.");
+    }
+
+    UpdateJointLimits();
+}
+
+void KinematicTree::SetJointLimitsAcceleration(Eigen::VectorXdRefConst acceleration_in)
+{
+    if (acceleration_in.rows() == num_controlled_joints_)
+    {
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+        {
+            controlled_joints_[i].lock()->joint_limits[LIMIT_ACCELERATION] = acceleration_in(i);
+        }
+    }
+    else
+    {
+        ThrowPretty("Got " << acceleration_in.rows() << " but " << num_controlled_joints_ << " expected.");
+    }
+
+    UpdateJointLimits();
+}
+
+void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
+    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration)
+{
+    if (controlled_base_type_ != BaseType::FLOATING)
+    {
+        ThrowPretty("This is not a floating joint!");
+    }
+    if (lower.size() != 6 || upper.size() != 6)
+    {
+        ThrowPretty("Wrong limit data size!");
+    }
+    for (int i = 0; i < 6; ++i)
+    {
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], velocity[i], acceleration[i]};
     }
 
     UpdateJointLimits();
@@ -1008,7 +1061,27 @@ void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
     }
     for (int i = 0; i < 6; ++i)
     {
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        // Set velocity and acceleration to +inf
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], inf, inf};
+    }
+
+    UpdateJointLimits();
+}
+
+void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
+    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration)
+{
+    if (controlled_base_type_ != BaseType::PLANAR)
+    {
+        ThrowPretty("This is not a planar joint!");
+    }
+    if (lower.size() != 3 || upper.size() != 3)
+    {
+        ThrowPretty("Wrong limit data size!");
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], velocity[i], acceleration[i]};
     }
 
     UpdateJointLimits();
@@ -1027,7 +1100,8 @@ void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
     }
     for (int i = 0; i < 3; ++i)
     {
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        // Set velocity and acceleration to +inf
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], inf, inf};
     }
 
     UpdateJointLimits();
@@ -1042,14 +1116,12 @@ void KinematicTree::ResetJointLimits()
         {
             auto& ControlledJoint = controlled_joints_map_.at(vars[i]);
             int index = ControlledJoint.lock()->control_id;
-            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_};
+            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_, model_->getVariableBounds(vars[i]).max_velocity_, model_->getVariableBounds(vars[i]).max_acceleration_};
         }
     }
 
     ///	Manually defined floating base limits
     ///	Should be done more systematically with robot model class
-    constexpr double inf = std::numeric_limits<double>::infinity();
-    constexpr double pi = std::atan(1) * 4;
     if (controlled_base_type_ == BaseType::FLOATING)
     {
         controlled_joints_[0].lock()->joint_limits = {-inf, inf};
@@ -1074,15 +1146,18 @@ void KinematicTree::UpdateJointLimits()
     joint_limits_.setZero();
     for (int i = 0; i < num_controlled_joints_; ++i)
     {
-        joint_limits_(i, 0) = controlled_joints_[i].lock()->joint_limits[0];
-        joint_limits_(i, 1) = controlled_joints_[i].lock()->joint_limits[1];
+        joint_limits_(i, LIMIT_POSITION_LOWER) = controlled_joints_[i].lock()->joint_limits[LIMIT_POSITION_LOWER];
+        joint_limits_(i, LIMIT_POSITION_UPPER) = controlled_joints_[i].lock()->joint_limits[LIMIT_POSITION_UPPER];
+        joint_limits_(i, LIMIT_VELOCITY) = controlled_joints_[i].lock()->joint_limits[LIMIT_VELOCITY];
+        joint_limits_(i, LIMIT_ACCELERATION) = controlled_joints_[i].lock()->joint_limits[LIMIT_ACCELERATION];
     }
 
     // Update random state distributions for generating random controlled states
     random_state_distributions_.clear();
     for (int i = 0; i < num_controlled_joints_; ++i)
     {
-        random_state_distributions_.push_back(std::uniform_real_distribution<double>(joint_limits_(i, 0), joint_limits_(i, 1)));
+        random_state_distributions_.push_back(std::uniform_real_distribution<double>(joint_limits_(i, LIMIT_POSITION_LOWER), joint_limits_(i, LIMIT_POSITION_UPPER)));
+        // TODO: Implement random velocities and accelerations
     }
 }
 

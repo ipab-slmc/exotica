@@ -154,16 +154,16 @@ public:
     const Eigen::MatrixXd& GetJointLimits() const { return joint_limits_; }
     void SetJointLimitsLower(Eigen::VectorXdRefConst lower_in);
     void SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
-    void SetJointLimitsVelocity(Eigen::VectorXdRefConst velocity_in);
-    void SetJointLimitsAcceleration(Eigen::VectorXdRefConst acceleration_in);
+    void SetJointVelocityLimits(Eigen::VectorXdRefConst velocity_in);
+    void SetJointAccelerationLimits(Eigen::VectorXdRefConst acceleration_in);
     void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
     void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
     std::map<std::string, std::vector<double>> GetUsedJointLimits() const;
-    bool GetHasAccelerationLimit() const { return has_acceleration_limit; }
-    const Eigen::VectorXd& GetAccelerationLimit() const { return acceleration_limit_; }
-    const Eigen::VectorXd& GetVelocityLimit() const { return velocity_limit_; }
+    bool HasAccelerationLimits() const { return has_acceleration_limit; }
+    const Eigen::VectorXd& GetAccelerationLimits() const { return acceleration_limits_; }
+    const Eigen::VectorXd& GetVelocityLimits() const { return velocity_limits_; }
     int GetNumControlledJoints() const;
     int GetNumModelJoints() const;
     void PublishFrames();
@@ -261,8 +261,8 @@ private:
     // Joint limits
     // TODO: Add effort limits
     Eigen::MatrixXd joint_limits_;
-    Eigen::VectorXd velocity_limit_;
-    Eigen::VectorXd acceleration_limit_;
+    Eigen::VectorXd velocity_limits_;
+    Eigen::VectorXd acceleration_limits_;
     bool has_acceleration_limit = false;
     void UpdateJointLimits();
 

@@ -90,14 +90,10 @@ void Scene::Instantiate(const SceneInitializer& init)
     // Set up debug topics if running in ROS mode
     if (Server::IsRos())
     {
-        ps_pub_ = Server::Advertise<moveit_msgs::PlanningScene>(object_name_ + (object_name_ == "" ? "" : "/") + "PlanningScene", 100, true);
-        proxy_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + (object_name_ == "" ? "" : "/") + "CollisionProxies", 100, true);
+        ps_pub_ = Server::Advertise<moveit_msgs::PlanningScene>(object_name_ + (object_name_ == "" ? "" : "/") + "PlanningScene", 1, true);
+        proxy_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + (object_name_ == "" ? "" : "/") + "CollisionProxies", 1, true);
         if (debug_)
-            HIGHLIGHT_NAMED(
-                object_name_,
-                "Running in debug mode, planning scene will be published to '"
-                    << Server::Instance()->GetName() << "/" << object_name_
-                    << "/PlanningScene'");
+            HIGHLIGHT_NAMED(object_name_, "Running in debug mode, planning scene will be published to '" << Server::Instance()->GetName() << "/" << object_name_ << "/PlanningScene'");
     }
 
     // Note: Using the LoadScene initializer does not support custom offsets/poses, assumes Identity transform to world_frame

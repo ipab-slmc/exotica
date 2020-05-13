@@ -1,0 +1,3 @@
+class CollisionSceneFCLLatest
+
+extend <exotica_core/collision_scene>

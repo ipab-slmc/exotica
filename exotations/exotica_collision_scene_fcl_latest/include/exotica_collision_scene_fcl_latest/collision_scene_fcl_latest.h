@@ -35,11 +35,13 @@
 #include <exotica_core/collision_scene.h>
 #include <exotica_core/tools/conversions.h>
 
+#include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest_initializer.h>
+
 #include <fcl/fcl.h>  // FCL 0.6 as provided by fcl_catkin
 
 namespace exotica
 {
-class CollisionSceneFCLLatest : public CollisionScene
+class CollisionSceneFCLLatest : public CollisionScene, public Instantiable<CollisionSceneFCLLatestInitializer>
 {
 public:
     struct CollisionData

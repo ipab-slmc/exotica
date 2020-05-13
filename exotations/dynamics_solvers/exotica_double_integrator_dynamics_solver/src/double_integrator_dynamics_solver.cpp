@@ -36,6 +36,7 @@ namespace exotica
 void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 {
     const int num_positions_in = scene_in->GetKinematicTree().GetNumControlledJoints();
+    if (debug_) HIGHLIGHT_NAMED("DoubleIntegratorDynamicsSolver::AssignScene", "Dimension: " << num_positions_in);
 
     num_positions_ = num_positions_in;
     num_velocities_ = num_positions_in;

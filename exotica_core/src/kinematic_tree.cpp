@@ -318,7 +318,9 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     }
     model_tree_[0]->is_robot_link = false;
 
-    joint_limits_ = Eigen::MatrixXd::Zero(num_controlled_joints_, 4);
+    joint_limits_ = Eigen::MatrixXd::Zero(num_controlled_joints_, 2);
+    velocity_limit_ = Eigen::VectorXd::Zero(num_controlled_joints_);
+    acceleration_limit_ = Eigen::VectorXd::Zero(num_controlled_joints_);
     ResetJointLimits();
 
     // Create random distributions for state sampling
@@ -1001,7 +1003,7 @@ void KinematicTree::SetJointLimitsVelocity(Eigen::VectorXdRefConst velocity_in)
     {
         for (unsigned int i = 0; i < num_controlled_joints_; ++i)
         {
-            controlled_joints_[i].lock()->joint_limits[LIMIT_VELOCITY] = velocity_in(i);
+            controlled_joints_[i].lock()->velocity_limit[0] = velocity_in(i);
         }
     }
     else
@@ -1018,8 +1020,10 @@ void KinematicTree::SetJointLimitsAcceleration(Eigen::VectorXdRefConst accelerat
     {
         for (unsigned int i = 0; i < num_controlled_joints_; ++i)
         {
-            controlled_joints_[i].lock()->joint_limits[LIMIT_ACCELERATION] = acceleration_in(i);
+            controlled_joints_[i].lock()->acceleration_limit[0] = acceleration_in(i);
         }
+
+        has_acceleration_limit = true;
     }
     else
     {
@@ -1042,7 +1046,9 @@ void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
     }
     for (int i = 0; i < 6; ++i)
     {
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], velocity[i], acceleration[i]};
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->velocity_limit = {velocity[i]};
+        controlled_joints_[i].lock()->acceleration_limit = {acceleration[i]};
     }
 
     UpdateJointLimits();
@@ -1062,7 +1068,9 @@ void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
     for (int i = 0; i < 6; ++i)
     {
         // Set velocity and acceleration to +inf
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], inf, inf};
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->velocity_limit = {inf};
+        controlled_joints_[i].lock()->acceleration_limit = {inf};
     }
 
     UpdateJointLimits();
@@ -1081,7 +1089,9 @@ void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
     }
     for (int i = 0; i < 3; ++i)
     {
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], velocity[i], acceleration[i]};
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->velocity_limit = {velocity[i]};
+        controlled_joints_[i].lock()->acceleration_limit = {acceleration[i]};
     }
 
     UpdateJointLimits();
@@ -1101,7 +1111,9 @@ void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
     for (int i = 0; i < 3; ++i)
     {
         // Set velocity and acceleration to +inf
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i], inf, inf};
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->velocity_limit = {inf};
+        controlled_joints_[i].lock()->acceleration_limit = {inf};
     }
 
     UpdateJointLimits();
@@ -1117,10 +1129,11 @@ void KinematicTree::ResetJointLimits()
             auto& ControlledJoint = controlled_joints_map_.at(vars[i]);
             int index = ControlledJoint.lock()->control_id;
 
-            // Last element should be model_->getVariableBounds(vars[i]).max_acceleration_, but the URDF-parser
-            // in ros_control seems to skip over parsing acceleration limits (https://github.com/ros-controls/ros_control/issues/350#issuecomment-411670354)
-            // Set to infinity as a work around
-            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_, model_->getVariableBounds(vars[i]).max_velocity_, inf};
+            // moveit_core::RobotModel does not have effort limits
+            // TODO: use urdf::Model instead
+            controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_};
+            controlled_joints_[index].lock()->velocity_limit = {model_->getVariableBounds(vars[i]).max_velocity_};
+            controlled_joints_[index].lock()->acceleration_limit = {inf};
         }
     }
 
@@ -1152,8 +1165,8 @@ void KinematicTree::UpdateJointLimits()
     {
         joint_limits_(i, LIMIT_POSITION_LOWER) = controlled_joints_[i].lock()->joint_limits[LIMIT_POSITION_LOWER];
         joint_limits_(i, LIMIT_POSITION_UPPER) = controlled_joints_[i].lock()->joint_limits[LIMIT_POSITION_UPPER];
-        joint_limits_(i, LIMIT_VELOCITY) = controlled_joints_[i].lock()->joint_limits[LIMIT_VELOCITY];
-        joint_limits_(i, LIMIT_ACCELERATION) = controlled_joints_[i].lock()->joint_limits[LIMIT_ACCELERATION];
+        velocity_limit_(i) = controlled_joints_[i].lock()->velocity_limit[0];
+        acceleration_limit_(i) = controlled_joints_[i].lock()->acceleration_limit[0];
     }
 
     // Update random state distributions for generating random controlled states

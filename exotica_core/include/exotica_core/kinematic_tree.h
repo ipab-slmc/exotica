@@ -209,7 +209,7 @@ public:
     std::vector<std::string> GetKinematicChainLinks(const std::string& begin, const std::string& end) const;
 
     void SetModelState(Eigen::VectorXdRefConst x);
-    void SetModelState(std::map<std::string, double> x);
+    void SetModelState(const std::map<std::string, double>& x);
     Eigen::VectorXd GetControlledState() const;
 
     const std::vector<std::weak_ptr<KinematicElement>>& GetTree() const { return tree_; }

@@ -96,7 +96,7 @@ public:
     std::map<std::string, double> GetModelStateMap();
     std::map<std::string, std::weak_ptr<KinematicElement>> GetTreeMap();
     void SetModelState(Eigen::VectorXdRefConst x, double t = 0, bool update_traj = true);
-    void SetModelState(std::map<std::string, double> x, double t = 0, bool update_traj = true);
+    void SetModelState(const std::map<std::string, double>& x, double t = 0, bool update_traj = true);
 
     void AddTrajectoryFromFile(const std::string& link, const std::string& traj);
     void AddTrajectory(const std::string& link, const std::string& traj);

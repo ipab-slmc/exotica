@@ -1220,7 +1220,7 @@ void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
     if (debug) PublishFrames();
 }
 
-void KinematicTree::SetModelState(std::map<std::string, double> x)
+void KinematicTree::SetModelState(const std::map<std::string, double>& x)
 {
     for (auto& joint : x)
     {

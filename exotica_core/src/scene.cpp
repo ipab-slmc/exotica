@@ -496,7 +496,7 @@ void Scene::SetModelState(Eigen::VectorXdRefConst x, double t, bool update_traj)
     if (debug_) PublishScene();
 }
 
-void Scene::SetModelState(std::map<std::string, double> x, double t, bool update_traj)
+void Scene::SetModelState(const std::map<std::string, double>& x, double t, bool update_traj)
 {
     if (request_needs_updating_ && kinematic_request_callback_)
     {

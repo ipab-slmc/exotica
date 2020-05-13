@@ -1203,15 +1203,15 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("reset_joint_limits", &KinematicTree::ResetJointLimits);
     kinematic_tree.def("set_joint_limits_lower", &KinematicTree::SetJointLimitsLower);
     kinematic_tree.def("set_joint_limits_upper", &KinematicTree::SetJointLimitsUpper);
-    kinematic_tree.def("set_joint_limits_velocity", &KinematicTree::SetJointLimitsVelocity);
-    kinematic_tree.def("set_joint_limits_acceleration", &KinematicTree::SetJointLimitsAcceleration);
-    kinematic_tree.def("get_velocity_limit", &KinematicTree::GetVelocityLimit);
-    kinematic_tree.def("get_has_acceleration_limit", &KinematicTree::GetHasAccelerationLimit);
-    kinematic_tree.def("get_acceleration_limit", &KinematicTree::GetAccelerationLimit);
-    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&)) &KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
-    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&)) &KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
-    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&)) &KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
-    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&)) &KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
+    kinematic_tree.def("set_joint_velocity_limits", &KinematicTree::SetJointVelocityLimits);
+    kinematic_tree.def("set_joint_acceleration_limits", &KinematicTree::SetJointAccelerationLimits);
+    kinematic_tree.def("get_velocity_limits", &KinematicTree::GetVelocityLimits);
+    kinematic_tree.def("has_acceleration_limits", &KinematicTree::HasAccelerationLimits);
+    kinematic_tree.def("get_acceleration_limits", &KinematicTree::GetAccelerationLimits);
+    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
+    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
+    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
+    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
     kinematic_tree.def("get_used_joint_limits", &KinematicTree::GetUsedJointLimits);
 
     // Get full tree

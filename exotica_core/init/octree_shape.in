@@ -1,0 +1,6 @@
+class OctreeShape
+
+extend <exotica_core/shape>
+
+Required std::string OctreeFilePath;
+Optional std::string Type = "Octree";  // DO NOT CHANGE

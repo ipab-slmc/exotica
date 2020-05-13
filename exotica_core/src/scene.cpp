@@ -38,8 +38,14 @@
 #include <exotica_core/setup.h>
 
 #include <exotica_core/attach_link_initializer.h>
+#include <exotica_core/box_shape_initializer.h>
 #include <exotica_core/collision_scene_initializer.h>
+#include <exotica_core/cylinder_shape_initializer.h>
 #include <exotica_core/link_initializer.h>
+#include <exotica_core/mesh_shape_initializer.h>
+#include <exotica_core/octree_shape_initializer.h>
+#include <exotica_core/shape_initializer.h>
+#include <exotica_core/sphere_shape_initializer.h>
 #include <exotica_core/trajectory_initializer.h>
 
 namespace exotica
@@ -107,7 +113,52 @@ void Scene::Instantiate(const SceneInitializer& init)
     for (const exotica::Initializer& linkInit : init.Links)
     {
         LinkInitializer link(linkInit);
-        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), Eigen::Vector4d::Zero(), false);
+
+        shapes::ShapePtr link_shape = nullptr;
+        Eigen::Vector4d link_color = Eigen::Vector4d::Zero();
+        if (link.Shape.size() == 1)
+        {
+            ShapeInitializer shape(link.Shape[0]);
+            link_color = shape.Color;
+
+            if (shape.Type == "Box")
+            {
+                BoxShapeInitializer box(link.Shape[0]);
+                std::cout << "BOX: " << box.Dimensions.transpose() << std::endl;
+                link_shape.reset(new shapes::Box(box.Dimensions.x(), box.Dimensions.y(), box.Dimensions.z()));
+            }
+            else if (shape.Type == "Cylinder")
+            {
+                CylinderShapeInitializer cylinder(link.Shape[0]);
+                link_shape.reset(new shapes::Cylinder(cylinder.Radius, cylinder.Length));
+            }
+            else if (shape.Type == "Mesh")
+            {
+                MeshShapeInitializer mesh(link.Shape[0]);
+                // TODO: This will not support textures.
+                link_shape.reset(shapes::createMeshFromResource(ParsePath(mesh.MeshFilePath), mesh.Scale));
+            }
+            else if (shape.Type == "Octree")
+            {
+                OctreeShapeInitializer octree(link.Shape[0]);
+                link_shape = LoadOctreeAsShape(ParsePath(octree.OctreeFilePath));
+            }
+            else if (shape.Type == "Sphere")
+            {
+                SphereShapeInitializer sphere(link.Shape[0]);
+                link_shape.reset(new shapes::Sphere(sphere.Radius));
+            }
+            else
+            {
+                ThrowPretty("Unrecognized ShapeType: " << shape.Type);
+            }
+        }
+        else if (link.Shape.size() > 1)
+        {
+            ThrowPretty("Only one Shape per Link allowed, given: " << link.Shape.size());
+        }
+
+        AddObject(link.Name, GetFrame(link.Transform), link.Parent, link_shape, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), link_color, false);  // false since CollisionScene is not yet setup
     }
 
     // Check list of robot links to exclude from CollisionScene

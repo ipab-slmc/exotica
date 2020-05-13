@@ -1,0 +1,6 @@
+class BoxShape
+
+extend <exotica_core/shape>
+
+Required Eigen::Vector3d Dimensions;
+Optional std::string Type = "Box";  // DO NOT CHANGE

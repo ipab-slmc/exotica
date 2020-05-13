@@ -76,6 +76,13 @@ AddInitializer(
   dynamic_time_indexed_shooting_problem
   dynamics_solver
   collision_scene
+
+  shape
+  box_shape
+  cylinder_shape
+  mesh_shape
+  octree_shape
+  sphere_shape
 )
 GenInitializers()
 

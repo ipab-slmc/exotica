@@ -564,7 +564,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
 
     // Update current state kinematics and costs
-    UpdateTaskMaps(X_.col(t), U_.col(t), t);
+    if (num_tasks > 0) UpdateTaskMaps(X_.col(t), U_.col(t), t);
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
@@ -607,7 +607,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // Twice would not be necessary if "UpdateTerminalState" is used by the solver.
     // However, as this is a recent addition, this check and update is required for
     // backwards compatibility.
-    if (t == T_ - 2)
+    if (num_tasks > 0 && t == T_ - 2)
     {
         const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
         UpdateTaskMaps(X_.col(t + 1), Eigen::VectorXd::Zero(scene_->get_num_controls()), t + 1);
@@ -659,7 +659,7 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     // Actually update the tasks' kinematics mappings.
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
-    UpdateTaskMaps(X_.col(t), Eigen::VectorXd::Zero(scene_->get_num_controls()), t);
+    if (num_tasks > 0) UpdateTaskMaps(X_.col(t), Eigen::VectorXd::Zero(scene_->get_num_controls()), t);
 
     ++number_of_problem_updates_;
 }

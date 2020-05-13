@@ -117,7 +117,7 @@ void VariableSizeCollisionDistance::Initialize()
 
     if (debug_)
     {
-        HIGHLIGHT_NAMED("Variable Size Collision Distance", "Dimension: " << dim_ << "World Margin: " << world_margin_);
+        HIGHLIGHT_NAMED("Variable Size Collision Distance", "Dimension: " << dim_ << " - World Margin: " << world_margin_);
     }
 }
 

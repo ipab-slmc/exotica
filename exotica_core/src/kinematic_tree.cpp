@@ -1209,6 +1209,13 @@ std::vector<std::string> KinematicTree::GetKinematicChainLinks(const std::string
 
 void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
 {
+    // Work-around in case someone passed a vector of size num_controlled_joints_
+    if (x.rows() == num_controlled_joints_)
+    {
+        Update(x);
+        return;
+    }
+
     if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
     for (int i = 0; i < model_joints_names_.size(); ++i)
     {

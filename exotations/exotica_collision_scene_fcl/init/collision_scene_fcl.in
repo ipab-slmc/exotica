@@ -1,0 +1,3 @@
+class CollisionSceneFCL
+
+extend <exotica_core/collision_scene>

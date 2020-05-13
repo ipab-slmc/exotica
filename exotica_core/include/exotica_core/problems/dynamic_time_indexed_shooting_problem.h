@@ -99,11 +99,11 @@ public:
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 
-    Eigen::VectorXd GetStateCostJacobian(int t) const;    ///< lx
-    Eigen::VectorXd GetControlCostJacobian(int t) const;  ///< lu
-    Eigen::MatrixXd GetStateCostHessian(int t) const;     ///< lxx
-    Eigen::MatrixXd GetControlCostHessian(int t) const;   ///< luu
-    Eigen::MatrixXd GetStateControlCostHessian() const
+    Eigen::VectorXd GetStateCostJacobian(int t);    ///< lx
+    Eigen::VectorXd GetControlCostJacobian(int t);  ///< lu
+    Eigen::MatrixXd GetStateCostHessian(int t);     ///< lxx
+    Eigen::MatrixXd GetControlCostHessian(int t);   ///< luu
+    Eigen::MatrixXd GetStateControlCostHessian()
     {
         // NOTE: For quadratic costs this is always 0
         //  thus we return a scalar of size 1 and value 0
@@ -153,6 +153,15 @@ protected:
 
     std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
     Eigen::MatrixXd CW_;               ///< White noise covariance
+
+    // Pre-allocated variables
+    std::vector<Eigen::MatrixXd> dxdiff_;
+    std::vector<Eigen::VectorXd> state_cost_jacobian_;
+    std::vector<Eigen::MatrixXd> state_cost_hessian_;
+    std::vector<Eigen::VectorXd> general_cost_jacobian_;
+    std::vector<Eigen::MatrixXd> general_cost_hessian_;
+    std::vector<Eigen::VectorXd> control_cost_jacobian_;
+    std::vector<Eigen::MatrixXd> control_cost_hessian_;
 
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 

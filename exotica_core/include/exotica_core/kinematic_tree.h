@@ -64,9 +64,7 @@ enum KinematicRequestFlags
 enum JointLimitType
 {
     LIMIT_POSITION_LOWER = 0,
-    LIMIT_POSITION_UPPER = 1,
-    LIMIT_VELOCITY = 2,
-    LIMIT_ACCELERATION = 3
+    LIMIT_POSITION_UPPER = 1
 };
 
 constexpr double inf = std::numeric_limits<double>::infinity();
@@ -163,6 +161,9 @@ public:
     void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
     void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
     std::map<std::string, std::vector<double>> GetUsedJointLimits() const;
+    bool GetHasAccelerationLimit() const { return has_acceleration_limit; }
+    const Eigen::VectorXd& GetAccelerationLimit() const { return acceleration_limit_; }
+    const Eigen::VectorXd& GetVelocityLimit() const { return velocity_limit_; }
     int GetNumControlledJoints() const;
     int GetNumModelJoints() const;
     void PublishFrames();
@@ -258,7 +259,11 @@ private:
     void UpdateJdot();
 
     // Joint limits
+    // TODO: Add effort limits
     Eigen::MatrixXd joint_limits_;
+    Eigen::VectorXd velocity_limit_;
+    Eigen::VectorXd acceleration_limit_;
+    bool has_acceleration_limit = false;
     void UpdateJointLimits();
 
     // Random state generation

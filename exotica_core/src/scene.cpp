@@ -38,6 +38,7 @@
 #include <exotica_core/setup.h>
 
 #include <exotica_core/attach_link_initializer.h>
+#include <exotica_core/collision_scene_initializer.h>
 #include <exotica_core/link_initializer.h>
 #include <exotica_core/trajectory_initializer.h>
 
@@ -133,19 +134,32 @@ void Scene::Instantiate(const SceneInitializer& init)
         }
     }
 
-    // Set up CollisionScene
+    // Initialize CollisionScene
     force_collision_ = init.AlwaysUpdateCollisionScene;
-    collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene);
-    collision_scene_->debug_ = this->debug_;
-    collision_scene_->Setup();
-    collision_scene_->AssignScene(shared_from_this());
-    collision_scene_->SetAlwaysExternallyUpdatedCollisionScene(force_collision_);
-    collision_scene_->SetReplacePrimitiveShapesWithMeshes(init.ReplacePrimitiveShapesWithMeshes);
-    collision_scene_->SetWorldLinkPadding(init.WorldLinkPadding);
-    collision_scene_->SetRobotLinkPadding(init.RobotLinkPadding);
-    collision_scene_->SetWorldLinkScale(init.WorldLinkScale);
-    collision_scene_->SetRobotLinkScale(init.RobotLinkScale);
-    collision_scene_->set_replace_cylinders_with_capsules(init.ReplaceCylindersWithCapsules);
+    if (!init.DoNotInstantiateCollisionScene)
+    {
+        if (init.CollisionScene.size() == 0)
+        {
+            // Not set ==> Default to CollisionSceneFCL for backwards compatibility.
+            collision_scene_ = Setup::CreateCollisionScene("CollisionSceneFCL");  // NB: This is an implicit run-time dependency and thus dangerous! But we don't want to break existing configs...
+        }
+        else if (init.CollisionScene.size() == 1)
+        {
+            collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene[0]);
+        }
+        else
+        {
+            // Only one dynamics solver per scene is allowed, i.e., throw if more than one provided:
+            ThrowPretty("Only one CollisionScene per scene allowed - " << init.CollisionScene.size() << " provided");
+        }
+
+        collision_scene_->debug_ = this->debug_;  // Backwards compatibility - TODO: Remove
+        // collision_scene_->ns_ = ns_ + "/" + collision_scene_->GetObjectName();
+        collision_scene_->Setup();  // TODO: Trigger from Initializer
+        collision_scene_->AssignScene(shared_from_this());
+        collision_scene_->SetAlwaysExternallyUpdatedCollisionScene(force_collision_);
+    }
+
     UpdateSceneFrames();
     UpdateInternalFrames(false);
 
@@ -179,7 +193,7 @@ void Scene::Instantiate(const SceneInitializer& init)
             }
         }
     }
-    collision_scene_->SetACM(acm);
+    if (collision_scene_ != nullptr) collision_scene_->SetACM(acm);
 
     // Set up trajectory generators
     for (const exotica::Initializer& it : init.Trajectories)
@@ -254,7 +268,7 @@ void Scene::Update(Eigen::VectorXdRefConst x, double t)
 
     UpdateTrajectoryGenerators(t);
     kinematica_.Update(x);
-    if (force_collision_) collision_scene_->UpdateCollisionObjectTransforms();
+    if (force_collision_ && collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjectTransforms();
     if (debug_) PublishScene();
 }
 
@@ -356,11 +370,13 @@ void Scene::UpdatePlanningSceneWorld(const moveit_msgs::PlanningSceneWorldConstP
 
 void Scene::UpdateCollisionObjects()
 {
+    if (collision_scene_ == nullptr) ThrowPretty("No CollisionScene initialized!");
     collision_scene_->UpdateCollisionObjects(kinematica_.GetCollisionTreeMap());
 }
 
 const CollisionScenePtr& Scene::GetCollisionScene() const
 {
+    if (collision_scene_ == nullptr) ThrowPretty("No CollisionScene initialized!");
     return collision_scene_;
 }
 
@@ -398,19 +414,19 @@ moveit_msgs::PlanningScene Scene::GetPlanningSceneMsg()
     {
         moveit_msgs::LinkPadding padding;
         padding.link_name = robot_link;
-        padding.padding = collision_scene_->GetRobotLinkPadding();
+        padding.padding = (collision_scene_ != nullptr) ? collision_scene_->GetRobotLinkPadding() : 0.0;
         msg.link_padding.push_back(padding);
 
         moveit_msgs::LinkScale scale;
         scale.link_name = robot_link;
-        scale.scale = collision_scene_->GetRobotLinkScale();
+        scale.scale = (collision_scene_ != nullptr) ? collision_scene_->GetRobotLinkScale() : 1.0;
         msg.link_scale.push_back(scale);
     }
 
     // As we cannot apply world link scalings in the message itself, we need to
     // manually scale the objects.
     // TODO(wxm): Recreate as updated poses won't be reflected (e.g. trajectories)
-    if (collision_scene_->GetWorldLinkScale() != 1.0 || collision_scene_->GetWorldLinkPadding() > 0.0)
+    if (collision_scene_ != nullptr && (collision_scene_->GetWorldLinkScale() != 1.0 || collision_scene_->GetWorldLinkPadding() > 0.0))
     {
         for (auto it : msg.world.collision_objects)
         {
@@ -492,7 +508,7 @@ void Scene::SetModelState(Eigen::VectorXdRefConst x, double t, bool update_traj)
     // Update Kinematica internal state
     kinematica_.SetModelState(x);
 
-    if (force_collision_) collision_scene_->UpdateCollisionObjectTransforms();
+    if (force_collision_ && collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjectTransforms();
     if (debug_) PublishScene();
 }
 
@@ -507,7 +523,7 @@ void Scene::SetModelState(const std::map<std::string, double>& x, double t, bool
     // Update Kinematica internal state
     kinematica_.SetModelState(x);
 
-    if (force_collision_) collision_scene_->UpdateCollisionObjectTransforms();
+    if (force_collision_ && collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjectTransforms();
     if (debug_) PublishScene();
 }
 

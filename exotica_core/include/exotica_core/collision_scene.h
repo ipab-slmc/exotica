@@ -136,11 +136,14 @@ struct CollisionProxy
 };
 
 /// The class of collision scene
-class CollisionScene : public Uncopyable
+class CollisionScene : public Object, public Uncopyable, public virtual InstantiableBase
 {
 public:
     CollisionScene() {}
     virtual ~CollisionScene() {}
+    /// \brief Instantiates the base properties of the CollisionScene
+    virtual void InstantiateBase(const Initializer& init);
+
     /// @brief Setup additional construction that requires initialiser parameter
     virtual void Setup() {}
     /// @brief Returns whether two collision objects/shapes are allowed to collide by name.
@@ -321,6 +324,9 @@ protected:
 
     /// Replace cylinders with capsules internally
     bool replace_cylinders_with_capsules_ = false;
+
+    /// Filename for config file (YAML) which contains shape replacements
+    std::string robot_link_replacement_config_ = "";
 };
 
 typedef std::shared_ptr<CollisionScene> CollisionScenePtr;

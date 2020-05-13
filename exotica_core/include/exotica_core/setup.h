@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,13 @@ public:
     static std::shared_ptr<exotica::DynamicsSolver> CreateDynamicsSolver(const Initializer& init)
     {
         auto ret = ToStdPtr(Instance()->dynamics_solvers_.createInstance(init.GetName()));
+        ret->InstantiateInternal(init);
+        return ret;
+    }
+
+    static std::shared_ptr<exotica::CollisionScene> CreateCollisionScene(const Initializer& init)
+    {
+        auto ret = ToStdPtr(Instance()->collision_scenes_.createInstance(init.GetName()));
         ret->InstantiateInternal(init);
         return ret;
     }

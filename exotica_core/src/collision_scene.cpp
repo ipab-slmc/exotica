@@ -30,11 +30,29 @@
 #include <exotica_core/collision_scene.h>
 #include <exotica_core/scene.h>
 
+#include <exotica_core/collision_scene_initializer.h>
+
 namespace exotica
 {
 inline bool IsRobotLink(std::shared_ptr<KinematicElement> e)
 {
     return e->is_robot_link || e->closest_robot_link.lock();
+}
+
+void CollisionScene::InstantiateBase(const Initializer& init)
+{
+    Object::InstantiateObject(init);
+    CollisionSceneInitializer collision_scene_initializer = CollisionSceneInitializer(init);
+
+    this->SetReplacePrimitiveShapesWithMeshes(collision_scene_initializer.ReplacePrimitiveShapesWithMeshes);
+    this->set_replace_cylinders_with_capsules(collision_scene_initializer.ReplaceCylindersWithCapsules);
+    this->SetWorldLinkPadding(collision_scene_initializer.WorldLinkPadding);
+    this->SetRobotLinkPadding(collision_scene_initializer.RobotLinkPadding);
+    this->SetWorldLinkScale(collision_scene_initializer.WorldLinkScale);
+    this->SetRobotLinkScale(collision_scene_initializer.RobotLinkScale);
+    this->robot_link_replacement_config_ = collision_scene_initializer.RobotLinkReplacementConfig;
+
+    if (debug_) INFO_NAMED(object_name_, "Initialized CollisionScene of type " << GetObjectName());
 }
 
 bool CollisionScene::IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self)

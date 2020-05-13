@@ -75,6 +75,7 @@ AddInitializer(
   bounded_end_pose_problem
   dynamic_time_indexed_shooting_problem
   dynamics_solver
+  collision_scene
 )
 GenInitializers()
 

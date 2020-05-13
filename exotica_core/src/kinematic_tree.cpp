@@ -325,6 +325,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     joint_limits_ = Eigen::MatrixXd::Zero(num_controlled_joints_, 2);
     ResetJointLimits();
 
+    if (debug) HIGHLIGHT_NAMED("KinematicTree::BuildTree", "Number of controlled joints: " << num_controlled_joints_ << " - Number of model joints: " << num_joints_);
+
     // Create random distributions for state sampling
     generator_ = std::mt19937(rd_());
 

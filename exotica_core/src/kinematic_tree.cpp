@@ -1053,7 +1053,7 @@ void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
 }
 
 void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
-    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity = {}, const std::vector<double>& acceleration = {})
+    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration)
 {
     if (controlled_base_type_ != BaseType::FLOATING)
     {
@@ -1101,7 +1101,7 @@ void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
 }
 
 void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
-    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity = {}, const std::vector<double>& acceleration = {})
+    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration)
 {
     if (controlled_base_type_ != BaseType::PLANAR)
     {
@@ -1143,7 +1143,7 @@ void KinematicTree::ResetJointLimits()
             // TODO: use urdf::Model instead
 
             // Check for bounds, else set limits to inf
-            if (model_->getVariableBounds(vars[i]).position_bounded_ == true)
+            if (model_->getVariableBounds(vars[i]).position_bounded_)
             {
                 controlled_joints_[index].lock()->joint_limits = {model_->getVariableBounds(vars[i]).min_position_, model_->getVariableBounds(vars[i]).max_position_};
             }
@@ -1151,7 +1151,7 @@ void KinematicTree::ResetJointLimits()
             {
                 controlled_joints_[index].lock()->joint_limits = {-inf, inf};
             }
-            if (model_->getVariableBounds(vars[i]).velocity_bounded_ == true)
+            if (model_->getVariableBounds(vars[i]).velocity_bounded_)
             {
                 controlled_joints_[index].lock()->velocity_limit = {model_->getVariableBounds(vars[i]).max_velocity_};
             }
@@ -1159,7 +1159,7 @@ void KinematicTree::ResetJointLimits()
             {
                 controlled_joints_[index].lock()->velocity_limit = {inf};
             }
-            if (model_->getVariableBounds(vars[i]).acceleration_bounded_ == true)
+            if (model_->getVariableBounds(vars[i]).acceleration_bounded_)
             {
                 controlled_joints_[index].lock()->acceleration_limit = {model_->getVariableBounds(vars[i]).max_acceleration_};
             }

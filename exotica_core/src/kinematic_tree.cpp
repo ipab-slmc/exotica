@@ -1023,48 +1023,11 @@ void KinematicTree::SetJointAccelerationLimits(Eigen::VectorXdRefConst accelerat
             controlled_joints_[i].lock()->acceleration_limit = acceleration_in(i);
         }
 
-        has_acceleration_limit = true;
+        has_acceleration_limit_ = true;
     }
     else
     {
         ThrowPretty("Got " << acceleration_in.rows() << " but " << num_controlled_joints_ << " expected.");
-    }
-
-    UpdateJointLimits();
-}
-
-void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
-    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration)
-{
-    bool velocity_acceleration_to_inf = false;
-    if (controlled_base_type_ != BaseType::FLOATING)
-    {
-        ThrowPretty("This is not a floating joint!");
-    }
-    if (velocity.size() == 0 && acceleration.size() == 0)
-    {
-        velocity_acceleration_to_inf = true;
-    }
-    else if (lower.size() != 6 || upper.size() != 6 || velocity.size() != 6 || acceleration.size() != 6)
-    {
-        ThrowPretty("Wrong limit data size!");
-    }
-    else
-    {
-    }
-    for (int i = 0; i < 6; ++i)
-    {
-        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
-        if (velocity_acceleration_to_inf == false)
-        {
-            controlled_joints_[i].lock()->velocity_limit = {velocity[i]};
-            controlled_joints_[i].lock()->acceleration_limit = {acceleration[i]};
-        }
-        else
-        {
-            controlled_joints_[i].lock()->velocity_limit = {inf};
-            controlled_joints_[i].lock()->acceleration_limit = {inf};
-        }
     }
 
     UpdateJointLimits();
@@ -1083,47 +1046,36 @@ void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
     }
     for (int i = 0; i < 6; ++i)
     {
-        // Set velocity and acceleration to +inf
         controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
-        controlled_joints_[i].lock()->velocity_limit = {inf};
-        controlled_joints_[i].lock()->acceleration_limit = {inf};
     }
 
     UpdateJointLimits();
 }
 
-void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
-    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration)
+void KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX(
+    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity = {}, const std::vector<double>& acceleration = {})
 {
-    bool velocity_acceleration_to_inf = false;
-    if (controlled_base_type_ != BaseType::PLANAR)
+    if (controlled_base_type_ != BaseType::FLOATING)
     {
-        ThrowPretty("This is not a planar joint!");
+        ThrowPretty("This is not a floating joint!");
     }
-    if (velocity.size() == 0 && acceleration.size() == 0)
+    if (lower.size() != 6 || upper.size() != 6)
     {
-        velocity_acceleration_to_inf = true;
+        ThrowPretty("Wrong joint limit data size!");
     }
-    else if (lower.size() != 3 || upper.size() != 3 || velocity.size() != 3 || acceleration.size() != 3)
+    if (velocity.size() != 6 && velocity.size() != 0)
     {
-        ThrowPretty("Wrong limit data size!");
+        ThrowPretty("Wrong velocity limit size!");
     }
-    else
+    if (acceleration.size() != 6 && acceleration.size() != 0)
     {
+        ThrowPretty("Wrong acceleration limit size!");
     }
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 6; ++i)
     {
         controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
-        if (velocity_acceleration_to_inf == false)
-        {
-            controlled_joints_[i].lock()->velocity_limit = {velocity[i]};
-            controlled_joints_[i].lock()->acceleration_limit = {acceleration[i]};
-        }
-        else
-        {
-            controlled_joints_[i].lock()->velocity_limit = {inf};
-            controlled_joints_[i].lock()->acceleration_limit = {inf};
-        }
+        controlled_joints_[i].lock()->velocity_limit = {velocity.size() != 0 ? velocity[i] : inf};
+        controlled_joints_[i].lock()->acceleration_limit = {acceleration.size() != 0 ? acceleration[i] : inf};
     }
 
     UpdateJointLimits();
@@ -1142,10 +1094,36 @@ void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
     }
     for (int i = 0; i < 3; ++i)
     {
-        // Set velocity and acceleration to +inf
         controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
-        controlled_joints_[i].lock()->velocity_limit = {inf};
-        controlled_joints_[i].lock()->acceleration_limit = {inf};
+    }
+
+    UpdateJointLimits();
+}
+
+void KinematicTree::SetPlanarBaseLimitsPosXYEulerZ(
+    const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity = {}, const std::vector<double>& acceleration = {})
+{
+    if (controlled_base_type_ != BaseType::PLANAR)
+    {
+        ThrowPretty("This is not a planar joint!");
+    }
+    if (lower.size() != 3 || upper.size() != 3)
+    {
+        ThrowPretty("Wrong joint limit data size!");
+    }
+    if (velocity.size() != 3 && velocity.size() != 0)
+    {
+        ThrowPretty("Wrong velocity limit size!");
+    }
+    if (acceleration.size() != 3 && acceleration.size() != 0)
+    {
+        ThrowPretty("Wrong acceleration limit size!");
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        controlled_joints_[i].lock()->joint_limits = {lower[i], upper[i]};
+        controlled_joints_[i].lock()->velocity_limit = {velocity.size() != 0 ? velocity[i] : inf};
+        controlled_joints_[i].lock()->acceleration_limit = {acceleration.size() != 0 ? acceleration[i] : inf};
     }
 
     UpdateJointLimits();
@@ -1171,7 +1149,7 @@ void KinematicTree::ResetJointLimits()
             }
             else
             {
-                controlled_joints_[index].lock()->joint_limits = {inf, inf};
+                controlled_joints_[index].lock()->joint_limits = {-inf, inf};
             }
             if (model_->getVariableBounds(vars[i]).velocity_bounded_ == true)
             {

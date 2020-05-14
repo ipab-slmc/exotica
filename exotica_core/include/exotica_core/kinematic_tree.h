@@ -156,12 +156,12 @@ public:
     void SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
     void SetJointVelocityLimits(Eigen::VectorXdRefConst velocity_in);
     void SetJointAccelerationLimits(Eigen::VectorXdRefConst acceleration_in);
-    void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
-    void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
+    void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
+    void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     std::map<std::string, std::vector<double>> GetUsedJointLimits() const;
-    bool HasAccelerationLimits() const { return has_acceleration_limit; }
+    const bool& HasAccelerationLimits() const { return has_acceleration_limit_; }
     const Eigen::VectorXd& GetAccelerationLimits() const { return acceleration_limits_; }
     const Eigen::VectorXd& GetVelocityLimits() const { return velocity_limits_; }
     int GetNumControlledJoints() const;
@@ -263,7 +263,7 @@ private:
     Eigen::MatrixXd joint_limits_;
     Eigen::VectorXd velocity_limits_;
     Eigen::VectorXd acceleration_limits_;
-    bool has_acceleration_limit = false;
+    bool has_acceleration_limit_ = false;
     void UpdateJointLimits();
 
     // Random state generation

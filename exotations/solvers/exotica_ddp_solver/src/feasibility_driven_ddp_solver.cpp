@@ -130,14 +130,14 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     control_limits_ = dynamics_solver_->get_control_limits();
 
     AllocateData();
-    Eigen::MatrixXd X_warm = prob_->get_X();
-    X_warm.col(0) = prob_->ApplyStartState();  // Apply start state
-    auto U_warm = prob_->get_U();
+    const Eigen::MatrixXd& X_warm = prob_->get_X();
+    const Eigen::MatrixXd& U_warm = prob_->get_U();
     for (int t = 0; t < T_ - 1; ++t)
     {
         xs_[t] = X_warm.col(t);
         us_[t] = U_warm.col(t);
     }
+    xs_[0] = prob_->ApplyStartState();  // Apply start state
     xs_.back() = X_warm.col(T_ - 1);
     is_feasible_ = false;  // We assume the first iteration is always infeasible. TODO: Make this configurable
 

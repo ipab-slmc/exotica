@@ -417,8 +417,7 @@ void Scene::UpdatePlanningSceneWorld(const moveit_msgs::PlanningSceneWorldConstP
 
 void Scene::UpdateCollisionObjects()
 {
-    if (collision_scene_ == nullptr) ThrowPretty("No CollisionScene initialized!");
-    collision_scene_->UpdateCollisionObjects(kinematica_.GetCollisionTreeMap());
+    if (collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjects(kinematica_.GetCollisionTreeMap());
 }
 
 const CollisionScenePtr& Scene::GetCollisionScene() const

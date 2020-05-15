@@ -38,6 +38,15 @@
 
 namespace exotica
 {
+enum ControlCostLossTermType
+{
+    L2 = 0,
+    SmoothL1 = 1,
+    Huber = 2,
+    BimodalHuber = 3,
+    SuperHuber = 4
+};
+
 class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instantiable<DynamicTimeIndexedShootingProblemInitializer>
 {
 public:
@@ -171,6 +180,7 @@ protected:
     TaskSpaceVector cost_Phi;
 
     double control_cost_weight_ = 1;
+    ControlCostLossTermType loss_type_;
     void InstantiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init);
 
     // sparsity costs

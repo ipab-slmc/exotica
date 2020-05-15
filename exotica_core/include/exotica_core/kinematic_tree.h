@@ -61,6 +61,15 @@ enum KinematicRequestFlags
     KIN_J_DOT = 8
 };
 
+enum JointLimitType
+{
+    LIMIT_POSITION_LOWER = 0,
+    LIMIT_POSITION_UPPER = 1
+};
+
+constexpr double inf = std::numeric_limits<double>::infinity();
+constexpr double pi = std::atan(1) * 4;
+
 inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)
 {
     return static_cast<KinematicRequestFlags>(static_cast<int>(a) | static_cast<int>(b));
@@ -145,9 +154,16 @@ public:
     const Eigen::MatrixXd& GetJointLimits() const { return joint_limits_; }
     void SetJointLimitsLower(Eigen::VectorXdRefConst lower_in);
     void SetJointLimitsUpper(Eigen::VectorXdRefConst upper_in);
+    void SetJointVelocityLimits(Eigen::VectorXdRefConst velocity_in);
+    void SetJointAccelerationLimits(Eigen::VectorXdRefConst acceleration_in);
     void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper);
+    void SetFloatingBaseLimitsPosXYZEulerZYX(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper);
+    void SetPlanarBaseLimitsPosXYEulerZ(const std::vector<double>& lower, const std::vector<double>& upper, const std::vector<double>& velocity, const std::vector<double>& acceleration);
     std::map<std::string, std::vector<double>> GetUsedJointLimits() const;
+    const bool& HasAccelerationLimits() const { return has_acceleration_limit_; }
+    const Eigen::VectorXd& GetAccelerationLimits() const { return acceleration_limits_; }
+    const Eigen::VectorXd& GetVelocityLimits() const { return velocity_limits_; }
     int GetNumControlledJoints() const;
     int GetNumModelJoints() const;
     void PublishFrames();
@@ -243,7 +259,11 @@ private:
     void UpdateJdot();
 
     // Joint limits
+    // TODO: Add effort limits
     Eigen::MatrixXd joint_limits_;
+    Eigen::VectorXd velocity_limits_;
+    Eigen::VectorXd acceleration_limits_;
+    bool has_acceleration_limit_ = false;
     void UpdateJointLimits();
 
     // Random state generation

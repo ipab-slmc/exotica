@@ -121,6 +121,8 @@ public:
     KDL::Frame generated_offset = KDL::Frame::Identity();
     bool is_trajectory_generated = false;
     std::vector<double> joint_limits;
+    double velocity_limit = std::numeric_limits<double>::quiet_NaN();
+    double acceleration_limit = std::numeric_limits<double>::quiet_NaN();
     shapes::ShapeConstPtr shape = nullptr;
     std::string shape_resource_path = std::string();
     Eigen::Vector3d scale = Eigen::Vector3d::Ones();

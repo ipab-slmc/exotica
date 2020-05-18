@@ -53,16 +53,19 @@ def check_whether_trajectory_is_collision_free_by_subsampling(scene, trajectory,
     return True
 
 
-def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collision=True):
+def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collision=True, debug=False):
     robotLinks = scene.get_collision_robot_links()
     world_links = scene.get_collision_world_links()
+    collisions = []
     for r_l in robotLinks:
         for w_l in world_links:
             if scene.is_allowed_to_collide(r_l, w_l, True):
                 if not scene.is_collision_free(r_l, w_l, margin):
                     d=scene.get_collision_distance(r_l, w_l)
                     if abs(d[0].distance) > safe_distance:
-                        print(r_l,"-",w_l,"d=",d[0].distance)
+                        collisions.append((r_l, w_l, d[0].distance))
+                        if debug:
+                            print(r_l,"-",w_l,"d=",d[0].distance)
         if check_self_collision:
             for w_l in robotLinks:
                 if w_l != r_l:
@@ -70,5 +73,8 @@ def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collisi
                         if not scene.is_collision_free(r_l, w_l, margin):
                             d=scene.get_collision_distance(r_l,w_l)
                             if abs(d[0].distance) > safe_distance:
-                                print(r_l,"-",w_l,d[0].distance)
+                                collisions.append((r_l, w_l, d[0].distance))
+                                if debug:
+                                    print(r_l,"-",w_l,d[0].distance)
+    return collisions
 

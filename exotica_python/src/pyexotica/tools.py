@@ -64,7 +64,7 @@ def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collisi
                     d=scene.get_collision_distance(r_l, w_l)
                     if abs(d[0].distance) > safe_distance:
                         collisions.append((r_l, w_l, d[0].distance))
-                        if debug: 
+                        if debug:
                             print(r_l,"-",w_l,"d=",d[0].distance)
         if check_self_collision:
             for w_l in robotLinks:
@@ -74,7 +74,7 @@ def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collisi
                             d=scene.get_collision_distance(r_l,w_l)
                             if abs(d[0].distance) > safe_distance:
                                 collisions.append((r_l, w_l, d[0].distance))
-                                if debug: 
+                                if debug:
                                     print(r_l,"-",w_l,d[0].distance)
     return collisions
 

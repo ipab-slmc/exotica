@@ -27,7 +27,7 @@ env:
     - ROS_DISTRO="kinetic" CMAKE_ARGS='-DCMAKE_BUILD_TYPE=Release'
     - ROS_DISTRO="kinetic" PRERELEASE=true
     - ROS_DISTRO="kinetic" CLANG_FORMAT_CHECK=file CLANG_FORMAT_VERSION=3.9
-    - ROS_DISTRO="melodic" CMAKE_ARGS='-DCMAKE_BUILD_TYPE=Debug' DOCKER_RUN_OPTS="--cpus=\"1\""
+    - ROS_DISTRO="melodic" CMAKE_ARGS='-DCMAKE_BUILD_TYPE=Debug' PARALLEL_BUILDS=1
     - ROS_DISTRO="melodic" CMAKE_ARGS='-DCMAKE_BUILD_TYPE=Release'
     - ROS_DISTRO="melodic" PRERELEASE=true
 matrix:
@@ -35,6 +35,7 @@ matrix:
     - env: ROS_DISTRO="kinetic" PRERELEASE=true
     - env: ROS_DISTRO="melodic" PRERELEASE=true
 install:
-  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config -b master
+  #- git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config -b master
+  - git clone --quiet --depth 1 https://github.com/ipa-mdl/industrial_ci.git .ci_config -b feature/parallel-builds
 script:
   - source .ci_config/travis.sh

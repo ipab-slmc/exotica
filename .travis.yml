@@ -35,7 +35,6 @@ matrix:
     - env: ROS_DISTRO="kinetic" PRERELEASE=true
     - env: ROS_DISTRO="melodic" PRERELEASE=true
 install:
-  #- git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config -b master
-  - git clone --quiet --depth 1 https://github.com/ipa-mdl/industrial_ci.git .ci_config -b feature/parallel-builds
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config -b master
 script:
   - source .ci_config/travis.sh

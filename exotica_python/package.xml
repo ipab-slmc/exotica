@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>exotica_python</name>
   <version>5.1.3</version>
   <description>Python bindings for EXOTica</description>
@@ -12,8 +12,12 @@
   <depend>moveit_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>shape_msgs</depend>
-  <depend>python-matplotlib</depend>
-  <depend>python-pyassimp</depend>
-  <depend>python-tk</depend>
-  <depend>python-rospkg</depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-matplotlib</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-pyassimp</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-tk</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-rospkg</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-matplotlib</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-pyassimp</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-tk</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-rospkg</exec_depend>
 </package>

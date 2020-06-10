@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>exotica_core</name>
   <version>5.1.3</version>
   <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning.</description>
@@ -19,6 +19,8 @@
   <depend>roscpp</depend>
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
+  <build_export_depend>liborocos-kdl-dev</build_export_depend>
+  <exec_depend>liborocos-kdl</exec_depend>
   <depend>moveit_core</depend>
   <depend>moveit_ros_planning</depend>
   <depend>moveit_msgs</depend>

@@ -4,7 +4,7 @@
   <version>5.1.3</version>
   <description>Collision checking using the FCL library.</description>
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
-  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
 
   <license>BSD</license>
 

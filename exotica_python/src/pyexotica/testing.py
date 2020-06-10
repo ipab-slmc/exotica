@@ -3,11 +3,12 @@ from __future__ import print_function, division
 
 import numpy as np
 import pyexotica as exo
+import sys
 
 __all__ = ["check_dynamics_solver_derivatives"]
 
 # np.random.seed(42)
-
+np.set_printoptions(2, suppress=True, threshold=sys.maxsize, linewidth=500)
 
 def random_quaternion():
     # Using http://planning.cs.uiuc.edu/node198.html
@@ -95,6 +96,8 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
     fx_fd = ds.fx_fd(x,u)
     if np.linalg.norm(fx-fx_fd) > 1e-3 or np.any(np.isnan(fx)):
         print(fx-fx_fd<1e-3)
+        fx_fd[fx_fd<1e-6] = 0.
+        print(fx-fx_fd, 2)
         print("fx\n",fx)
         print("fx_fd\n",fx_fd)
     np.testing.assert_allclose(fx, fx_fd, rtol=1e-5, atol=1e-5, err_msg='fx does not match!')

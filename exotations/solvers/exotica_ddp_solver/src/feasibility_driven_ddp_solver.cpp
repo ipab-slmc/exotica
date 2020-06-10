@@ -114,6 +114,23 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
     Quu_inv_.assign(T, Eigen::MatrixXd(NU_, NU_));
     fx_.assign(T, Eigen::MatrixXd(NDX_, NDX_));
     fu_.assign(T, Eigen::MatrixXd(NDX_, NU_));
+
+    // If T changed, we need to re-allocate.
+    last_T_ = T_;
+}
+
+void AbstractFeasibilityDrivenDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
+{
+    AbstractDDPSolver::SpecifyProblem(pointer);
+
+    T_ = prob_->get_T();
+    dt_ = dynamics_solver_->get_dt();
+
+    NU_ = prob_->GetScene()->get_num_controls();
+    NX_ = prob_->GetScene()->get_num_state();              // State vector size
+    NDX_ = prob_->GetScene()->get_num_state_derivative();  // Tangent vector size
+
+    AllocateData();
 }
 
 void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
@@ -122,14 +139,11 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     T_ = prob_->get_T();
-    NU_ = prob_->GetScene()->get_num_controls();
-    NX_ = prob_->GetScene()->get_num_state();              // State vector size
-    NDX_ = prob_->GetScene()->get_num_state_derivative();  // Tangent vector size
-    dt_ = dynamics_solver_->get_dt();
+    if (T_ != last_T_) AllocateData();
 
+    dt_ = dynamics_solver_->get_dt();
     control_limits_ = dynamics_solver_->get_control_limits();
 
-    AllocateData();
     const Eigen::MatrixXd& X_warm = prob_->get_X();
     const Eigen::MatrixXd& U_warm = prob_->get_U();
     for (int t = 0; t < T_ - 1; ++t)

@@ -92,8 +92,6 @@ std::string ToString(const KDL::Frame& s);
 
 std::string ToString(const Eigen::Isometry3d& s);
 
-std::string ToString(const Eigen::Affine3d& s);
-
 void PrintDimensions(const std::string& name, const Eigen::Ref<const Eigen::MatrixXd> m);
 }  // namespace exotica
 

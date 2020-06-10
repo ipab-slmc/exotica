@@ -50,12 +50,6 @@ std::string ToString(const Eigen::Isometry3d& s)
     return "([" + std::to_string(s.translation().x()) + " " + std::to_string(s.translation().y()) + " " + std::to_string(s.translation().z()) + "] [" + std::to_string(quat.x()) + " " + std::to_string(quat.y()) + " " + std::to_string(quat.z()) + " " + std::to_string(quat.w()) + "])";
 }
 
-std::string ToString(const Eigen::Affine3d& s)
-{
-    Eigen::Quaterniond quat(s.rotation());
-    return "([" + std::to_string(s.translation().x()) + " " + std::to_string(s.translation().y()) + " " + std::to_string(s.translation().z()) + "] [" + std::to_string(quat.x()) + " " + std::to_string(quat.y()) + " " + std::to_string(quat.z()) + " " + std::to_string(quat.w()) + "])";
-}
-
 void PrintDimensions(const std::string& name, const Eigen::Ref<const Eigen::MatrixXd> m)
 {
     INFO_NAMED(name, m.rows() << "x" << m.cols());

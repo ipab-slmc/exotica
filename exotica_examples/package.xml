@@ -35,7 +35,7 @@
   <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>interactive_markers</exec_depend>
-  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-pykdl</exec_depend>
+  <!-- <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-pykdl</exec_depend> --><!-- key does not exist -->
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-pykdl</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rviz</exec_depend>

@@ -1,26 +1,28 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>
-    <ControlLimitedFeasibilityDrivenDDPSolver Name="BoxFDDP">
+    <FeasibilityDrivenDDPSolver Name="BoxFDDP">
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
         <FunctionTolerance>1e-10</FunctionTolerance>
         <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
-    </ControlLimitedFeasibilityDrivenDDPSolver>
+        <RegularizationRate>0.01</RegularizationRate>
+    </FeasibilityDrivenDDPSolver>
     
     <DynamicTimeIndexedShootingProblem Name="cartpole">
         <!-- <LossType>L2</LossType> -->
         <!-- <R_rate>0</R_rate> -->
 
-        <!-- <LossType>Huber</LossType> -->
-        <!-- <HuberRate>1</HuberRate> -->
+        <LossType>NormalizedHuber</LossType>
+        <HuberRate>0.1</HuberRate>
+        <ControlCostWeight>1e-4</ControlCostWeight>
 
         <!-- <LossType>BiModalHuber</LossType> -->
         <!-- <Mode1>  -10</Mode1> -->
         <!-- <Mode2>   10</Mode2> -->
     
-        <LossType>SmoothL1</LossType>
-        <L1Rate>0.001</L1Rate>
-        <L1IncreaseRate>1.05</L1IncreaseRate>
+        <!-- <LossType>SmoothL1</LossType> -->
+        <!-- <L1Rate>0.001</L1Rate> -->
+        <!-- <L1IncreaseRate>1.05</L1IncreaseRate> -->
 
         <PlanningScene>
             <Scene>
@@ -41,8 +43,8 @@
         <T>300</T>
         <tau>0.01</tau>
         <Q_rate>0</Q_rate>
-        <Qf_rate>100</Qf_rate>
-        <R_rate>1e-3</R_rate>
+        <Qf_rate>10</Qf_rate>
+        <R_rate>0</R_rate>
         <StartState>0 0 0 0 </StartState>
         <GoalState>0 3.14 0 0</GoalState>
     </DynamicTimeIndexedShootingProblem>

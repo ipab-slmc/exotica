@@ -54,20 +54,20 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.L1Rate.size() == 1)
         {
-            l1_rate_.setConstant(scene_->get_num_controls(), parameters_.L1Rate(0));
+            l1_rate_.setConstant(get_num_controls(), parameters_.L1Rate(0));
         }
-        else if (parameters_.L1Rate.size() == scene_->get_num_controls())
+        else if (parameters_.L1Rate.size() == get_num_controls())
         {
             l1_rate_ = parameters_.L1Rate;
         }
         else
         {
-            ThrowPretty("L1Rate has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.L1Rate.size());
+            ThrowPretty("L1Rate has wrong size: expected " << get_num_controls() << ", got " << parameters_.L1Rate.size());
         }
     }
 
     // Huber Rate
-    if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber" || parameters_.LossType == "BiModalHuber" || parameters_.LossType == "NormalizedHuber")
+    if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber")
     {
         if (parameters_.HuberRate.size() == 0)
         {
@@ -75,15 +75,15 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.HuberRate.size() == 1)
         {
-            huber_rate_.setConstant(scene_->get_num_controls(), parameters_.HuberRate(0));
+            huber_rate_.setConstant(get_num_controls(), parameters_.HuberRate(0));
         }
-        else if (parameters_.HuberRate.size() == scene_->get_num_controls())
+        else if (parameters_.HuberRate.size() == get_num_controls())
         {
             huber_rate_ = parameters_.HuberRate;
         }
         else
         {
-            ThrowPretty("HuberRate has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.HuberRate.size());
+            ThrowPretty("HuberRate has wrong size: expected " << get_num_controls() << ", got " << parameters_.HuberRate.size());
         }
     }
 
@@ -97,15 +97,15 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.Mode1.size() == 1)
         {
-            bimodal_huber_mode1_.setConstant(scene_->get_num_controls(), parameters_.Mode1(0));
+            bimodal_huber_mode1_.setConstant(get_num_controls(), parameters_.Mode1(0));
         }
-        else if (parameters_.Mode1.size() == scene_->get_num_controls())
+        else if (parameters_.Mode1.size() == get_num_controls())
         {
             bimodal_huber_mode1_ = parameters_.Mode1;
         }
         else
         {
-            ThrowPretty("Mode1 has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.Mode1.size());
+            ThrowPretty("Mode1 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode1.size());
         }
 
         // BimodalHuber mode 1
@@ -115,18 +115,17 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
         else if (parameters_.Mode2.size() == 1)
         {
-            bimodal_huber_mode2_.setConstant(scene_->get_num_controls(), parameters_.Mode2(0));
+            bimodal_huber_mode2_.setConstant(get_num_controls(), parameters_.Mode2(0));
         }
-        else if (parameters_.Mode2.size() == scene_->get_num_controls())
+        else if (parameters_.Mode2.size() == get_num_controls())
         {
             bimodal_huber_mode2_ = parameters_.Mode2;
         }
         else
         {
-            ThrowPretty("Mode2 has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.Mode2.size());
+            ThrowPretty("Mode2 has wrong size: expected " << get_num_controls() << ", got " << parameters_.Mode2.size());
         }
     }
-    control_cost_weight_ = parameters_.ControlCostWeight;
 }
 
 void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShootingProblemInitializer& init)
@@ -135,9 +134,9 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
 
     if (!scene_->GetDynamicsSolver()) ThrowPretty("DynamicsSolver is not initialised!");
 
-    const int NX = scene_->get_num_positions() + scene_->get_num_velocities(),
-              NDX = 2 * scene_->get_num_velocities(),
-              NU = scene_->get_num_controls();
+    const int NX = num_positions_ + num_velocities_,
+              NDX = 2 * num_velocities_,
+              NU = num_controls_;
     Qf_ = Eigen::MatrixXd::Identity(NDX, NDX);
     if (this->parameters_.Qf.rows() > 0)
     {
@@ -152,16 +151,16 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     }
     Qf_ *= this->parameters_.Qf_rate;
 
-    R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(scene_->get_num_controls(), scene_->get_num_controls());
+    R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(num_controls_, num_controls_);
     if (this->parameters_.R.rows() > 0)
     {
-        if (this->parameters_.R.rows() == scene_->get_num_controls())
+        if (this->parameters_.R.rows() == num_controls_)
         {
             R_.diagonal() = this->parameters_.R;
         }
         else
         {
-            ThrowNamed("R dimension mismatch! Expected " << scene_->get_num_controls() << ", got " << this->parameters_.R.rows());
+            ThrowNamed("R dimension mismatch! Expected " << num_controls_ << ", got " << this->parameters_.R.rows());
         }
     }
 
@@ -261,15 +260,19 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
 {
     if (debug_) HIGHLIGHT_NAMED("DynamicTimeIndexedShootingProblem", "Initialize problem with T=" << T_);
 
-    const int NX = scene_->get_num_positions() + scene_->get_num_velocities(), NDX = 2 * scene_->get_num_velocities();
+    const int NX = num_positions_ + num_velocities_, NDX = 2 * num_velocities_;
+
+    // Check if the system has a floating-base, and if so, if it contains a quaternion.
+    // Will need to trigger special logic below to handle this (w.r.t. normalisation).
+    has_quaternion_floating_base_ = (scene_->GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && NX == NDX + 1);
 
     X_ = Eigen::MatrixXd::Zero(NX, T_);
     X_star_ = Eigen::MatrixXd::Zero(NX, T_);
     X_diff_ = Eigen::MatrixXd::Zero(NDX, T_);
-    U_ = Eigen::MatrixXd::Zero(scene_->get_num_controls(), T_ - 1);
+    U_ = Eigen::MatrixXd::Zero(num_controls_, T_ - 1);
 
     // Set w component of quaternion by default
-    if (scene_->get_has_quaternion_floating_base())
+    if (has_quaternion_floating_base_)
     {
         for (int t = 0; t < T_; ++t)
         {
@@ -287,9 +290,9 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         {
             goal_state.col(T_ - 1) = this->parameters_.GoalState;
         }
-        else if (this->parameters_.GoalState.rows() == scene_->get_num_positions())
+        else if (this->parameters_.GoalState.rows() == num_positions_)
         {
-            goal_state.col(T_ - 1).head(scene_->get_num_positions()) = this->parameters_.GoalState;
+            goal_state.col(T_ - 1).head(num_positions_) = this->parameters_.GoalState;
         }
         else if (this->parameters_.GoalState.rows() == NX * T_)
         {
@@ -300,7 +303,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         }
         else
         {
-            ThrowPretty("GoalState has " << this->parameters_.GoalState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << scene_->get_num_positions() << ", or NX*T=" << NX * T_);
+            ThrowPretty("GoalState has " << this->parameters_.GoalState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
         }
         set_X_star(goal_state);
     }
@@ -313,11 +316,11 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         {
             start_state = this->parameters_.StartState.replicate(1, T_);
         }
-        else if (this->parameters_.StartState.rows() == scene_->get_num_positions())
+        else if (this->parameters_.StartState.rows() == num_positions_)
         {
             for (int t = 0; t < T_; ++t)
             {
-                start_state.col(t).head(scene_->get_num_positions()) = this->parameters_.StartState;
+                start_state.col(t).head(num_positions_) = this->parameters_.StartState;
             }
         }
         else if (this->parameters_.StartState.rows() == NX * T_)
@@ -329,7 +332,7 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         }
         else
         {
-            ThrowPretty("StartState has " << this->parameters_.StartState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << scene_->get_num_positions() << ", or NX*T=" << NX * T_);
+            ThrowPretty("StartState has " << this->parameters_.StartState.rows() << " rows, but expected either NX=" << NX << " or NQ=" << num_positions_ << ", or NX*T=" << NX * T_);
         }
         set_X(start_state);
     }
@@ -364,21 +367,14 @@ void DynamicTimeIndexedShootingProblem::ReinitializeVariables()
         length_jacobian += tasks_[i]->length_jacobian;
     }
 
-    // Initialize the TaskSpaceVector and its derivatives
     y_ref_.SetZero(length_Phi);
     Phi.assign(T_, y_ref_);
-
-    if (flags_ & KIN_J)
+    if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
+    if (flags_ & KIN_J_DOT)
     {
-        dPhi_dx.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_state_derivative()));
-        dPhi_du.assign(T_, Eigen::MatrixXd(length_jacobian, scene_->get_num_controls()));
-    }
-
-    if (flags_ & KIN_H)
-    {
-        ddPhi_ddx.assign(T_, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_state_derivative())));
-        ddPhi_ddu.assign(T_, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_controls())));
-        ddPhi_dxdu.assign(T_, Hessian::Constant(length_jacobian, Eigen::MatrixXd::Zero(scene_->get_num_state_derivative(), scene_->get_num_controls())));
+        Hessian Htmp;
+        Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
+        hessian.assign(T_, Htmp);
     }
     cost.ReinitializeVariables(T_, shared_from_this(), cost_Phi);
 
@@ -423,7 +419,8 @@ void DynamicTimeIndexedShootingProblem::PreUpdate()
         for (int t = 0; t < T_ - 1; ++t)
         {
             U_.col(t) = scene_->GetDynamicsSolver()->InverseDynamics(X_.col(t));
-            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(X_.col(t), U_.col(t), tau_);
+            X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(
+                X_.col(t), U_.col(t), tau_);
         }
     }
 }
@@ -451,7 +448,7 @@ void DynamicTimeIndexedShootingProblem::set_X(Eigen::MatrixXdRefConst X_in)
     X_ = X_in;
 
     // Normalize quaternion, if required.
-    if (scene_->get_has_quaternion_floating_base())
+    if (has_quaternion_floating_base_)
     {
         for (int t = 0; t < T_; ++t)
         {
@@ -488,7 +485,7 @@ void DynamicTimeIndexedShootingProblem::set_X_star(Eigen::MatrixXdRefConst X_sta
     X_star_ = X_star_in;
 
     // Normalize quaternion, if required.
-    if (scene_->get_has_quaternion_floating_base())
+    if (has_quaternion_floating_base_)
     {
         for (int t = 0; t < T_; ++t)
         {
@@ -537,14 +534,14 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
         t = T_ - 2;
     }
 
-    if (u_in.rows() != scene_->get_num_controls())
+    if (u_in.rows() != num_controls_)
     {
-        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << scene_->get_num_controls());
+        ThrowPretty("Mismatching in size of control vector: " << u_in.rows() << " given, expected: " << num_controls_);
     }
 
-    if (x_in.rows() != scene_->get_num_positions() + scene_->get_num_velocities())
+    if (x_in.rows() != num_positions_ + num_velocities_)
     {
-        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << scene_->get_num_positions() + scene_->get_num_velocities());
+        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << num_positions_ + num_velocities_);
     }
 
     X_.col(t) = x_in;
@@ -554,7 +551,8 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
 
     // Update current state kinematics and costs
-    UpdateTaskMaps(X_.col(t), U_.col(t), t);
+    const Eigen::VectorXd q_current_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
+    UpdateTaskMaps(q_current_position, t);
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
@@ -581,27 +579,22 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // Stochastic noise, if enabled
     if (stochastic_matrices_specified_ && stochastic_updates_enabled_)
     {
-        Eigen::VectorXd noise(scene_->get_num_positions() + scene_->get_num_velocities());
-        for (int i = 0; i < scene_->get_num_positions() + scene_->get_num_velocities(); ++i)
+        Eigen::VectorXd noise(num_positions_ + num_velocities_);
+        for (int i = 0; i < num_positions_ + num_velocities_; ++i)
             noise(i) = standard_normal_noise_(generator_);
 
         Eigen::VectorXd control_dependent_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * get_F(t) * noise;
 
-        for (int i = 0; i < scene_->get_num_positions() + scene_->get_num_velocities(); ++i)
+        for (int i = 0; i < num_positions_ + num_velocities_; ++i)
             noise(i) = standard_normal_noise_(generator_);
         Eigen::VectorXd white_noise = std::sqrt(scene_->GetDynamicsSolver()->get_dt()) * CW_ * noise;
 
         X_.col(t + 1) = X_.col(t + 1) + white_noise + control_dependent_noise;
     }
 
-    // Twice would not be necessary if "UpdateTerminalState" is used by the solver.
-    // However, as this is a recent addition, this check and update is required for
-    // backwards compatibility.
-    if (t == T_ - 2)
-    {
-        const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
-        UpdateTaskMaps(X_.col(t + 1), Eigen::VectorXd::Zero(scene_->get_num_controls()), t + 1);
-    }
+    // TODO: We are now updating the TaskMaps _twice_ per call. This may be very expensive (!)
+    const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
+    UpdateTaskMaps(q_next_position, t + 1);
 
     ++number_of_problem_updates_;
 }
@@ -625,9 +618,9 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
 {
     int t = T_ - 1;
 
-    if (x_in.rows() != scene_->get_num_positions() + scene_->get_num_velocities())
+    if (x_in.rows() != num_positions_ + num_velocities_)
     {
-        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << scene_->get_num_positions() + scene_->get_num_velocities());
+        ThrowPretty("Mismatching in size of state vector vector: " << x_in.rows() << " given, expected: " << num_positions_ + num_velocities_);
     }
 
     X_.col(t) = x_in;
@@ -649,78 +642,48 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     // Actually update the tasks' kinematics mappings.
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
-    UpdateTaskMaps(X_.col(t), Eigen::VectorXd::Zero(scene_->get_num_controls()), t);
+    const Eigen::VectorXd x_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t));
+    UpdateTaskMaps(x_next_position, t);
 
     ++number_of_problem_updates_;
 }
 
-void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t)
+void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst q, int t)
 {
     ValidateTimeIndex(t);
 
-    // Update the kinematic scene based on the configuration.
-    // NB: The KinematicTree only understands a certain format for the configuration (RPY)
-    // => As a result, we need to use GetPosition to potentially convert.
-    const Eigen::VectorXd q = scene_->GetDynamicsSolver()->GetPosition(x);
     scene_->Update(q, static_cast<double>(t) * tau_);
 
-    // Reset the task space vector and its derivatives for the current timestep
     Phi[t].SetZero(length_Phi);
-
-    if (flags_ & KIN_J)
-    {
-        dPhi_dx[t].setZero();
-        dPhi_du[t].setZero();
-    }
-
-    if (flags_ & KIN_H)
-    {
-        for (int i = 0; i < length_jacobian; ++i)
-        {
-            ddPhi_ddx[t](i).setZero();
-            ddPhi_ddu[t](i).setZero();
-            ddPhi_dxdu[t](i).setZero();
-        }
-    }
-
-    // Update all task-maps
+    if (flags_ & KIN_J) jacobian[t].setZero();
+    if (flags_ & KIN_J_DOT)
+        for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
-            if (flags_ & KIN_H)
+            if (flags_ & KIN_J_DOT)
             {
-                tasks_[i]->Update(x, u,
-                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
-                                  dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
-                                  dPhi_du[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
-                                  ddPhi_ddx[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
-                                  ddPhi_ddu[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
-                                  ddPhi_dxdu[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
             }
             else if (flags_ & KIN_J)
             {
-                tasks_[i]->Update(x, u,
-                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
-                                  dPhi_dx[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
-                                  dPhi_du[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else
             {
-                tasks_[i]->Update(x, u, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(q, Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length));
             }
         }
     }
-
-    // Update costs (TimeIndexedTask)
-    if (flags_ & KIN_H)
+    if (flags_ & KIN_J_DOT)
     {
-        cost.Update(Phi[t], dPhi_dx[t], dPhi_du[t], ddPhi_ddx[t], ddPhi_ddu[t], ddPhi_dxdu[t], t);
+        cost.Update(Phi[t], jacobian[t], hessian[t], t);
     }
     else if (flags_ & KIN_J)
     {
-        cost.Update(Phi[t], dPhi_dx[t], dPhi_du[t], t);
+        cost.Update(Phi[t], jacobian[t], t);
     }
     else
     {
@@ -731,45 +694,93 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst x
 double DynamicTimeIndexedShootingProblem::GetStateCost(int t) const
 {
     ValidateTimeIndex(t);
-    const double state_cost = X_diff_.col(t).transpose() * Q_[t] * X_diff_.col(t);
-    const double general_cost = cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];
-    return state_cost + general_cost;  // TODO: ct scaling
+    const double general_cost = cost.ydiff[t].transpose() * cost.S[t] * cost.ydiff[t];  // TODO: ct scaling
+    return (X_diff_.col(t).transpose() * Q_[t] * X_diff_.col(t)) + general_cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetStateCostJacobian(int t) const
 {
-    // ValidateTimeIndex(t);
-
-    // // (1,1) * (NDX,1)^T * (NDX,NDX) * (NDX,NDX) => (1,NDX)
-    // const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
-    // const Eigen::RowVectorXd state_cost_jacobian = 2.0 * X_diff_.col(t).transpose() * Q_[t] * dxdiff;
-
-    // // m => dimension of task maps, "length_jacobian"
-    // // (1,1) * (m,1)^T * (m,m) * (m,NQ) => (1,NQ)
-    // Eigen::RowVectorXd general_cost_jacobian = 2.0 * cost.ydiff[t].transpose() * cost.S[t] * cost.dPhi_dx[t];
-
-    // return state_cost_jacobian + general_cost_jacobian;
-
     // TODO: Check whether we should make this a RowVectorXd
     ValidateTimeIndex(t);
-    const int ndx = 2 * scene_->get_num_velocities();
+    const int ndx = 2 * num_velocities_;
+
+    // X_.col(t) is (NX,1)
+    // Q_[t] is (NDX,NDX)
+    // Xdiff_.col(t) is (NDX,1)
+    // dxdiff is (NDX,NDX)
+
+    const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
 
     // (NDX,NDX)^T * (NDX,NDX) * (NDX,1) * (1,1) => (NDX,1), TODO: We should change this to RowVectorXd format
-    const Eigen::MatrixXd dxdiff = scene_->GetDynamicsSolver()->dStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
     const Eigen::VectorXd state_cost_jacobian = dxdiff.transpose() * Q_[t] * X_diff_.col(t) * 2.0;
 
-    // m => dimension of task maps, "length_jacobian"
     Eigen::VectorXd general_cost_jacobian = Eigen::VectorXd::Zero(ndx);
+
+    // m => dimension of task maps, "length_jacobian"
     // (m,NQ)^T * (m,m) * (m,1) * (1,1) => (NQ,1), TODO: We should change this to RowVectorXd format
-    general_cost_jacobian = cost.dPhi_dx[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
+    general_cost_jacobian.head(num_velocities_) = cost.jacobian[t].transpose() * cost.S[t] * cost.ydiff[t] * 2.0;
 
     return state_cost_jacobian + general_cost_jacobian;
 }
 
-Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) const
+Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t)
 {
     ValidateTimeIndex(t);
-    const int ndx = 2 * scene_->get_num_velocities();
+    const int ndx = 2 * num_velocities_;
+
+
+
+
+
+
+
+    Eigen::MatrixXd res = Eigen::MatrixXd::Zero(ndx, ndx);
+    Eigen::VectorXd xt_old = X_.col(t);
+
+    for (int i = 0; i < ndx; ++ i)
+    {
+        double eps = 1e-6;
+        
+
+        // do finite differences
+
+        Eigen::VectorXd dx_plus = X_.col(t), dx_minus = X_.col(t);
+
+        dx_plus(i) += eps;
+        Eigen::VectorXd x_plus = Eigen::VectorXd::Zero(X_.col(t).size());
+        scene_->GetDynamicsSolver()->Integrate(xt_old, dx_plus, 1.0, x_plus);
+        X_.col(t) = x_plus;
+
+        Eigen::VectorXd jac_plus = GetStateCostJacobian(t);
+
+
+        
+        dx_minus(i) -= eps;
+        Eigen::VectorXd x_minus = Eigen::VectorXd::Zero(X_.col(t).size());
+        scene_->GetDynamicsSolver()->Integrate(xt_old, dx_minus, 1.0, x_minus);
+        X_.col(t) = x_minus;
+        Eigen::VectorXd jac_minus = GetStateCostJacobian(t);
+        
+
+        X_.col(t) = xt_old; 
+        
+        res.col(i) = (jac_plus - jac_minus) / (2 * eps);
+    }
+
+    return res;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // State Cost
     Eigen::MatrixXd state_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
@@ -777,31 +788,64 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetStateCostHessian(int t) co
     state_cost_hessian.noalias() = dxdiff.transpose() * Q_[t] * dxdiff;
 
     // For non-Euclidean spaces (i.e. on manifolds), there exists a second derivative of the state delta
-    if (scene_->get_has_quaternion_floating_base())
+    if (has_quaternion_floating_base_)
     {
         Eigen::RowVectorXd xdiffTQ = X_diff_.col(t).transpose() * Q_[t];  // (1*ndx)
-        Hessian ddxdiff = scene_->GetDynamicsSolver()->ddStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+
+        // finite dif, Booooooys
+        Hessian ddxdiff1 = scene_->GetDynamicsSolver()->ddStateDelta(X_.col(t), X_star_.col(t), ArgumentPosition::ARG0);
+        // 
+        //  dStateDelta is an Nx1 vector
+
+
         for (int i = 0; i < ndx; ++i)
         {
-            state_cost_hessian.noalias() += xdiffTQ(i) * ddxdiff(i);
+            double eps = 1e-8;
+            
+
+            // do finite differences
+            Eigen::VectorXd dx_plus = X_.col(t), dx_minus = X_.col(t);
+
+            dx_plus(i) += eps;
+            Eigen::VectorXd x_plus = Eigen::VectorXd::Zero(X_.col(t).size());
+            scene_->GetDynamicsSolver()->Integrate(X_.col(t), dx_plus, 1.0, x_plus);
+
+            dx_minus(i) -= eps;
+            Eigen::VectorXd x_minus = Eigen::VectorXd::Zero(X_.col(t).size());
+            scene_->GetDynamicsSolver()->Integrate(X_.col(t), dx_minus, 1.0, x_minus);
+
+
+
+            Eigen::MatrixXd dxdiff_plus = scene_->GetDynamicsSolver()->dStateDelta(x_plus, X_star_.col(t), ArgumentPosition::ARG0);
+            Eigen::MatrixXd dxdiff_minus = scene_->GetDynamicsSolver()->dStateDelta(x_minus, X_star_.col(t), ArgumentPosition::ARG0);
+
+            Eigen::MatrixXd ddxdiff = (dxdiff_plus - dxdiff_minus) / (2 * eps);
+
+
+            // HIGHLIGHT_NAMED("ddxdiff", ddxdiff);
+
+            state_cost_hessian.noalias() += xdiffTQ(i) * ddxdiff;
+            // state_cost_hessian.noalias() += xdiffTQ(i) * ddxdiff1(i);
         }
     }
 
     // General Cost
     Eigen::MatrixXd general_cost_hessian = Eigen::MatrixXd::Zero(ndx, ndx);
-    general_cost_hessian.noalias() = cost.dPhi_dx[t].transpose() * cost.S[t] * cost.dPhi_dx[t];
+    // general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_) = cost.ydiff[t].transpose() * cost.S[t] * cost.hessian[t] + cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
+    general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() = cost.jacobian[t].transpose() * cost.S[t] * cost.jacobian[t];
 
     // Contract task-map Hessians
-    if (flags_ & KIN_H)
+    if (flags_ & KIN_J_DOT)
     {
         Eigen::RowVectorXd ydiffTS = cost.ydiff[t].transpose() * cost.S[t];  // (1*m)
         for (int i = 0; i < cost.length_jacobian; ++i)                       // length m
         {
-            general_cost_hessian.noalias() += ydiffTS(i) * cost.ddPhi_ddx[t](i);
+            general_cost_hessian.topLeftCorner(num_velocities_, num_velocities_).noalias() += ydiffTS(i) * cost.hessian[t](i);
         }
     }
 
-    return 2.0 * state_cost_hessian + 2.0 * general_cost_hessian;
+    // return 2.0 * state_cost_hessian + 2.0 * general_cost_hessian;
+    return 2.0 * state_cost_hessian;
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) const
@@ -815,38 +859,29 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t) 
         t = T_ - 2;
     }
 
+    if (parameters_.LossType == "L2")
+        return R_ + R_.transpose();
+
     // auto dynamics_solver = scene_->GetDynamicsSolver();
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control Hessian
-    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_controls());
-
-    // This allows composition of multiple functions
-    //  useful when you want to apply different cost functions to different controls
-    // if (parameters_.LossType == "L2")
-    Quu += R_ + R_.transpose();
-
-    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
+    Eigen::MatrixXd Quu = Eigen::MatrixXd::Zero(num_controls_, num_controls_);
+    for (int iu = 0; iu < num_controls_; ++iu)
     {
+        // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
+        //     continue;
         if (parameters_.LossType == "SmoothL1")
-            Quu(iu, iu) += smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
-
+            Quu(iu, iu) = smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
+        else if (parameters_.LossType == "Huber")
+            Quu(iu, iu) = huber_hessian(U_.col(t)[iu], huber_rate_(iu));
         else if (parameters_.LossType == "SuperHuber")
-            Quu(iu, iu) += super_huber_hessian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-
-        // if huber_rate is 0, huber is undefined
-        //  this is a shortcut for disabling the loss
-        else if (parameters_.LossType == "Huber" && huber_rate_(iu) != 0)
-            Quu(iu, iu) += huber_hessian(U_.col(t)[iu], huber_rate_(iu));
-
-        else if (parameters_.LossType == "BiModalHuber" && huber_rate_(iu) != 0)
-            Quu(iu, iu) += bimodal_huber_hessian(
+            Quu(iu, iu) = super_huber_hessian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
+        else if (parameters_.LossType == "BiModalHuber")
+            Quu(iu, iu) = bimodal_huber_hessian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
-
-        else if (parameters_.LossType == "NormalizedHuber" && huber_rate_(iu) != 0)
-            Quu(iu, iu) += normalized_huber_hessian(U_.col(t)[iu], huber_rate_(iu));
     }
-    return control_cost_weight_ * Quu;
+    return parameters_.ControlCostWeight * Quu;
 }
 
 double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
@@ -860,45 +895,33 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
         t = T_ - 2;
     }
 
+    if (parameters_.LossType == "L2")
+        return U_.col(t).transpose() * R_ * U_.col(t);
+
     // auto dynamics_solver = scene_->GetDynamicsSolver();
     // auto control_limits = dynamics_solver->get_control_limits();
 
     // Sparsity-related control cost
     double cost = 0;
-
-    // This allows composition of multiple functions
-    //  useful when you want to apply different cost functions to different controls
-    // if (parameters_.LossType == "L2")
-    cost += U_.col(t).transpose() * R_ * U_.col(t);
-
-    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
+    for (int iu = 0; iu < num_controls_; ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
         if (parameters_.LossType == "SmoothL1")
             cost += smooth_l1_cost(U_.col(t)[iu], l1_rate_(iu));
-
-        // if huber_rate is 0, huber is undefined
-        //  this is a shortcut for disabling the loss
-        else if (parameters_.LossType == "Huber" && huber_rate_(iu) != 0)
+        else if (parameters_.LossType == "Huber")
             cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
-
         else if (parameters_.LossType == "SuperHuber")
             cost += super_huber_cost(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-
-        else if (parameters_.LossType == "BiModalHuber" && huber_rate_(iu) != 0)
+        else if (parameters_.LossType == "BiModalHuber")
             cost += bimodal_huber_cost(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
-
-        else if (parameters_.LossType == "NormalizedHuber" && huber_rate_(iu) != 0)
-            cost += normalized_huber_cost(U_.col(t)[iu], huber_rate_(iu));
-
     }
     if (!std::isfinite(cost))
     {
         cost = 0.0;  // Likely "inf" as u is too small.
     }
-    return control_cost_weight_ * cost;
+    return parameters_.ControlCostWeight * cost;
 }
 
 Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t) const
@@ -912,36 +935,39 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
         t = T_ - 2;
     }
 
+    if (parameters_.LossType == "L2")
+        return R_ * U_.col(t) + R_.transpose() * U_.col(t);
+
+    // auto dynamics_solver = scene_->GetDynamicsSolver();
+    // auto control_limits = dynamics_solver->get_control_limits();
+
     // Sparsity-related control cost Jacobian
-    Eigen::VectorXd Qu = Eigen::VectorXd::Zero(scene_->get_num_controls());
-
-    // This allows composition of multiple functions
-    //  useful when you want to apply different cost functions to different controls
-    // if (parameters_.LossType == "L2")
-    // Qu += 2.0 * U_.col(t).transpose() * R_;  // Assumes R is diagonal
-    Qu += R_ * U_.col(t) + R_.transpose() * U_.col(t);
-
-    for (int iu = 0; iu < scene_->get_num_controls(); ++iu)
+    Eigen::MatrixXd Qu = Eigen::VectorXd::Zero(num_controls_);
+    for (int iu = 0; iu < num_controls_; ++iu)
     {
         // if (U_.col(t)[iu] >= control_limits.col(1)[iu])
         //     continue;
         if (parameters_.LossType == "SmoothL1")
-            Qu(iu) += smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
-
-        // if huber_rate is 0, huber is undefined
-        //  this is a shortcut for disabling the loss
-        else if (parameters_.LossType == "Huber" && huber_rate_(iu) != 0)
-            Qu(iu) += huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
-
-        else if (parameters_.LossType == "BiModalHuber" && huber_rate_(iu) != 0)
-            Qu(iu) += bimodal_huber_jacobian(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
+            Qu(iu) = smooth_l1_jacobian(U_.col(t)[iu], l1_rate_(iu));
+        else if (parameters_.LossType == "Huber")
+            Qu(iu) = huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
         else if (parameters_.LossType == "SuperHuber")
-            Qu(iu) += super_huber_jacobian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-        else if (parameters_.LossType == "NormalizedHuber")
-            Qu(iu) += normalized_huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
+            Qu(iu) = super_huber_jacobian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
+        else if (parameters_.LossType == "BiModalHuber")
+            Qu(iu) = bimodal_huber_jacobian(
+                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
-    return control_cost_weight_ * Qu;
+    return parameters_.ControlCostWeight * Qu;
+}
+
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
+{
+    return scene_->GetDynamicsSolver()->f(x, u);
+}
+
+Eigen::VectorXd DynamicTimeIndexedShootingProblem::Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u)
+{
+    return scene_->GetDynamicsSolver()->Simulate(x, u, tau_);
 }
 
 Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
@@ -951,7 +977,7 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
         ThrowPretty("Requested t=" << t << " out of range, needs to be 0 =< t < " << T_ - 1);
     }
 
-    const int NX = scene_->get_num_positions() + scene_->get_num_velocities();
+    const int NX = num_positions_ + num_velocities_;
     Eigen::MatrixXd F(NX, NX);
 
     for (int i = 0; i < NX; ++i)
@@ -963,8 +989,8 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::get_F(int t) const
 // F[i]_u
 const Eigen::MatrixXd& DynamicTimeIndexedShootingProblem::GetControlNoiseJacobian(int column_idx) const
 {
-    if (column_idx < 0 || column_idx >= scene_->get_num_velocities())
-        ThrowPretty("Requested column_idx=" << column_idx << " out of range; needs to be 0 <= column_idx < " << scene_->get_num_velocities() - 1);
+    if (column_idx < 0 || column_idx >= num_velocities_)
+        ThrowPretty("Requested column_idx=" << column_idx << " out of range; needs to be 0 <= column_idx < " << num_velocities_ - 1);
     return Ci_[column_idx];
 }
 
@@ -976,6 +1002,10 @@ void DynamicTimeIndexedShootingProblem::EnableStochasticUpdates()
 void DynamicTimeIndexedShootingProblem::DisableStochasticUpdates()
 {
     stochastic_updates_enabled_ = false;
+}
+
+void DynamicTimeIndexedShootingProblem::RescaleCostWeights()
+{
 }
 
 }  // namespace exotica

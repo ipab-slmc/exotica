@@ -161,15 +161,16 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     // Initial roll-out to get initial cost
     cost_ = 0.0;
-    for (int t = 0; t < T_ - 1; ++t)
-    {
-        prob_->Update(xs_[t], us_[t], t);
-        cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
-    }
-    // Reset shooting nodes so we can warm-start from state trajectory
-    prob_->set_X(X_warm);
-    cost_ += prob_->GetStateCost(T_ - 1);
-    prob_->SetCostEvolution(0, cost_);
+    cost_ = 1e10;
+    // for (int t = 0; t < T_ - 1; ++t)
+    // {
+    //     prob_->Update(xs_[t], us_[t], t);
+    //     cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+    // }
+    // // Reset shooting nodes so we can warm-start from state trajectory
+    // prob_->set_X(X_warm);
+    // cost_ += prob_->GetStateCost(T_ - 1);
+    // prob_->SetCostEvolution(0, cost_);
 
     xreg_ = std::max(regmin_, initial_regularization_rate_);
     ureg_ = std::max(regmin_, initial_regularization_rate_);
@@ -180,6 +181,9 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     bool recalcDiff = true;
     int iter;
+
+    double time_taken_setup_ = planning_timer.GetDuration();
+
     for (iter = 1; iter <= GetNumberOfMaxIterations(); ++iter)
     {
         // Check whether user interrupted (Ctrl+C)
@@ -324,10 +328,12 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     for (int t = 0; t < T_ - 1; ++t)
     {
         solution.row(t) = us_[t].transpose();
-        prob_->Update(us_[t], t);
+        // prob_->Update(us_[t], t);
     }
 
     planning_time_ = planning_timer.GetDuration();
+
+    // HIGHLIGHT(std::setprecision(4) << "Setup: " << time_taken_setup_ * 1e3 << "\tBwd: " << time_taken_backward_pass_ * 1e3 << "\tFwd: " << time_taken_forward_pass_ * 1e3 << "\tSolve = " << (planning_time_ - time_taken_setup_)*1e3 << "\talpha=" << steplength_)
 }
 
 void AbstractFeasibilityDrivenDDPSolver::IncreaseRegularization()

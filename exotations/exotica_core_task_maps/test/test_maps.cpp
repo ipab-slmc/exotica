@@ -651,6 +651,8 @@ TEST(ExoticaTaskMaps, testSphereCollision)
             0, -0.349195, -0.447214,
             0, -0.270171, -0.430172;
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
+
+        // EXPECT_TRUE(test_jacobian(problem));  // Throws!
     }
     catch (std::exception& e)
     {

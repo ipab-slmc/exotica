@@ -13,7 +13,9 @@
                 <Trajectories>
                     <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
                 </Trajectories>
-                <CollisionScene>CollisionSceneFCLLatest</CollisionScene>
+                <CollisionScene>
+                    <CollisionSceneFCLLatest Name="MyCollisionScene"/>
+                </CollisionScene>
                 <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
             </Scene>
         </PlanningScene>
@@ -26,6 +28,7 @@
                 <Debug>0</Debug>
                 <WorldMargin>0.2</WorldMargin>
                 <CheckSelfCollision>0</CheckSelfCollision>
+                <Linear>1</Linear>
             </SmoothCollisionDistance>
         </Maps>
 

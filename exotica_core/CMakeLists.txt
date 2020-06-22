@@ -18,7 +18,6 @@ set(CATKIN_DEPENDS
 
 ## system dependencies
 set(SYSTEM_DEPENDS
-  Boost
   EIGEN3
   TinyXML2
   ZeroMQ
@@ -26,7 +25,6 @@ set(SYSTEM_DEPENDS
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS cmake_modules ${CATKIN_DEPENDS})
-find_package(Boost REQUIRED COMPONENTS signals)
 find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -92,7 +90,6 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
   ${TinyXML2_INCLUDE_DIRS}
   ${ZeroMQ_INCLUDE_DIRS}
   ${MSGPACK_INCLUDE_DIRS}
@@ -135,7 +132,7 @@ add_library(${PROJECT_NAME}
 
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 # mark all warnings as errors
 target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)

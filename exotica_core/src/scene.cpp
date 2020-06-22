@@ -48,6 +48,8 @@
 #include <exotica_core/sphere_shape_initializer.h>
 #include <exotica_core/trajectory_initializer.h>
 
+#include <moveit/version.h>
+
 namespace exotica
 {
 Scene::Scene() = default;
@@ -730,8 +732,11 @@ void Scene::UpdateSceneFrames()
 
     // Add robot collision objects
     ps_->getCurrentStateNonConst().update(true);
-    const std::vector<const robot_model::LinkModel*>& links =
-        ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+#if MOVEIT_VERSION_MAJOR >=1 && MOVEIT_VERSION_MINOR >= 1
+    const std::vector<const robot_model::LinkModel*>& links = ps_->getCollisionEnv()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+#else
+    const std::vector<const robot_model::LinkModel*>& links = ps_->getCollisionRobot()->getRobotModel()->getLinkModelsWithCollisionGeometry();
+#endif
 
     int last_controlled_joint_id = -1;
     std::string last_controlled_joint_name = "";

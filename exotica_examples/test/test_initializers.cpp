@@ -197,9 +197,9 @@ TEST(ExoticaTestInitializers, testRos)
     {
         EXPECT_TRUE(testRos());
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -211,9 +211,9 @@ TEST(ExoticaTestInitializers, testCore)
         EXPECT_TRUE(testCore());
         Setup::Destroy();
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -223,9 +223,9 @@ TEST(ExoticaTestInitializers, testGenericInit)
     {
         EXPECT_TRUE(testGenericInit());
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -235,9 +235,9 @@ TEST(ExoticaTestInitializers, testXMLInit)
     {
         EXPECT_TRUE(testXMLInit());
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 

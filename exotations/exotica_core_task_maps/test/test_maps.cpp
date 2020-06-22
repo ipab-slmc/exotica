@@ -296,9 +296,9 @@ TEST(ExoticaTaskMaps, testEffPositionXY)
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -326,9 +326,9 @@ TEST(ExoticaTaskMaps, testEffPosition)
 
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -355,9 +355,9 @@ TEST(ExoticaTaskMaps, testEffOrientation)
             EXPECT_TRUE(test_jacobian(problem, eps[i]));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -374,9 +374,9 @@ TEST(ExoticaTaskMaps, testEffAxisAlignment)
 
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -402,9 +402,9 @@ TEST(ExoticaTaskMaps, testEffFrame)
             EXPECT_TRUE(test_jacobian(problem, eps[i]));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -430,9 +430,9 @@ TEST(ExoticaTaskMaps, testEffVelocity)
             EXPECT_TRUE(test_jacobian_time_indexed(problem, problem->cost, t, 1e-3));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -464,9 +464,9 @@ TEST(ExoticaTaskMaps, testDistance)
 
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -506,9 +506,9 @@ TEST(ExoticaTaskMaps, testJointLimit)
             0, 0, 1;
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -525,9 +525,9 @@ TEST(ExoticaTaskMaps, testJointTorqueMinimizationProxy)
 
         EXPECT_TRUE(test_jacobian(problem, 1.e-4));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -622,9 +622,9 @@ TEST(ExoticaTaskMaps, testSphereCollision)
             0, -0.270171, -0.430172;
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -726,7 +726,7 @@ TEST(ExoticaTaskMaps, testJointPose)
         }
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
         ADD_FAILURE() << "JointPose: Uncaught exception!" << e.what();
     }
@@ -875,9 +875,9 @@ TEST(ExoticaTaskMaps, testCoM)
         }
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -891,9 +891,9 @@ TEST(ExoticaTaskMaps, testContinuousJointPose)
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -974,9 +974,9 @@ TEST(ExoticaTaskMaps, testIMesh)
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -999,9 +999,9 @@ TEST(ExoticaTaskMaps, testPoint2Line)
 
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1029,9 +1029,9 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
             EXPECT_TRUE(test_jacobian(problem));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1047,9 +1047,9 @@ TEST(ExoticaTaskMaps, testCollisionDistance)
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1073,9 +1073,9 @@ TEST(ExoticaTaskMaps, testSmoothCollisionDistance)
             EXPECT_TRUE(test_jacobian(problem));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1143,9 +1143,9 @@ TEST(ExoticaTaskMaps, testQuasiStatic)
             EXPECT_TRUE(test_jacobian(problem));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1194,9 +1194,9 @@ TEST(ExoticaTaskMaps, testJointSmoothingBackwardDifference)
             // }
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1222,9 +1222,9 @@ TEST(ExoticaTaskMaps, testAvoidLookAtSphere)
             EXPECT_TRUE(test_jacobian(problem, 2e-5));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1247,9 +1247,9 @@ TEST(ExoticaTaskMaps, testLookAt)
             EXPECT_TRUE(test_jacobian(problem, 2e-5));
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -1270,9 +1270,9 @@ TEST(ExoticaTaskMaps, testManipulability)
 
         EXPECT_TRUE(test_jacobian(problem));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 

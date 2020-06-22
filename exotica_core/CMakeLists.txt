@@ -135,7 +135,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 # mark all warnings as errors
-target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra) # -Werror 
 # enable additional warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
 

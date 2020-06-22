@@ -28,4 +28,7 @@
     local-name: ros_pytest
     uri: https://github.com/machinekoder/ros_pytest.git
     version: melodic-devel
-    
+- git:
+    local-name: spacenav_node
+    uri: https://github.com/ros-drivers/joystick_drivers.git
+    version: master

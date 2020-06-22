@@ -162,15 +162,15 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     // Initial roll-out to get initial cost
     cost_ = 0.0;
     cost_ = 1e10;
-    // for (int t = 0; t < T_ - 1; ++t)
-    // {
-    //     prob_->Update(xs_[t], us_[t], t);
-    //     cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
-    // }
-    // // Reset shooting nodes so we can warm-start from state trajectory
-    // prob_->set_X(X_warm);
-    // cost_ += prob_->GetStateCost(T_ - 1);
-    // prob_->SetCostEvolution(0, cost_);
+    for (int t = 0; t < T_ - 1; ++t)
+    {
+        prob_->Update(xs_[t], us_[t], t);
+        cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+    }
+    // Reset shooting nodes so we can warm-start from state trajectory
+    prob_->set_X(X_warm);
+    cost_ += prob_->GetStateCost(T_ - 1);
+    prob_->SetCostEvolution(0, cost_);
 
     xreg_ = std::max(regmin_, initial_regularization_rate_);
     ureg_ = std::max(regmin_, initial_regularization_rate_);

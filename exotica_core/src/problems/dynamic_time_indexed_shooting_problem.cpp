@@ -94,6 +94,9 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
     // SuperHuber
     if (parameters_.LossType == "SuperHuber") loss_type_ = ControlCostLossTermType::SuperHuber;
 
+    // NormalizedHuber
+    if (parameters_.LossType == "NormalizedHuber") loss_type_ = ControlCostLossTermType::NormalizedHuber;
+
     // BimodalHuber
     if (parameters_.LossType == "BiModalHuber")
     {
@@ -835,6 +838,9 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t)
         else if (loss_type_ == ControlCostLossTermType::Huber && huber_rate_(iu) != 0)
             control_cost_hessian_[t](iu, iu) += huber_hessian(U_.col(t)[iu], huber_rate_(iu));
 
+        else if (loss_type_ == ControlCostLossTermType::NormalizedHuber && huber_rate_(iu) != 0)
+            control_cost_hessian_[t](iu, iu) += normalized_huber_hessian(U_.col(t)[iu], huber_rate_(iu));
+
         else if (loss_type_ == ControlCostLossTermType::BimodalHuber && huber_rate_(iu) != 0)
             control_cost_hessian_[t](iu, iu) += bimodal_huber_hessian(
                 U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
@@ -872,6 +878,9 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
         //  this is a shortcut for disabling the loss
         else if (loss_type_ == ControlCostLossTermType::Huber && huber_rate_(iu) != 0)
             cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
+
+        else if (loss_type_ == ControlCostLossTermType::NormalizedHuber && huber_rate_(iu) != 0)
+            cost += normalized_huber_cost(U_.col(t)[iu], huber_rate_(iu));
 
         else if (loss_type_ == ControlCostLossTermType::SuperHuber)
             cost += super_huber_cost(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
@@ -916,6 +925,9 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
         //  this is a shortcut for disabling the loss
         else if (loss_type_ == ControlCostLossTermType::Huber && huber_rate_(iu) != 0)
             control_cost_jacobian_[t](iu) += huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
+
+        else if (loss_type_ == ControlCostLossTermType::NormalizedHuber && huber_rate_(iu) != 0)
+            control_cost_jacobian_[t](iu) += normalized_huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
 
         else if (loss_type_ == ControlCostLossTermType::BimodalHuber && huber_rate_(iu) != 0)
             control_cost_jacobian_[t](iu) += bimodal_huber_jacobian(

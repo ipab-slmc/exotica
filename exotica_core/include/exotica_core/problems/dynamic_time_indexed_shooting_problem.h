@@ -44,7 +44,8 @@ enum ControlCostLossTermType
     SmoothL1 = 1,
     Huber = 2,
     BimodalHuber = 3,
-    SuperHuber = 4
+    SuperHuber = 4,
+    NormalizedHuber = 5
 };
 
 class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instantiable<DynamicTimeIndexedShootingProblemInitializer>

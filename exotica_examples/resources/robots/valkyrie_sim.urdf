@@ -2900,12 +2900,6 @@
       <origin rpy="0 0 0" xyz="-0.122993 0.035033383 0.02774"/>
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
     </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </visual>
   </link>
   <joint name="head_imu_joint" type="fixed">
     <parent link="head"/>
@@ -2969,12 +2963,6 @@
       <origin xyz="0 0 0"/>
       <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </visual>
   </link>
   <joint name="l_hand_force_torque_joint" type="fixed">
     <origin rpy="-1.57079632679 0 1.57079632679" xyz="0 0 0"/>
@@ -2987,12 +2975,6 @@
       <origin xyz="0 0 0"/>
       <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </visual>
   </link>
   <joint name="left_valkyrie_hand_joint" type="fixed">
     <origin rpy="1.57079632679 1.57079632679 0" xyz="0.08 0 0"/>
@@ -3019,12 +3001,6 @@
       <origin xyz="0 0 0"/>
       <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </visual>
   </link>
   <joint name="r_hand_force_torque_joint" type="fixed">
     <origin rpy="-1.57079632679 0 -1.57079632679" xyz="0 0 0"/>
@@ -3037,12 +3013,6 @@
       <origin xyz="0 0 0"/>
       <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </visual>
   </link>
   <joint name="right_valkyrie_hand_joint" type="fixed">
     <origin rpy="0 -1.57079632679 -1.57079632679" xyz="0.08 0 0"/>

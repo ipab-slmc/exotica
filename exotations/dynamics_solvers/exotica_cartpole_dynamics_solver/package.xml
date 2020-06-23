@@ -18,7 +18,6 @@
   <exec_depend>roscpp</exec_depend>
   <!-- not currently used (test deactivated, installation fails on kinetic <test_depend>autograd-pip</test_depend>-->
   <test_depend>exotica_python</test_depend>
-  <test_depend>exotica_examples</test_depend>
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

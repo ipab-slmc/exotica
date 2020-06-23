@@ -14,8 +14,8 @@
         <PlanningScene>
             <Scene>
                 <JointGroup>actuated_joints</JointGroup>
-                <URDF>{exotica_examples}/resources/robots/cartpole.urdf</URDF>
-                <SRDF>{exotica_examples}/resources/robots/cartpole.srdf</SRDF>
+                <URDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.urdf</URDF>
+                <SRDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
                     <CartpoleDynamicsSolver Name="solver" Integrator="RK1">

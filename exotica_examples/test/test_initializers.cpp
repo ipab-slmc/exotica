@@ -36,6 +36,15 @@ namespace testing
 {
 namespace internal
 {
+#if !ROS_VERSION_MINIMUM(1, 15, 0)
+enum GTestColor
+{
+    COLOR_DEFAULT,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW
+};
+#endif
 extern void ColoredPrintf(testing::internal::GTestColor color, const char* fmt, ...);
 }
 }

@@ -95,6 +95,8 @@ void CollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi
             J.row(i) -= (closest_proxy.normal1.transpose() * tmpJ.topRows<3>());
         }
     }
+
+    J *= -1;  // yup, this is was wrong since forever.
 }
 
 void CollisionDistance::AssignScene(ScenePtr scene)

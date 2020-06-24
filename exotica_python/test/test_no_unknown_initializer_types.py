@@ -9,10 +9,10 @@ class TestUnknownInitializerTypes(unittest.TestCase):
         output = None
         if os.environ['ROS_PYTHON_VERSION'] == '2':
             output = subprocess.check_output(
-                "/usr/bin/env python -c 'import pyexotica as exo\ninitializers = exo.Setup.get_initializers()'", shell=True)
+                ["/usr/bin/env", "python", "-c", "'import pyexotica as exo ; initializers = exo.Setup.get_initializers()'"])
         elif os.environ['ROS_PYTHON_VERSION'] == '3':
             output = subprocess.check_output(
-                "/usr/bin/env python3 -c 'import pyexotica as exo\ninitializers = exo.Setup.get_initializers()'", shell=True)
+                ["/usr/bin/env", "python3", "-c", "'import pyexotica as exo ; initializers = exo.Setup.get_initializers()'"])
         else:
             raise AssertionError("Unknown ROS_PYTHON_VERSION")
 

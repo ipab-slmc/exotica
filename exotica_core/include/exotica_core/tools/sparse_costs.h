@@ -99,10 +99,8 @@ inline double bimodal_huber_hessian(double x, double delta, double mode1, double
 inline double normalized_huber_cost(double x, double delta)
 {
     return (
-        1.0 * (delta * delta + 1.0) * (std::sqrt(std::pow(x / delta, 2) + 1.0) - 1.0)
-    ) / (
-        std::sqrt(1 + 1/(delta * delta)) * (delta + 1.0)
-    );
+               1.0 * (delta * delta + 1.0) * (std::sqrt(std::pow(x / delta, 2) + 1.0) - 1.0)) /
+           (std::sqrt(1 + 1 / (delta * delta)) * (delta + 1.0));
 }
 
 inline double normalized_huber_jacobian(double x, double delta)
@@ -111,30 +109,23 @@ inline double normalized_huber_jacobian(double x, double delta)
     x = x + epsilon;
 
     return (
-        1.0 * std::pow(x / delta, 2) * (delta * delta  + 1.0)
-    ) / (
-        x * std::sqrt((delta * delta + 1.0) / (delta * delta)) * (delta + 1.0) * std::sqrt(
-            std::pow(x / delta, 2) + 1.0
-        )
-    );
+               1.0 * std::pow(x / delta, 2) * (delta * delta + 1.0)) /
+           (x * std::sqrt((delta * delta + 1.0) / (delta * delta)) * (delta + 1.0) * std::sqrt(
+                                                                                         std::pow(x / delta, 2) + 1.0));
 }
 
 inline double normalized_huber_hessian(double x, double delta)
 {
     const double epsilon = 1e-7;
     x = x + epsilon;
-    
-    return (
-        (delta * delta + 1) * (
-            std::pow(x / delta, 2) * std::pow(std::pow(x / delta, 2) + 1.0, 1.5) - 
-            std::pow(x / delta, 4) * std::pow(std::pow(x / delta, 2) + 1.0, 0.5)
-        )
 
-    ) / (
-        x * x * std::sqrt((delta * delta + 1) / (delta * delta)) * (delta + 1.0) * std::pow(
-            std::pow(x / delta, 2) + 1.0, 2
-        )
-    );
+    return (
+               (delta * delta + 1) * (std::pow(x / delta, 2) * std::pow(std::pow(x / delta, 2) + 1.0, 1.5) -
+                                      std::pow(x / delta, 4) * std::pow(std::pow(x / delta, 2) + 1.0, 0.5))
+
+                   ) /
+           (x * x * std::sqrt((delta * delta + 1) / (delta * delta)) * (delta + 1.0) * std::pow(
+                                                                                           std::pow(x / delta, 2) + 1.0, 2));
 }
 
 }  // namespace exotica

@@ -161,7 +161,6 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     // Initial roll-out to get initial cost
     cost_ = 0.0;
-    cost_ = 1e10;
     for (int t = 0; t < T_ - 1; ++t)
     {
         prob_->Update(xs_[t], us_[t], t);

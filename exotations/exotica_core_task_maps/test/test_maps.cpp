@@ -175,7 +175,7 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
             TaskSpaceVector x_minus(problem->Phi);
             jacobian.col(i) = (x_plus - x_minus) / (2.0 * h);
         }
-        double errJ = (jacobian - J0).norm();
+        double errJ = (jacobian - J0).lpNorm<Eigen::Infinity>();
         if (errJ > eps)
         {
             TEST_COUT << "x: " << x0.transpose();

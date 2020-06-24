@@ -726,6 +726,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("GradientTolerance", TerminationCriterion::GradientTolerance)
         .value("Divergence", TerminationCriterion::Divergence)
         .value("UserDefined", TerminationCriterion::UserDefined)
+        .value("Convergence", TerminationCriterion::Convergence)
         .export_values();
 
     py::enum_<RotationType>(module, "RotationType")

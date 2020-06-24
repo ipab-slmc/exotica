@@ -193,7 +193,8 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
             const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
             if (info != Eigen::Success)
             {
-                ThrowPretty("Error during Cholesky decomposition of Hff");
+                ThrowPretty("Error during Cholesky decomposition of Hff:\n"
+                            << Hff);
             }
             solution.Hff_inv.setIdentity(num_free, num_free);
             Hff_inv_llt_.solveInPlace(solution.Hff_inv);

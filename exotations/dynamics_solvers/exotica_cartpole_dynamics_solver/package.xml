@@ -18,6 +18,7 @@
   <exec_depend>roscpp</exec_depend>
   <!-- not currently used (test deactivated, installation fails on kinetic <test_depend>autograd-pip</test_depend>-->
   <test_depend>exotica_python</test_depend>
+  <test_depend>exotica_collision_scene_fcl</test_depend><!-- Until we can have no-CollisionScene Scenes -->
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

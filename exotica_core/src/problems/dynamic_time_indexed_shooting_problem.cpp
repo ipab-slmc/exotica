@@ -164,7 +164,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     }
     Qf_ *= this->parameters_.Qf_rate;
 
-    R_ = this->parameters_.R_rate * Eigen::MatrixXd::Identity(scene_->get_num_controls(), scene_->get_num_controls());
+    R_ = Eigen::MatrixXd::Identity(scene_->get_num_controls(), scene_->get_num_controls());
     if (this->parameters_.R.rows() > 0)
     {
         if (this->parameters_.R.rows() == scene_->get_num_controls())
@@ -176,6 +176,7 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
             ThrowNamed("R dimension mismatch! Expected " << scene_->get_num_controls() << ", got " << this->parameters_.R.rows());
         }
     }
+    R_ *= this->parameters_.R_rate;
 
     // Set up stochastic terms
     //  see https://homes.cs.washington.edu/~todorov/papers/TodorovNeuralComp05.pdf

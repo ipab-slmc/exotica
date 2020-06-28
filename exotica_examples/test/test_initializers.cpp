@@ -36,6 +36,7 @@ namespace testing
 {
 namespace internal
 {
+#if !ROS_VERSION_MINIMUM(1, 15, 0)
 enum GTestColor
 {
     COLOR_DEFAULT,
@@ -43,8 +44,8 @@ enum GTestColor
     COLOR_GREEN,
     COLOR_YELLOW
 };
-
-extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
+#endif
+extern void ColoredPrintf(testing::internal::GTestColor color, const char* fmt, ...);
 }
 }
 #define PRINTF(...)                                                                        \
@@ -197,9 +198,9 @@ TEST(ExoticaTestInitializers, testRos)
     {
         EXPECT_TRUE(testRos());
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -211,9 +212,9 @@ TEST(ExoticaTestInitializers, testCore)
         EXPECT_TRUE(testCore());
         Setup::Destroy();
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -223,9 +224,9 @@ TEST(ExoticaTestInitializers, testGenericInit)
     {
         EXPECT_TRUE(testGenericInit());
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -235,9 +236,9 @@ TEST(ExoticaTestInitializers, testXMLInit)
     {
         EXPECT_TRUE(testXMLInit());
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 

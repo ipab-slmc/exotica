@@ -28,9 +28,7 @@ class TestCartpoleDiff(unittest.TestCase):
 
     def setUp(self):
         # set up exotica with the test configuration
-        prob = exo.Initializers.load_xml(
-            '{exotica_cartpole_dynamics_solver}/test/test_cartpole_diff.xml')
-        problem = exo.Setup.create_problem(prob)
+        problem = exo.Setup.load_problem('{exotica_cartpole_dynamics_solver}/test/test_cartpole_diff.xml')
 
         # alias derivatives and dynamic solver
         self.dynamics_solver = problem.get_scene().get_dynamics_solver()

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(exotica_python)
 
 find_package(PkgConfig REQUIRED)
@@ -45,4 +45,5 @@ install(TARGETS _pyexotica LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATIO
 
 if(CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(test/test_no_unknown_initializer_types.py)
+  catkin_add_nosetests(test/test_box_qp.py)
 endif()

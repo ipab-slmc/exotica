@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0.2)
 project(exotica_core)
 
 ## catkin dependencies
@@ -18,7 +18,6 @@ set(CATKIN_DEPENDS
 
 ## system dependencies
 set(SYSTEM_DEPENDS
-  Boost
   EIGEN3
   TinyXML2
   ZeroMQ
@@ -26,7 +25,6 @@ set(SYSTEM_DEPENDS
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS cmake_modules ${CATKIN_DEPENDS})
-find_package(Boost REQUIRED COMPONENTS signals)
 find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -92,7 +90,6 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
   ${TinyXML2_INCLUDE_DIRS}
   ${ZeroMQ_INCLUDE_DIRS}
   ${MSGPACK_INCLUDE_DIRS}
@@ -135,10 +132,10 @@ add_library(${PROJECT_NAME}
 
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 # mark all warnings as errors
-target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra) # -Werror 
 # enable additional warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
 
@@ -165,6 +162,4 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_autodiff test/test_autodiff.cpp)
   target_link_libraries(test_autodiff ${catkin_LIBRARIES} ${PROJECT_NAME})
   add_dependencies(test_autodiff ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-
-  catkin_add_nosetests(test/test_box_qp.py)
 endif()

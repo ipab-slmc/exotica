@@ -227,7 +227,7 @@ inline Eigen::Matrix<T, S, 1> ParseVector(const std::string value)
         {
             ret[i - 1] = ToNumber<T>(temp_entry);
         }
-        catch (std::invalid_argument)
+        catch (const std::invalid_argument& /* e */)
         {
             ret[i - 1] = std::numeric_limits<T>::quiet_NaN();
         }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(exotica_cartpole_dynamics_solver)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -39,6 +39,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES
   exotica_plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(DIRECTORY resources/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

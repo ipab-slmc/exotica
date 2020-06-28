@@ -17,7 +17,7 @@ class TestClass(unittest.TestCase):
         ik_scene = ik_problem.get_scene()
 
         # Check number of collision robot links
-        assert (len(ik_scene.get_collision_robot_links()) == 84)
+        assert (len(ik_scene.get_collision_robot_links()) == 79)
 
         # Check number of collision world links
         assert (len(ik_scene.get_collision_world_links()) == 0)

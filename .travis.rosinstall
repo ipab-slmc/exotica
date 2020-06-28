@@ -6,3 +6,29 @@
 #    uri: https://github.com/stack-of-tasks/pinocchio.git
 #    version: devel
 #    local-name: pinocchio
+
+# ROS Noetic
+- git:
+    uri: https://github.com/ros-planning/moveit.git
+    version: master
+    local-name: moveit_core
+- git:
+    uri: https://github.com/ros-planning/moveit_msgs.git
+    version: master
+    local-name: moveit_msgs
+- git:
+    uri: https://github.com/ros-planning/moveit_resources.git
+    version: master
+    local-name: moveit_resources
+- git:
+    uri: https://github.com/ros-planning/srdfdom.git
+    version: noetic-devel
+    local-name: srdfdom
+- git:
+    local-name: ros_pytest
+    uri: https://github.com/machinekoder/ros_pytest.git
+    version: melodic-devel
+- git:
+    local-name: spacenav_node
+    uri: https://github.com/ros-drivers/joystick_drivers.git
+    version: master

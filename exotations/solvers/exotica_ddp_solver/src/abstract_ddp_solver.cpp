@@ -56,7 +56,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
 
         // Running cost
         control_cost_ += dt_ * prob_->GetControlCost(t);
-        cost_ += dt_ * prob_->GetControlCost(t);
+        cost_ += dt_ * prob_->GetStateCost(t);
     }
 
     // Add terminal cost

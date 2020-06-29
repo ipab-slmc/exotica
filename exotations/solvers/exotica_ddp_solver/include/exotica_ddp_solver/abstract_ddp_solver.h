@@ -114,6 +114,10 @@ protected:
     double dt_;                    ///< Integration time-step
     double cost_;                  ///< Cost during iteration
     double control_cost_;          ///< Control cost during iteration
+
+    double cost_try_;                      //!< Total cost computed by line-search procedure
+    double control_cost_try_;              //!< Total control cost computed by line-search procedure
+
     double cost_prev_;             ///< Cost during previous iteration
     double alpha_best_;            ///< Line-search step taken
     double time_taken_forward_pass_, time_taken_backward_pass_;

@@ -166,11 +166,11 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     {
         prob_->Update(xs_[t], us_[t], t);
         control_cost_ += dt_ * prob_->GetControlCost(t);
-        cost_ += dt_ * prob_->GetStateCost(t) + control_cost_;
+        cost_ += dt_ * prob_->GetStateCost(t);
     }
     // Reset shooting nodes so we can warm-start from state trajectory
     prob_->set_X(X_warm);
-    cost_ += prob_->GetStateCost(T_ - 1);
+    cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
     prob_->SetCostEvolution(0, cost_);
     control_cost_evolution_.push_back(control_cost_);
 
@@ -490,7 +490,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         xnext_ = prob_->get_X(t + 1);
 
         control_cost_try_ += dt_ * prob_->GetControlCost(t);
-        cost_try_ += dt_ * prob_->GetStateCost(t) + control_cost_try_;
+        cost_try_ += dt_ * prob_->GetStateCost(t);
 
         if (IsNaN(cost_try_))
         {
@@ -514,7 +514,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         prob_->GetScene()->GetDynamicsSolver()->Integrate(xnext_, fs_.back() * (steplength - 1), 1., xs_try_.back());
     }
     prob_->UpdateTerminalState(xs_try_.back());
-    cost_try_ += prob_->GetStateCost(T_ - 1);
+    cost_try_ += prob_->GetStateCost(T_ - 1) + control_cost_try_;
 
     if (IsNaN(cost_try_))
     {
@@ -540,10 +540,10 @@ double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
     for (int t = 0; t < T_ - 1; ++t)
     {
         control_cost_ += dt_ * prob_->GetControlCost(t);
-        cost_ += dt_ * prob_->GetStateCost(t) + control_cost_;
+        cost_ += dt_ * prob_->GetStateCost(t);
     }
     // Terminal cost
-    cost_ += prob_->GetStateCost(T_ - 1);
+    cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
 
     if (!is_feasible_)
     {

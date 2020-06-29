@@ -62,8 +62,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     // Add terminal cost
     cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
     prob_->SetCostEvolution(0, cost_);
-
-    control_cost_evolution_.push_back(control_cost_);
+    set_control_cost_evolution(0, control_cost_);
 
     // Initialize gain matrices
     K_.assign(T_, Eigen::MatrixXd(NU_, NDX_));
@@ -229,7 +228,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             X_ref_[t] = prob_->get_X(t);
 
         prob_->SetCostEvolution(iteration, cost_);
-        control_cost_evolution_.push_back(control_cost_);
+        set_control_cost_evolution(iteration, control_cost_);
 
         // Iteration limit
         if (iteration == GetNumberOfMaxIterations())
@@ -322,5 +321,13 @@ const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_U_ref() const { retur
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Quu_inv() const { return Quu_inv_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fx() const { return fx_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fu() const { return fu_; }
+
 const std::vector<double>& AbstractDDPSolver::get_control_cost_evolution() const { return control_cost_evolution_; }
+
+void AbstractDDPSolver::set_control_cost_evolution(const signed int iter, const double cost)
+{
+    if (control_cost_evolution_.size() <= iter) control_cost_evolution_.push_back(cost);
+    else control_cost_evolution_[iter] = cost;
+}
+
 }  // namespace exotica

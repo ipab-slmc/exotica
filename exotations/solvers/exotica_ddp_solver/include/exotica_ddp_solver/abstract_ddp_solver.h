@@ -75,6 +75,7 @@ public:
     const std::vector<Eigen::MatrixXd>& get_fu() const;
 
     const std::vector<double>& get_control_cost_evolution() const;
+    void set_control_cost_evolution(const signed int iter, const double cost);
 
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;  ///< Shared pointer to the planning problem.

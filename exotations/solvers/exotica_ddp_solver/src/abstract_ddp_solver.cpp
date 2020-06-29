@@ -312,4 +312,5 @@ const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_U_ref() const { retur
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Quu_inv() const { return Quu_inv_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fx() const { return fx_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fu() const { return fu_; }
+const std::vector<double>& AbstractDDPSolver::get_control_cost_evolution() const { return control_cost_evolution_; }
 }  // namespace exotica

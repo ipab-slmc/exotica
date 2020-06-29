@@ -161,15 +161,18 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     // Initial roll-out to get initial cost
     cost_ = 0.0;
+    control_cost_ = 0.0;
     for (int t = 0; t < T_ - 1; ++t)
     {
         prob_->Update(xs_[t], us_[t], t);
-        cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+        control_cost_ += dt_ * prob_->GetControlCost(t);
+        cost_ += dt_ * prob_->GetStateCost(t) + control_cost_;
     }
     // Reset shooting nodes so we can warm-start from state trajectory
     prob_->set_X(X_warm);
     cost_ += prob_->GetStateCost(T_ - 1);
     prob_->SetCostEvolution(0, cost_);
+    control_cost_evolution_.push_back(control_cost_);
 
     xreg_ = std::max(regmin_, initial_regularization_rate_);
     ureg_ = std::max(regmin_, initial_regularization_rate_);
@@ -181,7 +184,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     bool recalcDiff = true;
     int iter;
 
-    double time_taken_setup_ = planning_timer.GetDuration();
+    // double time_taken_setup_ = planning_timer.GetDuration();
 
     for (iter = 1; iter <= GetNumberOfMaxIterations(); ++iter)
     {
@@ -238,7 +241,9 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
                     was_feasible_ = is_feasible_;
                     SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1.0));
                     cost_ = cost_try_;
+                    control_cost_ = control_cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
+                    control_cost_evolution_.push_back(control_cost_);
                     recalcDiff = true;
                     break;
                 }
@@ -251,7 +256,9 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
                     was_feasible_ = is_feasible_;
                     SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
                     cost_ = cost_try_;
+                    control_cost_ = control_cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
+                    control_cost_evolution_.push_back(control_cost_);
                     break;
                 }
                 // else
@@ -261,6 +268,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             }
 
             prob_->SetCostEvolution(iter, cost_);
+            control_cost_evolution_.push_back(control_cost_);
         }
         time_taken_forward_pass_ = line_search_timer.GetDuration();
 
@@ -456,6 +464,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         ThrowPretty("Invalid argument: invalid step length, value should be between 0. to 1. - got=" << steplength);
     }
     cost_try_ = 0.;
+    control_cost_try_ = 0.;
     xnext_ = prob_->get_X(0);
     for (int t = 0; t < T_ - 1; ++t)
     {
@@ -479,7 +488,9 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 
         prob_->Update(xs_try_[t], us_try_[t], t);  // Performs integration and update of cost
         xnext_ = prob_->get_X(t + 1);
-        cost_try_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+
+        control_cost_try_ += dt_ * prob_->GetControlCost(t);
+        cost_try_ += dt_ * prob_->GetStateCost(t) + control_cost_try_;
 
         if (IsNaN(cost_try_))
         {
@@ -524,10 +535,12 @@ bool AbstractFeasibilityDrivenDDPSolver::ComputeDirection(const bool recalcDiff)
 double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
 {
     cost_ = 0;
+    control_cost_ = 0;
     // Running cost
     for (int t = 0; t < T_ - 1; ++t)
     {
-        cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+        control_cost_ += dt_ * prob_->GetControlCost(t);
+        cost_ += dt_ * prob_->GetStateCost(t) + control_cost_;
     }
     // Terminal cost
     cost_ += prob_->GetStateCost(T_ - 1);

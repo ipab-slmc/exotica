@@ -44,6 +44,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     dt_ = dynamics_solver_->get_dt();
     lambda_ = base_parameters_.RegularizationRate;
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    reset_control_cost_evolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();
     solution.resize(T_ - 1, NU_);
 
@@ -214,7 +215,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         else
         {
             cost_ = cost_prev_;
-            control_cost_ = control_cost_evolution_.back();
+            control_cost_ = get_control_cost_evolution(iteration - 1);
             // Revert by not storing U_try_ as U_ref_ (maintain U_ref_)
 
             IncreaseRegularization();
@@ -322,12 +323,56 @@ const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Quu_inv() const { ret
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fx() const { return fx_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fu() const { return fu_; }
 
-const std::vector<double>& AbstractDDPSolver::get_control_cost_evolution() const { return control_cost_evolution_; }
-
-void AbstractDDPSolver::set_control_cost_evolution(const signed int iter, const double cost)
+void AbstractDDPSolver::reset_control_cost_evolution(const size_t size)
 {
-    if (control_cost_evolution_.size() <= iter) control_cost_evolution_.push_back(cost);
-    else control_cost_evolution_[iter] = cost;
+    control_cost_evolution_.resize(size);
+    for (size_t position = 0; position < control_cost_evolution_.size(); ++position)
+    {
+        control_cost_evolution_[position] = std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
+std::vector<double> AbstractDDPSolver::get_control_cost_evolution() const
+{
+    std::vector<double> ret;
+    for (size_t position = 0; position < control_cost_evolution_.size(); ++position)
+    {
+        if (std::isnan(control_cost_evolution_[position])) break;
+        ret.push_back(control_cost_evolution_[position]);
+    }
+    return ret;
+}
+
+double AbstractDDPSolver::get_control_cost_evolution(const int index) const
+{
+    if (index > -1 && index < control_cost_evolution_.size())
+    {
+        return control_cost_evolution_[index];
+    }
+    else if (index == -1)
+    {
+        return control_cost_evolution_[control_cost_evolution_.size() - 1];
+    }
+    else
+    {
+        ThrowPretty("Out of range: " << index << " where length=" << control_cost_evolution_.size());
+    }
+}
+
+void AbstractDDPSolver::set_control_cost_evolution(const int index, const double cost)
+{
+    if (index > -1 && index < control_cost_evolution_.size())
+    {
+        control_cost_evolution_[index] = cost;
+    }
+    else if (index == -1)
+    {
+        control_cost_evolution_[control_cost_evolution_.size() - 1] = cost;
+    }
+    else
+    {
+        ThrowPretty("Out of range: " << index << " where length=" << control_cost_evolution_.size());
+    }
 }
 
 }  // namespace exotica

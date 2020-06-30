@@ -156,7 +156,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     is_feasible_ = false;  // We assume the first iteration is always infeasible. TODO: Make this configurable
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
-    control_cost_evolution_.clear();
+    reset_control_cost_evolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();
     solution.resize(T_ - 1, NU_);
 

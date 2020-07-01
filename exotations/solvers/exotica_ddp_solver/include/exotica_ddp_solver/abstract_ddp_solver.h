@@ -74,6 +74,12 @@ public:
     const std::vector<Eigen::MatrixXd>& get_fx() const;
     const std::vector<Eigen::MatrixXd>& get_fu() const;
 
+    std::vector<double> get_control_cost_evolution() const;
+    double get_control_cost_evolution(const int index) const;
+    
+    void set_control_cost_evolution(const int index, const double cost);
+    void reset_control_cost_evolution(const size_t size);
+
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;  ///< Shared pointer to the planning problem.
     DynamicsSolverPtr dynamics_solver_;          ///< Shared pointer to the dynamics solver.
@@ -111,6 +117,11 @@ protected:
     int NV_;                       ///< Size of velocity vector (tangent vector to the configuration)
     double dt_;                    ///< Integration time-step
     double cost_;                  ///< Cost during iteration
+    double control_cost_;          ///< Control cost during iteration
+
+    double cost_try_;                      //!< Total cost computed by line-search procedure
+    double control_cost_try_;              //!< Total control cost computed by line-search procedure
+
     double cost_prev_;             ///< Cost during previous iteration
     double alpha_best_;            ///< Line-search step taken
     double time_taken_forward_pass_, time_taken_backward_pass_;
@@ -134,6 +145,8 @@ protected:
     std::vector<Eigen::MatrixXd> Quu_inv_;  ///< Inverse of the Hessian of the Hamiltonian
     std::vector<Eigen::MatrixXd> fx_;       ///< Derivative of the dynamics f w.r.t. x
     std::vector<Eigen::MatrixXd> fu_;       ///< Derivative of the dynamics f w.r.t. u
+
+    std::vector<double> control_cost_evolution_;  ///< Evolution of the control cost, usually control regularization
 };
 
 }  // namespace exotica

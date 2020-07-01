@@ -44,22 +44,26 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
     dt_ = dynamics_solver_->get_dt();
     lambda_ = base_parameters_.RegularizationRate;
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    reset_control_cost_evolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();
     solution.resize(T_ - 1, NU_);
 
     // Perform initial roll-out
     cost_ = 0.0;
+    control_cost_ = 0.0;
     for (int t = 0; t < T_ - 1; ++t)
     {
         prob_->Update(prob_->get_U(t), t);
 
         // Running cost
-        cost_ += dt_ * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
+        control_cost_ += dt_ * prob_->GetControlCost(t);
+        cost_ += dt_ * prob_->GetStateCost(t);
     }
 
     // Add terminal cost
-    cost_ += prob_->GetStateCost(T_ - 1);
+    cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
     prob_->SetCostEvolution(0, cost_);
+    set_control_cost_evolution(0, control_cost_);
 
     // Initialize gain matrices
     K_.assign(T_, Eigen::MatrixXd(NU_, NDX_));
@@ -127,6 +131,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             if (rollout_cost < cost_)
             {
                 cost_ = rollout_cost;
+                control_cost_ = control_cost_try_;
                 for (int t = 0; t < T_ - 1; ++t) U_try_[t] = prob_->get_U(t);
                 alpha_best_ = alpha;
                 break;
@@ -210,6 +215,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
         else
         {
             cost_ = cost_prev_;
+            control_cost_ = get_control_cost_evolution(iteration - 1);
             // Revert by not storing U_try_ as U_ref_ (maintain U_ref_)
 
             IncreaseRegularization();
@@ -223,6 +229,7 @@ void AbstractDDPSolver::Solve(Eigen::MatrixXd& solution)
             X_ref_[t] = prob_->get_X(t);
 
         prob_->SetCostEvolution(iteration, cost_);
+        set_control_cost_evolution(iteration, control_cost_);
 
         // Iteration limit
         if (iteration == GetNumberOfMaxIterations())
@@ -266,7 +273,9 @@ void AbstractDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
 
 double AbstractDDPSolver::ForwardPass(const double alpha)
 {
-    double cost = 0.0;
+    cost_try_ = 0.0;
+    control_cost_try_ = 0.0;
+
     Eigen::VectorXd u_hat(NU_);  // TODO: allocate outside
 
     for (int t = 0; t < T_ - 1; ++t)
@@ -282,12 +291,13 @@ double AbstractDDPSolver::ForwardPass(const double alpha)
         }
 
         prob_->Update(u_hat, t);
-        cost += dt_ * (prob_->GetControlCost(t) + prob_->GetStateCost(t));
+        control_cost_try_ += dt_ * prob_->GetControlCost(t);
+        cost_try_ += dt_ * prob_->GetStateCost(t);
     }
 
     // add terminal cost
-    cost += prob_->GetStateCost(T_ - 1);
-    return cost;
+    cost_try_ += prob_->GetStateCost(T_ - 1) + control_cost_try_;
+    return cost_try_;
 }
 
 Eigen::VectorXd AbstractDDPSolver::GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const
@@ -312,4 +322,57 @@ const std::vector<Eigen::VectorXd>& AbstractDDPSolver::get_U_ref() const { retur
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_Quu_inv() const { return Quu_inv_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fx() const { return fx_; }
 const std::vector<Eigen::MatrixXd>& AbstractDDPSolver::get_fu() const { return fu_; }
+
+void AbstractDDPSolver::reset_control_cost_evolution(const size_t size)
+{
+    control_cost_evolution_.resize(size);
+    for (size_t position = 0; position < control_cost_evolution_.size(); ++position)
+    {
+        control_cost_evolution_[position] = std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
+std::vector<double> AbstractDDPSolver::get_control_cost_evolution() const
+{
+    std::vector<double> ret;
+    for (size_t position = 0; position < control_cost_evolution_.size(); ++position)
+    {
+        if (std::isnan(control_cost_evolution_[position])) break;
+        ret.push_back(control_cost_evolution_[position]);
+    }
+    return ret;
+}
+
+double AbstractDDPSolver::get_control_cost_evolution(const int index) const
+{
+    if (index > -1 && index < control_cost_evolution_.size())
+    {
+        return control_cost_evolution_[index];
+    }
+    else if (index == -1)
+    {
+        return control_cost_evolution_[control_cost_evolution_.size() - 1];
+    }
+    else
+    {
+        ThrowPretty("Out of range: " << index << " where length=" << control_cost_evolution_.size());
+    }
+}
+
+void AbstractDDPSolver::set_control_cost_evolution(const int index, const double cost)
+{
+    if (index > -1 && index < control_cost_evolution_.size())
+    {
+        control_cost_evolution_[index] = cost;
+    }
+    else if (index == -1)
+    {
+        control_cost_evolution_[control_cost_evolution_.size() - 1] = cost;
+    }
+    else
+    {
+        ThrowPretty("Out of range: " << index << " where length=" << control_cost_evolution_.size());
+    }
+}
+
 }  // namespace exotica

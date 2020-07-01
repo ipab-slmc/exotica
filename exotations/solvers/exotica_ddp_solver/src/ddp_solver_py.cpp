@@ -60,7 +60,8 @@ PYBIND11_MODULE(exotica_ddp_solver_py, module)
         .def_property_readonly("U_ref", &AbstractDDPSolver::get_U_ref)
         .def_property_readonly("Quu_inv", &AbstractDDPSolver::get_Quu_inv)
         .def_property_readonly("fx", &AbstractDDPSolver::get_fx)
-        .def_property_readonly("fu", &AbstractDDPSolver::get_fu);
+        .def_property_readonly("fu", &AbstractDDPSolver::get_fu)
+        .def_property_readonly("control_cost_evolution", (std::vector<double>(AbstractDDPSolver::*)() const)& AbstractDDPSolver::get_control_cost_evolution);
 
     py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, AbstractDDPSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
 

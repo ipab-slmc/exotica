@@ -51,9 +51,9 @@ void CartpoleDynamicsSolver::AssignScene(ScenePtr scene_in)
 
 Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
-    auto theta = x(1);
-    auto xdot = x(2);
-    auto thetadot = x(3);
+    const double& theta = x(1);
+    const double& xdot = x(2);
+    const double& thetadot = x(3);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
@@ -73,9 +73,8 @@ Eigen::VectorXd CartpoleDynamicsSolver::f(const StateVector& x, const ControlVec
 // NOTE: tested in test/test_cartpole_diff.py in this package
 Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
 {
-    auto theta = x(1);
-    // auto xdot = x(2);
-    auto tdot = x(3);
+    const double& theta = x(1);
+    const double& tdot = x(3);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
@@ -100,9 +99,7 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fx(const StateVector& x, const ControlVe
 // NOTE: tested in test/test_cartpole_diff.py in this package
 Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
-    auto theta = x(1);
-    // auto xdot = x(2);
-    // auto tdot = x(3);
+    const double& theta = x(1);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
@@ -119,9 +116,8 @@ Eigen::MatrixXd CartpoleDynamicsSolver::fu(const StateVector& x, const ControlVe
 // NU = 1
 Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const ControlVector& u)
 {
-    auto theta = x(1);
-    // auto xdot = x(2);
-    auto tdot = x(3);
+    const double& theta = x(1);
+    const double& tdot = x(3);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);
@@ -162,9 +158,7 @@ Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxx(const StateVector& x, const
 
 Eigen::Tensor<double, 3> CartpoleDynamicsSolver::fxu(const StateVector& x, const ControlVector& u)
 {
-    auto theta = x(1);
-    // auto xdot = x(2);
-    // auto ctdot = x(3);
+    const double& theta = x(1);
 
     auto sin_theta = std::sin(theta);
     auto cos_theta = std::cos(theta);

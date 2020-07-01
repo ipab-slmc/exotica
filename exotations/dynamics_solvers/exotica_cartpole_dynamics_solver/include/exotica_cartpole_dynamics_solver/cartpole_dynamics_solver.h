@@ -38,7 +38,7 @@
 namespace exotica
 {
 /// StateVector X ∈ R^4 = [x, theta, x_dot, theta_dot]
-/// Refer to http://underactuated.mit.edu/underactuated.html?chapter=acrobot
+/// Refer to http://underactuated.mit.edu/acrobot.html#cart_pole
 ///     for a derivation of the cartpole dynamics.
 class CartpoleDynamicsSolver : public DynamicsSolver, public Instantiable<CartpoleDynamicsSolverInitializer>
 {
@@ -68,16 +68,10 @@ public:
     Eigen::Tensor<double, 3> fxu(const StateVector& x, const ControlVector& u) override;
 
 private:
-    Eigen::Matrix3d M;      ///!< Inertia (mass) matrix
-    Eigen::Matrix3d M_inv;  ///!< Inverted inertia matrix
-
-    double g_ = 9.81;                     ///!< Gravity (m/s^2)
-    double m_c_ = 1;                      ///!< Cart mass (kg)
-    double m_p_ = 1;                      ///!< Pole mass (kg)
-    double l_ = 1;                        ///!< Pole length (kg)
-    double slider_length_ = 30;           ///!< Length of slider (m).
-    double max_x_ = slider_length_ / 2;   ///!< Left end of the slider
-    double max_y_ = -slider_length_ / 2;  ///!< Right end of the slider
+    double g_ = 9.81;  ///!< Gravity (m/s^2)
+    double m_c_ = 1;   ///!< Cart mass (kg)
+    double m_p_ = 1;   ///!< Pole mass (kg)
+    double l_ = 1;     ///!< Pole length (kg)
 };
 }  // namespace exotica
 

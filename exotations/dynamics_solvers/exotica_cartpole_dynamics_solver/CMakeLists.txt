@@ -24,7 +24,7 @@ add_library(${PROJECT_NAME} src/cartpole_dynamics_solver.cpp)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 # Ignore Eigen::Tensor warnings
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-ignored-attributes)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wno-ignored-attributes)
 
 install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

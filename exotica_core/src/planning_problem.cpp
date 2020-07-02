@@ -225,7 +225,7 @@ void PlanningProblem::InstantiateBase(const Initializer& init_in)
         idJ += tasks_[i]->length_jacobian;
     }
 
-    if (init.Maps.size() == 0)
+    if (debug_ && init.Maps.size() == 0)
     {
         HIGHLIGHT("No maps were defined!");
     }

@@ -75,10 +75,13 @@ public:
     const std::vector<Eigen::MatrixXd>& get_fu() const;
 
     std::vector<double> get_control_cost_evolution() const;
-    double get_control_cost_evolution(const int index) const;
-    
     void set_control_cost_evolution(const int index, const double cost);
-    void reset_control_cost_evolution(const size_t size);
+
+    std::vector<double> get_steplength_evolution() const;
+    // void set_steplength_evolution(const int index, const double cost);
+
+    std::vector<double> get_regularization_evolution() const;
+    // void set_regularization_evolution(const int index, const double cost);
 
 protected:
     DynamicTimeIndexedShootingProblemPtr prob_;  ///< Shared pointer to the planning problem.
@@ -119,11 +122,11 @@ protected:
     double cost_;                  ///< Cost during iteration
     double control_cost_;          ///< Control cost during iteration
 
-    double cost_try_;                      //!< Total cost computed by line-search procedure
-    double control_cost_try_;              //!< Total control cost computed by line-search procedure
+    double cost_try_;          //!< Total cost computed by line-search procedure
+    double control_cost_try_;  //!< Total control cost computed by line-search procedure
 
-    double cost_prev_;             ///< Cost during previous iteration
-    double alpha_best_;            ///< Line-search step taken
+    double cost_prev_;   ///< Cost during previous iteration
+    double alpha_best_;  ///< Line-search step taken
     double time_taken_forward_pass_, time_taken_backward_pass_;
 
     std::vector<Eigen::MatrixXd> Vxx_;  ///< Hessian of the Value function
@@ -146,7 +149,9 @@ protected:
     std::vector<Eigen::MatrixXd> fx_;       ///< Derivative of the dynamics f w.r.t. x
     std::vector<Eigen::MatrixXd> fu_;       ///< Derivative of the dynamics f w.r.t. u
 
-    std::vector<double> control_cost_evolution_;  ///< Evolution of the control cost, usually control regularization
+    std::vector<double> control_cost_evolution_;    ///< Evolution of the control cost (control regularization)
+    std::vector<double> steplength_evolution_;      ///< Evolution of the steplength
+    std::vector<double> regularization_evolution_;  ///< Evolution of the regularization (xreg/ureg)
 };
 
 }  // namespace exotica

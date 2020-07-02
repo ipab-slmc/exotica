@@ -104,8 +104,6 @@ protected:
     double regmax_ = 1e9;     //!< Maximum regularization (to exit by divergence)
     double regfactor_ = 10.;  //!< Factor by which the regularization gets increased/decreased
 
-    double cost_try_;                      //!< Total cost computed by line-search procedure
-    double control_cost_try_;              //!< Total control cost computed by line-search procedure
     std::vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure
     std::vector<Eigen::VectorXd> us_try_;  //!< Control trajectory computed by line-search procedure
     std::vector<Eigen::VectorXd> dx_;

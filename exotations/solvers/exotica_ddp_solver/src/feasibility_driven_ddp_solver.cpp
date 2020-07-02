@@ -156,7 +156,9 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     is_feasible_ = false;  // We assume the first iteration is always infeasible. TODO: Make this configurable
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
-    reset_control_cost_evolution(GetNumberOfMaxIterations() + 1);
+    control_cost_evolution_.assign(GetNumberOfMaxIterations() + 1, std::numeric_limits<double>::quiet_NaN());
+    steplength_evolution_.assign(GetNumberOfMaxIterations() + 1, std::numeric_limits<double>::quiet_NaN());
+    regularization_evolution_.assign(GetNumberOfMaxIterations() + 1, std::numeric_limits<double>::quiet_NaN());
     prob_->PreUpdate();
     solution.resize(T_ - 1, NU_);
 
@@ -173,7 +175,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     prob_->set_X(X_warm);
     cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
     prob_->SetCostEvolution(0, cost_);
-    set_control_cost_evolution(0, control_cost_);
+    control_cost_evolution_.at(0) = control_cost_;
 
     xreg_ = std::max(regmin_, initial_regularization_rate_);
     ureg_ = std::max(regmin_, initial_regularization_rate_);
@@ -244,7 +246,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
                     cost_ = cost_try_;
                     control_cost_ = control_cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
-                    set_control_cost_evolution(iter, control_cost_);
+                    control_cost_evolution_.at(iter) = control_cost_;
                     recalcDiff = true;
                     break;
                 }
@@ -259,7 +261,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
                     cost_ = cost_try_;
                     control_cost_ = control_cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
-                    set_control_cost_evolution(iter, control_cost_);
+                    control_cost_evolution_.at(iter) = control_cost_;
                     break;
                 }
                 // else
@@ -269,9 +271,12 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             }
 
             prob_->SetCostEvolution(iter, cost_);
-            set_control_cost_evolution(iter, control_cost_);
+            control_cost_evolution_.at(iter) = control_cost_;
         }
         time_taken_forward_pass_ = line_search_timer.GetDuration();
+
+        steplength_evolution_.at(iter) = steplength_;
+        regularization_evolution_.at(iter) = xreg_;
 
         if (debug_)
         {

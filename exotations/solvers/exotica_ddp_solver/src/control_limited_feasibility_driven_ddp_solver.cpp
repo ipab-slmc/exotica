@@ -80,11 +80,11 @@ void ControlLimitedFeasibilityDrivenDDPSolver::ComputeGains(const int t)
     BoxQPSolution boxqp_sol;
     if (parameters_.UseNewBoxQP)
     {
-        boxqp_sol = BoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
+        boxqp_sol = BoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, ureg_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
     }
     else
     {
-        boxqp_sol = ExoticaBoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
+        boxqp_sol = ExoticaBoxQP(Quu_[t], Qu_[t], du_lb_, du_ub_, k_[t], 0.1, 100, 1e-5, ureg_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
     }
 
     // Compute controls

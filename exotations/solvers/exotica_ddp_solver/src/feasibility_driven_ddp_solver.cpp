@@ -207,7 +207,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             IncreaseRegularization();
             if (xreg_ == regmax_)
             {
-                WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
+                if (debug_) WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
                 diverged = true;
                 break;
             }
@@ -220,7 +220,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
         if (diverged)
         {
-            WARNING("Terminating: Divergence in ComputeDirection / BackwardPass.");
+            if (debug_) WARNING("Terminating: Divergence in ComputeDirection / BackwardPass.");
             break;
         }
 
@@ -319,7 +319,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         // saturation of all dimensions.
         if (was_feasible_ && stop_ < th_stop_ && stop_ != 0.0)
         {
-            HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Convergence: " << stop_ << " < " << th_stop_)
+            if (debug_) HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Convergence: " << stop_ << " < " << th_stop_)
             converged = true;
             break;
         }

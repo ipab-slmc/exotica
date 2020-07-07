@@ -61,7 +61,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
     std::vector<double> alphas_;
     const std::size_t& n_alphas_ = 10;
     alphas_.resize(n_alphas_);
-    const Eigen::VectorXd alphas_linear = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
+    const Eigen::VectorXd alphas_linear = Eigen::VectorXd::LinSpaced(n_alphas_, 1.0, 0.1);
     for (std::size_t n = 0; n < n_alphas_; ++n)
     {
         if (use_polynomial_linesearch)

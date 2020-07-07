@@ -46,6 +46,8 @@ typedef struct BoxQPSolution
 
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double th_acceptstep, const int max_iterations, const double th_gradient_tolerance, const double lambda, bool use_polynomial_linesearch = true, bool use_cholesky_factorization = true)
 {
+    if (lambda < 0.) ThrowPretty("lambda needs to be positive.");
+
     // gamma = acceptance threshold
     // epsilon = gradient tolerance
     // lambda = regularization for Cholesky factorization
@@ -193,8 +195,10 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, c
             const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
             if (info != Eigen::Success)
             {
-                ThrowPretty("Error during Cholesky decomposition of Hff:\n"
-                            << Hff);
+                ThrowPretty("Error during Cholesky decomposition of Hff (iter=" << k << "):\n"
+                                                                                << Hff << "\n"
+                                                                                << "H:\n"
+                                                                                << H << "\nnum_free: " << num_free << " num_clamped: " << num_clamped << " lambda: " << lambda);
             }
             solution.Hff_inv.setIdentity(num_free, num_free);
             Hff_inv_llt_.solveInPlace(solution.Hff_inv);

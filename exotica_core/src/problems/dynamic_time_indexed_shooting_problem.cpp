@@ -45,11 +45,32 @@ DynamicTimeIndexedShootingProblem::~DynamicTimeIndexedShootingProblem() = defaul
 
 void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init)
 {
+    loss_type_ = ControlCostLossTermType::Undefined;
+
+    // L2
+    if (parameters_.LossType == "L2") loss_type_ = ControlCostLossTermType::L2;
+
+    // L1
+    if (parameters_.LossType == "SmoothL1") loss_type_ = ControlCostLossTermType::SmoothL1;
+
+    // Huber
+    if (parameters_.LossType == "Huber") loss_type_ = ControlCostLossTermType::Huber;
+
+    // SuperHuber
+    if (parameters_.LossType == "SuperHuber") loss_type_ = ControlCostLossTermType::SuperHuber;
+
+    // NormalizedHuber
+    if (parameters_.LossType == "NormalizedHuber") loss_type_ = ControlCostLossTermType::NormalizedHuber;
+
+    // BimodalHuber
+    if (parameters_.LossType == "BiModalHuber") loss_type_ = ControlCostLossTermType::BimodalHuber;
+
+    // If still undefined, throw.
+    if (loss_type_ == ControlCostLossTermType::Undefined) ThrowPretty("Unknown loss type: " << parameters_.LossType);
+
     // L1 Rate
     if (parameters_.LossType == "SmoothL1")
     {
-        loss_type_ = ControlCostLossTermType::SmoothL1;
-
         if (parameters_.L1Rate.size() == 0)
         {
             ThrowPretty("L1Rate not set.");  // TODO: set default...
@@ -71,8 +92,6 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
     // Huber Rate
     if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber" || parameters_.LossType == "BiModalHuber" || parameters_.LossType == "NormalizedHuber")
     {
-        loss_type_ = ControlCostLossTermType::Huber;
-
         if (parameters_.HuberRate.size() == 0)
         {
             ThrowPretty("HuberRate not set.");  // TODO: set default...
@@ -91,17 +110,9 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         }
     }
 
-    // SuperHuber
-    if (parameters_.LossType == "SuperHuber") loss_type_ = ControlCostLossTermType::SuperHuber;
-
-    // NormalizedHuber
-    if (parameters_.LossType == "NormalizedHuber") loss_type_ = ControlCostLossTermType::NormalizedHuber;
-
-    // BimodalHuber
+    // BimodalHuber modes
     if (parameters_.LossType == "BiModalHuber")
     {
-        loss_type_ = ControlCostLossTermType::BimodalHuber;
-
         // BimodalHuber mode 1
         if (parameters_.Mode1.size() == 0)
         {

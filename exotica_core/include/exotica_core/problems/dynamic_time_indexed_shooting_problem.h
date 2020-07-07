@@ -40,6 +40,7 @@ namespace exotica
 {
 enum ControlCostLossTermType
 {
+    Undefined = -1,
     L2 = 0,
     SmoothL1 = 1,
     Huber = 2,

@@ -111,4 +111,12 @@ const Eigen::VectorXd& JointPose::get_joint_ref() const
     return joint_ref_;
 }
 
+void JointPose::set_joint_ref(Eigen::VectorXdRefConst ref)
+{
+    if (ref.size() == joint_ref_.size())
+        joint_ref_ = ref;
+    else
+        ThrowPretty("Wrong size - expected " << joint_ref_.size() << ", but received " << ref.size());
+}
+
 }  // namespace exotica

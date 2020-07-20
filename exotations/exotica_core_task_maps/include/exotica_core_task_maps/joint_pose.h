@@ -48,6 +48,7 @@ public:
 
     const std::vector<int>& get_joint_map() const;
     const Eigen::VectorXd& get_joint_ref() const;
+    void set_joint_ref(Eigen::VectorXdRefConst ref);
 
 private:
     int num_controlled_joints_;   ///! Number of controlled joints

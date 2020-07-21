@@ -68,7 +68,7 @@ Initializer::Initializer(const std::string& name, const std::map<std::string, bo
 {
     for (auto& prop : properties)
     {
-        properties_.emplace(prop.first, Property(prop.first, true, prop.second));
+        AddProperty(Property(prop.first, true, prop.second));
     }
 }
 
@@ -79,7 +79,15 @@ std::string Initializer::GetName() const
 
 void Initializer::AddProperty(const Property& prop)
 {
-    properties_.emplace(prop.GetName(), prop);
+    if (HasProperty(prop.GetName()))
+    {
+        WARNING("Property '" << prop.GetName() << "' already added - overriding.");
+        SetProperty(prop.GetName(), prop.Get());
+    }
+    else
+    {
+        properties_.emplace(prop.GetName(), prop);
+    }
 }
 
 bool Initializer::HasProperty(const std::string& name) const

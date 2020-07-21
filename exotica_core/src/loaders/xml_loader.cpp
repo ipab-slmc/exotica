@@ -62,7 +62,7 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
                 // No child tags = this is an empty vector of properties
                 return;
             }
-            std::string value = tag.ToElement()->GetText();
+            const std::string value = tag.ToElement()->GetText();
             parent.AddProperty(Property(name, true, value));
         }
         else
@@ -257,4 +257,4 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
     if (!found_solver) ThrowPretty("Can't find solver '" + solver_name + "' in '" + file_name + "'!");
     if (!found_problem) ThrowPretty("Can't find problem '" + problem_name + "' in '" + file_name + "'!");
 }
-}
+}  // namespace exotica

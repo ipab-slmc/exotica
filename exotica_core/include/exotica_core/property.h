@@ -50,9 +50,9 @@ public:
     {
         value_ = val;
     }
-    Property(std::string prop_name);
-    Property(std::string prop_name, bool is_required);
-    Property(std::string prop_name, bool is_required, boost::any val);
+    Property(const std::string& prop_name);
+    Property(const std::string& prop_name, bool is_required);
+    Property(const std::string& prop_name, bool is_required, boost::any val);
     Property(std::initializer_list<boost::any> val);
     bool IsRequired() const;
     bool IsSet() const;
@@ -71,14 +71,14 @@ class Initializer
 {
 public:
     Initializer();
-    Initializer(std::string name);
-    Initializer(std::string name, std::map<std::string, boost::any> properties);
+    Initializer(const std::string& name);
+    Initializer(const std::string& name, const std::map<std::string, boost::any>& properties);
     std::string GetName() const;
-    void SetName(std::string name);
+    void SetName(const std::string& name);
     void AddProperty(const Property& prop);
-    boost::any GetProperty(std::string name) const;
-    void SetProperty(std::string name, boost::any);
-    bool HasProperty(std::string name) const;
+    boost::any GetProperty(const std::string& name) const;
+    void SetProperty(const std::string& name, boost::any);
+    bool HasProperty(const std::string& name) const;
     std::vector<std::string> GetPropertyNames() const;
 
     std::map<std::string, Property> properties_;
@@ -133,6 +133,6 @@ public:
 protected:
     C parameters_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_PROPERTY_H_

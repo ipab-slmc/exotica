@@ -139,21 +139,24 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         if (GetNumberOfMaxIterations() == 1 && parameters_.MaxStep != 0.0)
         {
             ScaleToStepSize(qd_);
+            q_ -= qd_;
         }
-
         // Line search
-        for (int ai = 0; ai < alpha_space_.size(); ++ai)
+        else
         {
-            steplength_ = alpha_space_(ai);
-            Eigen::VectorXd q_tmp = q_ - steplength_ * qd_;
-            prob_->Update(q_tmp);
-            error_ = prob_->GetScalarCost();
-
-            if (error_ < error_prev_)
+            for (int ai = 0; ai < alpha_space_.size(); ++ai)
             {
-                q_ = q_tmp;
-                qd_ *= steplength_;
-                break;
+                steplength_ = alpha_space_(ai);
+                Eigen::VectorXd q_tmp = q_ - steplength_ * qd_;
+                prob_->Update(q_tmp);
+                error_ = prob_->GetScalarCost();
+
+                if (error_ < error_prev_)
+                {
+                    q_ = q_tmp;
+                    qd_ *= steplength_;
+                    break;
+                }
             }
         }
 
@@ -181,11 +184,11 @@ void IKSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // Adapt regularization based on step-length
-        if (steplength_ > th_stepdec_)
+        if (GetNumberOfMaxIterations() == 1 && parameters_.MaxStep == 0.0 && steplength_ > th_stepdec_)
         {
             DecreaseRegularization();
         }
-        if (steplength_ <= th_stepinc_)
+        if (GetNumberOfMaxIterations() == 1 && parameters_.MaxStep == 0.0 && steplength_ <= th_stepinc_)
         {
             IncreaseRegularization();
             if (lambda_ == regmax_)

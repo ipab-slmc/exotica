@@ -83,13 +83,14 @@ protected:
     double initial_regularization_rate_ = 1e-9;             // Set from parameters on Instantiate
     bool clamp_to_control_limits_in_forward_pass_ = false;  // Set from parameters on Instantiate
 
-    double steplength_;           //!< Current applied step-length
-    Eigen::Vector2d d_;           //!< LQ approximation of the expected improvement
-    double dV_;                   //!< Cost reduction obtained by TryStep
-    double dVexp_;                //!< Expected cost reduction
-    double th_acceptstep_ = 0.1;  //!< Threshold used for accepting step
-    double th_stop_ = 1e-9;       //!< Tolerance for stopping the algorithm
-    double stop_;                 //!< Value computed by CheckStoppingCriteria
+    double steplength_;                  //!< Current applied step-length
+    Eigen::Vector2d d_;                  //!< LQ approximation of the expected improvement
+    double dV_;                          //!< Cost reduction obtained by TryStep
+    double dVexp_;                       //!< Expected cost reduction
+    double th_acceptstep_ = 0.1;         //!< Threshold used for accepting step
+    double th_stop_ = 1e-9;              //!< Tolerance for stopping the algorithm
+    double th_gradient_tolerance_ = 0.;  //!< Gradient tolerance
+    double stop_;                        //!< Value computed by CheckStoppingCriteria
 
     double dg_ = 0.;
     double dq_ = 0.;

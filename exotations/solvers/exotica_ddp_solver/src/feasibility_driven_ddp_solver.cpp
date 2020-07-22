@@ -44,6 +44,7 @@ void FeasibilityDrivenDDPSolver::Instantiate(const FeasibilityDrivenDDPSolverIni
     th_stepdec_ = base_parameters_.ThresholdRegularizationDecrease;
 
     th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
+    th_gradient_tolerance_ = parameters_.GradientTolerance;
     th_acceptstep_ = parameters_.DescentStepAcceptanceThreshold;
     th_acceptnegstep_ = parameters_.AscentStepAcceptanceThreshold;
 }
@@ -327,6 +328,14 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         if (diverged)
         {
             WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "Terminating: Divergence in ForwardPass.");
+            break;
+        }
+
+        // Check gradient tolerance
+        if (was_feasible_ && -d_[1] < th_gradient_tolerance_)
+        {
+            if (debug_) HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Gradient tolerance: " << -d_[1] << " < " << th_stop_)
+            prob_->termination_criterion = TerminationCriterion::GradientTolerance;
             break;
         }
 

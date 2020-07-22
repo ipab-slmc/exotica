@@ -46,6 +46,7 @@ void ControlLimitedFeasibilityDrivenDDPSolver::Instantiate(const ControlLimitedF
     th_stepdec_ = base_parameters_.ThresholdRegularizationDecrease;
 
     th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
+    th_gradient_tolerance_ = parameters_.GradientTolerance;
     th_acceptstep_ = parameters_.DescentStepAcceptanceThreshold;
     th_acceptnegstep_ = parameters_.AscentStepAcceptanceThreshold;
 }

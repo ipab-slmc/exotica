@@ -443,11 +443,27 @@ TEST(ExoticaTaskMaps, testEffFrame)
 
         for (std::size_t i = 0; i < types.size(); ++i)
         {
-            std::string type = types[i];
+            const std::string& type = types[i];
             TEST_COUT << "Rotation type " << type;
             Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
                                                  {"Type", type},
                                                  {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+            EXPECT_TRUE(test_random(problem));
+
+            EXPECT_TRUE(test_jacobian(problem));
+            EXPECT_TRUE(test_hessian(problem));
+        }
+
+        // Multi-end-effector test case
+        for (std::size_t i = 0; i < types.size(); ++i)
+        {
+            const std::string& type = types[i];
+            TEST_COUT << "[Multi end-effector] Rotation type " << type;
+            Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
+                                                 {"Type", type},
+                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}}),
+                                                                                           Initializer("Frame", {{"Link", std::string("link3")}})})}});
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
 

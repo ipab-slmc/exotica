@@ -275,8 +275,12 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
 UnconstrainedEndPoseProblemPtr setup_problem(Initializer& map, std::string collision_scene = "", std::vector<Initializer> links = std::vector<Initializer>())
 {
     Initializer scene;
-    if (collision_scene != "")
-        scene = Initializer("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}, {"Links", links}, {"CollisionScene", std::string(collision_scene)}});
+    if (!collision_scene.empty())
+        scene = Initializer("Scene", {{"Name", std::string("MyScene")},
+                                      {"JointGroup", std::string("arm")},
+                                      {"Links", links},
+                                      {"AlwaysUpdateCollisionScene", std::string("1")},
+                                      {"CollisionScene", std::vector<Initializer>({Initializer(collision_scene, {{"Name", std::string("MyCollisionScene")}})})}});
     else
         scene = Initializer("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}, {"Links", links}});
     Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
@@ -1096,7 +1100,7 @@ TEST(ExoticaTaskMaps, testCollisionDistance)
         Initializer map("exotica/CollisionDistance", {{"Name", std::string("MyTask")},
                                                       {"CheckSelfCollision", false},
                                                       {}});
-        UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "exotica/CollisionSceneFCLLatest");
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
     }
@@ -1121,7 +1125,7 @@ TEST(ExoticaTaskMaps, testSmoothCollisionDistance)
                                                                 {"RobotMargin", 0.01},
                                                                 {"Linear", is_linear},
                                                                 {}});
-            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "exotica/CollisionSceneFCLLatest");
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }

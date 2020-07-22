@@ -55,7 +55,7 @@ void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     if (phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi.segment<3>(i * 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        phi.segment<3>(i * big_stride_) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
     }
 }
@@ -66,7 +66,7 @@ void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 6 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi.segment<3>(i * 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        phi.segment<3>(i * big_stride_) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
         jacobian.middleRows<6>(i * 6) = kinematics[0].jacobian[i].data;
     }
@@ -78,7 +78,7 @@ void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 6 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi.segment<3>(i * 3) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        phi.segment<3>(i * big_stride_) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
         jacobian.middleRows<6>(i * 6) = kinematics[0].jacobian[i].data;
 

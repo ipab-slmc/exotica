@@ -10,23 +10,26 @@
         <BoxQPUsePolynomialLinesearch>1</BoxQPUsePolynomialLinesearch>
     </ControlLimitedFeasibilityDrivenDDPSolver>
 
-    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+    <DynamicTimeIndexedShootingProblem Name="valkyrie">
+
+        <!-- <LossType>L2</LossType>
+        <R_rate>1e-2</R_rate> -->
+
+        <LossType>Huber</LossType>
+        <HuberRate>0.01</HuberRate>
+        <ControlCostWeight>1e2</ControlCostWeight>
         <R_rate>0</R_rate>
 
-        <LossType>L2</LossType>
-        <R_rate>1</R_rate>
-
-        <!-- <LossType>Huber</LossType>
-        <HuberRate>0.1</HuberRate> -->
-
-        <!-- <LossType>NormalizedHuber</LossType>
-        <HuberRate>.01</HuberRate> -->
-
+        <!-- <LossType>NormalizedHuber</LossType> -->
+        <!-- <HuberRate>.01</HuberRate> -->
+        <!-- <R_rate>0</R_rate> -->
+        
         <!-- <LossType>SmoothL1</LossType>
         <L1Rate>0.5</L1Rate>
         <L1IncreaseRate>1.2</L1IncreaseRate>
-        <MaxL1Rate>1e3</MaxL1Rate> -->
-
+        <MaxL1Rate>1e3</MaxL1Rate>
+        <R_rate>0</R_rate> -->
+        
         <PlanningScene>
             <Scene>
                 <JointGroup>whole_body</JointGroup>

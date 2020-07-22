@@ -43,8 +43,8 @@ if __name__ == "__main__":
     scene = problem.get_scene()
     vis = exo.VisualizationMoveIt(scene)
 
-    palm_target = np.array([0.4, -0.35, 0.9])
-    # palm_target = np.array([0.4, 0, 0.9])
+    # This is now set in the XML
+    palm_target = problem.cost.get_goal('PalmPosition', -1)
 
     rospy.init_node('my_vis')
     sleep(0.5)
@@ -71,11 +71,6 @@ if __name__ == "__main__":
         problem.cost.set_rho('PalmPosition', 0, t)
     problem.cost.set_goal('PalmPosition', palm_target, -1)
     problem.cost.set_rho('PalmPosition', 100, -1)
-
-    # for t in range(problem.T - 1):
-    #     problem.update(problem.U[:,t], t)
-
-    # solver.max_iterations = 2500
     solution = solver.solve()
     print("Solved in", solver.get_planning_time())
     # task_cost_over_time(problem)

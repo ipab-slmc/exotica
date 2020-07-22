@@ -2,8 +2,8 @@
 <ExoticaConfig>
     <ControlLimitedFeasibilityDrivenDDPSolver Name="BoxFDDP">
         <Debug>1</Debug>
-        <MaxIterations>1000</MaxIterations>
-        <FunctionTolerance>1e-5</FunctionTolerance>
+        <MaxIterations>200</MaxIterations>
+        <GradientTolerance>1e-4</GradientTolerance>
         <RegularizationRate>1e-3</RegularizationRate>
         <UseNewBoxQP>1</UseNewBoxQP>
         <BoxQPUseCholeskyFactorization>1</BoxQPUseCholeskyFactorization>
@@ -12,17 +12,17 @@
 
     <DynamicTimeIndexedShootingProblem Name="valkyrie">
 
-        <!-- <LossType>L2</LossType>
-        <R_rate>1e-2</R_rate> -->
+        <LossType>L2</LossType>
+        <R_rate>1e-2</R_rate>
 
-        <LossType>Huber</LossType>
+        <!-- <LossType>Huber</LossType>
         <HuberRate>0.01</HuberRate>
         <ControlCostWeight>1e2</ControlCostWeight>
-        <R_rate>0</R_rate>
+        <R_rate>0</R_rate> -->
 
-        <!-- <LossType>NormalizedHuber</LossType> -->
-        <!-- <HuberRate>.01</HuberRate> -->
-        <!-- <R_rate>0</R_rate> -->
+        <!-- <LossType>NormalizedHuber</LossType>
+        <HuberRate>.01</HuberRate>
+        <R_rate>0</R_rate> -->
         
         <!-- <LossType>SmoothL1</LossType>
         <L1Rate>0.5</L1Rate>
@@ -50,7 +50,7 @@
         <Maps>
             <EffPosition Name="PalmPosition">
                 <EndEffector>
-                    <Frame Link="rightPalm" LinkOffset="0 0 0 0 0 0 1"/>
+                    <Frame Link="rightPalm"/>
                 </EndEffector>
             </EffPosition>
             <JointLimit Name="JointLimit">
@@ -66,11 +66,9 @@
                 <EndEffector>
                     <Frame Link="leftFoot" BaseOffset="-0.071169 0.137705 0.098544"/>
                     <Frame Link="rightFoot" BaseOffset="-0.071169 -0.137705 0.098544"/>
-                    <!-- <Frame Link="leftFoot" LinkOffset="0.052 0.0 -0.09" BaseOffset="0 0.1 0"/> -->
-                    <!-- <Frame Link="rightFoot" LinkOffset="0.052 0.0 -0.09" BaseOffset="0 -0.1 0"/> -->
                 </EndEffector>
             </EffFrame>
-            <QuasiStatic Name="Stability" PositiveOnly="1" Debug="1">
+            <QuasiStatic Name="Stability" PositiveOnly="1" Debug="0">
                 <EndEffector>
                     <Frame Link="leftFoot_collision_5"/>
                     <Frame Link="leftFoot_collision_6"/>
@@ -84,7 +82,8 @@
             </QuasiStatic>
         </Maps>
         <Cost>
-            <Task Task="PalmPosition" Rho="100"/>
+            <!-- <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100" Goal="0.4 0 0.9"/> -->
+            <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100" Goal="0.4 -0.35 0.9"/>
             <Task Task="JointLimit" Rho="100"/>
             <Task Task="Stability" Rho="10"/>
             <Task Task="FootPosition" Rho="1e5"/>

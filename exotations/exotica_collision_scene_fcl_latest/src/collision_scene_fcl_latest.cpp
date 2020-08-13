@@ -647,8 +647,13 @@ std::vector<CollisionProxy> CollisionSceneFCLLatest::GetCollisionDistance(
         {
             bool allowedToCollide = false;
             for (fcl::CollisionObjectd* o1_shape : shapes1)
+            {
                 if (IsAllowedToCollide(o1_shape, o, data.self, data.scene))
+                {
                     allowedToCollide = true;
+                    break;
+                }
+            }
 
             if (allowedToCollide) shapes2.push_back(o);
         }

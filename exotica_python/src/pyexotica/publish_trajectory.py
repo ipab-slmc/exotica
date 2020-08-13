@@ -55,9 +55,11 @@ def publish_time_indexed_trajectory(traj, Ts, problem, once=False):
     return True
 
 
-def plot(solution, labels=None):
+def plot(solution, labels=None, yscale=None):
     print('Plotting the solution')
     plt.plot(solution, '.-')
     if labels is not None:
         plt.legend(labels)
+    if yscale is not None:
+        plt.yscale(yscale)
     plt.show()

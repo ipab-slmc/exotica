@@ -332,7 +332,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // Check gradient tolerance
-        if (was_feasible_ && -d_[1] < th_gradient_tolerance_)
+        if (was_feasible_ && std::abs(-d_[1]) < th_gradient_tolerance_)
         {
             if (debug_) HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Gradient tolerance: " << -d_[1] << " < " << th_gradient_tolerance_)
             prob_->termination_criterion = TerminationCriterion::GradientTolerance;

@@ -188,6 +188,14 @@ public:
     const Eigen::MatrixXd& get_control_limits();
     void set_control_limits(Eigen::VectorXdRefConst control_limits_low, Eigen::VectorXdRefConst control_limits_high);
 
+    /// \brief Returns whether state limits are available
+    const bool& get_has_state_limits() const
+    {
+        return has_state_limits_;
+    }
+
+    void ClampToStateLimits(Eigen::Ref<Eigen::VectorXd> state_in);
+
     virtual ControlVector InverseDynamics(const StateVector& state);
 
     /// \brief Integrates without performing dynamics.
@@ -206,6 +214,10 @@ protected:
 
     bool has_second_order_derivatives_ = false;
     bool second_order_derivatives_initialized_ = false;  ///< Whether fxx, fxu and fuu have been initialized to 0.
+
+    bool has_state_limits_ = false;
+    Eigen::VectorXd state_limits_lower_;
+    Eigen::VectorXd state_limits_upper_;
 
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.
     Integrator integrator_ = Integrator::RK1;  ///< Chosen integrator. Defaults to Euler (RK1).

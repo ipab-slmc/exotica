@@ -268,6 +268,17 @@ void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXdRefCon
 }
 
 template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::ClampToStateLimits(Eigen::Ref<Eigen::VectorXd> state_in)
+{
+    if (!has_state_limits_) ThrowPretty("No StateLimits!");
+    if (state_in.size() != get_num_state()) ThrowPretty("Wrong size state passed in!");
+    assert(state_in.size() == state_limits_lower_.size());
+    assert(state_limits_lower_.size() == state_limits_upper_.size());
+
+    state_in = state_in.cwiseMax(state_limits_lower_).cwiseMin(state_limits_upper_);
+}
+
+template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
 {
     if (second_order_derivatives_initialized_)

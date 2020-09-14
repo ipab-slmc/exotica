@@ -1402,6 +1402,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .export_values();
 
     py::class_<DynamicsSolver, std::shared_ptr<DynamicsSolver>, Object>(module, "DynamicsSolver")
+        .def("F", &DynamicsSolver::F)
         .def("f", &DynamicsSolver::f)
         .def("fx", &DynamicsSolver::fx)
         .def("fu", &DynamicsSolver::fu)
@@ -1420,6 +1421,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("state_delta_derivative", &DynamicsSolver::dStateDelta)
         .def("state_delta_second_derivative", &DynamicsSolver::ddStateDelta)
         .def("compute_derivatives", &DynamicsSolver::ComputeDerivatives)
+        .def("get_Fx", &DynamicsSolver::get_Fx)
+        .def("get_Fu", &DynamicsSolver::get_Fu)
         .def("get_fx", &DynamicsSolver::get_fx)
         .def("get_fu", &DynamicsSolver::get_fu)
         .def("integrate", [](DynamicsSolver* instance, Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, const double dt) {

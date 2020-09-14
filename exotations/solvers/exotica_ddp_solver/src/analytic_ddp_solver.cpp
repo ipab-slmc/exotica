@@ -64,9 +64,10 @@ void AnalyticDDPSolver::BackwardPass()
         x = prob_->get_X(t);  // (NX,1)
         u = prob_->get_U(t);  // (NU,1)
 
+        // NB: ComputeDerivatives computes the derivatives of the state transition function which includes the selected integration scheme.
         dynamics_solver_->ComputeDerivatives(x, u);
-        fx_[t].noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);  // (NDX,NDX)  // TODO: This implicitly assumes explicit Euler.
-        fu_[t].noalias() = dt_ * dynamics_solver_->get_fu();                                          // (NDX,NU)
+        fx_[t].noalias() = dynamics_solver_->get_Fx();  // (NDX,NDX)
+        fu_[t].noalias() = dynamics_solver_->get_Fu();  // (NDX,NU)
 
         //
         // NB: We use a modified cost function to compare across different

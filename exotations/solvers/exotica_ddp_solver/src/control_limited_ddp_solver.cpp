@@ -59,8 +59,8 @@ void ControlLimitedDDPSolver::BackwardPass()
         u = prob_->get_U(t);
 
         dynamics_solver_->ComputeDerivatives(x, u);
-        fx_[t].noalias() = dt_ * dynamics_solver_->get_fx() + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_[t].noalias() = dt_ * dynamics_solver_->get_fu();
+        fx_[t].noalias() = dynamics_solver_->get_Fx();
+        fu_[t].noalias() = dynamics_solver_->get_Fu();
 
         Qx_[t].noalias() = dt_ * prob_->GetStateCostJacobian(t) + fx_[t].transpose() * Vx_[t + 1];
         Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t) + fu_[t].transpose() * Vx_[t + 1];

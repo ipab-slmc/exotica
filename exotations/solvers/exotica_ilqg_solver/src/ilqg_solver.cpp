@@ -69,10 +69,8 @@ void ILQGSolver::BackwardPass()
         // eq. 3
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         dynamics_solver_->ComputeDerivatives(x, u);
-        Eigen::MatrixXd A = dynamics_solver_->get_fx(), B = dynamics_solver_->get_fu();
-
-        A.noalias() = A * dt + Eigen::MatrixXd::Identity(A.rows(), A.cols());
-        B.noalias() = B * dt;
+        Eigen::MatrixXd A = dynamics_solver_->get_Fx();
+        Eigen::MatrixXd B = dynamics_solver_->get_Fu();
 
         double q0 = dt * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
         // Aliases from the paper used. These are used with different names in e.g. DDPSolver.

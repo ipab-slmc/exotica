@@ -62,6 +62,13 @@ void AbstractDynamicsSolver<T, NX, NU>::AssignScene(std::shared_ptr<Scene> scene
 }
 
 template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::F(const StateVector& x, const ControlVector& u)
+{
+    // TODO: Switch to Integrate here...
+    return SimulateOneStep(x, u);  // ToDo: Fold SimulateOneStep into here
+}
+
+template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::SetDt(double dt_in)
 {
     if (dt_in < 0.0001) ThrowPretty("dt needs to be strictly greater than 0. Provided: " << dt_in);
@@ -113,7 +120,7 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout)
 {
-    assert(num_positions_ == num_velocities_);
+    assert(num_positions_ == num_velocities_);  // Integration on manifolds needs to be handled using function overloads in specific dynamics solvers.
     assert(x.size() == get_num_state());
     assert(dx.size() == get_num_state_derivative());
     assert(xout.size() == get_num_state());
@@ -133,8 +140,6 @@ void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const St
             dx_new.head(num_positions_) = dt * x.tail(num_velocities_) + (dt * dt) * dx.tail(num_velocities_);
             dx_new.tail(num_velocities_) = dt * dx.tail(num_velocities_);
             xout.noalias() = x + dx_new;
-            //  = np.concatenate([dt * v_current + (dt*dt) * a, dt * a])
-            // return x + dx_new
 
             // xout.tail(num_velocities_).noalias() = x.tail(num_velocities_) + dt * dx.tail(num_velocities_);  // Integrate acceleration to velocity
             // xout.head(num_positions_).noalias() = x.head(num_positions_) + dt * xout.tail(num_velocities_);  // Integrate position with new velocity
@@ -386,8 +391,46 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::ComputeDerivatives(const StateVector& x, const ControlVector& u)
 {
+    // Compute derivatives of differential dynamics
     fx_ = fx(x, u);
     fu_ = fu(x, u);
+
+    // Compute derivatives of state transition function
+    // NB: In our "f" order, we have both velocity and acceleration. We only need the acceleration derivative part:
+    Eigen::Block<Eigen::MatrixXd> da_dx = fx_.block(num_velocities_, 0, num_velocities_, get_num_state_derivative());
+    Eigen::Block<Eigen::MatrixXd> da_du = fu_.block(num_velocities_, 0, num_velocities_, num_controls_);
+
+    // TODO: Do this only once...
+    Fx_.setZero(get_num_state_derivative(), get_num_state_derivative());
+    Fu_.setZero(get_num_state_derivative(), get_num_controls());
+
+    switch (integrator_)
+    {
+        // Forward Euler (RK1)
+        case Integrator::RK1:
+        {
+            Fx_.topRightCorner(num_velocities_, num_velocities_).diagonal().array() = dt_;
+            Fx_.bottomRows(num_velocities_).noalias() = dt_ * da_dx;
+            Fx_.diagonal().array() += 1.0;
+
+            Fu_.bottomRows(num_velocities_).noalias() = da_du * dt_;
+        }
+        break;
+        // Semi-implicit Euler
+        case Integrator::SymplecticEuler:
+        {
+            Fx_.topRows(num_velocities_).noalias() = da_dx * dt_ * dt_;
+            Fx_.bottomRows(num_velocities_).noalias() = da_dx * dt_;
+            Fx_.topRightCorner(num_velocities_, num_velocities_).diagonal().array() += dt_;
+            Fx_.diagonal().array() += 1.0;
+
+            Fu_.topRows(num_velocities_).noalias() = da_du * dt_ * dt_;  // Semi-implicit: configuration changes with acceleration in same step
+            Fu_.bottomRows(num_velocities_).noalias() = da_du * dt_;
+        }
+        break;
+        default:
+            ThrowPretty("Not implemented!");
+    };
 }
 
 template <typename T, int NX, int NU>
@@ -400,6 +443,18 @@ template <typename T, int NX, int NU>
 const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_fu() const
 {
     return fu_;
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NX>& AbstractDynamicsSolver<T, NX, NU>::get_Fx() const
+{
+    return Fx_;
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_Fu() const
+{
+    return Fu_;
 }
 
 }  // namespace exotica

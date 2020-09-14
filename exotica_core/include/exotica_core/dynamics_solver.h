@@ -74,11 +74,20 @@ public:
     /// \brief Sets the timestep dt to be used for integration.
     virtual void SetDt(double dt_in);
 
-    /// \brief Forward dynamics
+    /// \brief Forward dynamics. This computes the differential dynamics.
     virtual StateVector f(const StateVector& x, const ControlVector& u) = 0;
+
+    /// \brief State transition function. This internally computes the differential dynamics and applies the chosen integration scheme.
+    virtual StateVector F(const StateVector& x, const ControlVector& u);
 
     /// \brief Computes derivatives fx, fu [single call for efficiency, derivatives can be retrieved with get_fx, get_fu]
     virtual void ComputeDerivatives(const StateVector& x, const ControlVector& u);
+
+    /// \brief Returns derivative Fx computed by ComputeDerivatives
+    const StateDerivative& get_Fx() const;
+
+    /// \brief Returns derivative Fu computed by ComputeDerivatives
+    const ControlDerivative& get_Fu() const;
 
     /// \brief Returns derivative fx computed by ComputeDerivatives
     const StateDerivative& get_fx() const;
@@ -231,8 +240,10 @@ protected:
     void InitializeSecondOrderDerivatives();
     Eigen::Tensor<T, 3> fxx_default_, fuu_default_, fxu_default_;
 
-    Eigen::MatrixXd fx_;  ///< Internal storage of derivative fx computed by ComputeDerivatives
-    Eigen::MatrixXd fu_;  ///< Internal storage of derivative fu computed by ComputeDerivatives
+    Eigen::MatrixXd fx_;  ///< Internal storage of differential dynamics partial derivative fx computed by ComputeDerivatives
+    Eigen::MatrixXd fu_;  ///< Internal storage of differential dynamics partial derivative fu computed by ComputeDerivatives
+    Eigen::MatrixXd Fx_;  ///< Internal storage of state transition partial derivative Fx computed by ComputeDerivatives
+    Eigen::MatrixXd Fu_;  ///< Internal storage of state transition partial derivative Fu computed by ComputeDerivatives
 };
 
 typedef AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic> DynamicsSolver;

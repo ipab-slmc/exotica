@@ -51,6 +51,9 @@ void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 
     fx_ = A_;
     fu_ = B_;
+
+    // Set up state transition derivative
+    DynamicsSolver::ComputeDerivatives(Eigen::VectorXd(num_positions_ + num_velocities_), Eigen::VectorXd(num_controls_));
 }
 
 Eigen::VectorXd DoubleIntegratorDynamicsSolver::f(const StateVector& x, const ControlVector& u)

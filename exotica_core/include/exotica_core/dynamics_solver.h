@@ -189,7 +189,7 @@ public:
     void set_integrator(Integrator integrator_in);
 
     /// \brief Sets integrator type based on request string
-    void SetIntegrator(std::string integrator_in);
+    void SetIntegrator(const std::string& integrator_in);
 
     /// \brief Returns the control limits vector.
     //  returns: Two-column matrix, first column contains low control limits,

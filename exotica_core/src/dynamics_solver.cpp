@@ -226,7 +226,7 @@ void AbstractDynamicsSolver<T, NX, NU>::set_integrator(Integrator integrator_in)
 }
 
 template <typename T, int NX, int NU>
-void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
+void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(const std::string& integrator_in)
 {
     if (integrator_in == "RK1")
         integrator_ = Integrator::RK1;

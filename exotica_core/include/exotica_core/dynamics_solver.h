@@ -80,7 +80,7 @@ public:
     /// \brief State transition function. This internally computes the differential dynamics and applies the chosen integration scheme.
     virtual StateVector F(const StateVector& x, const ControlVector& u);
 
-    /// \brief Computes derivatives fx, fu [single call for efficiency, derivatives can be retrieved with get_fx, get_fu]
+    /// \brief Computes derivatives fx, fu, Fx, Fu [single call for efficiency, derivatives can be retrieved with get_fx, get_fu, get_Fx, get_Fu]
     virtual void ComputeDerivatives(const StateVector& x, const ControlVector& u);
 
     /// \brief Returns derivative Fx computed by ComputeDerivatives
@@ -119,6 +119,7 @@ public:
     //
     // Additionally, the first subscript is the *second* partial derivative.
     //  I.e. f_xu = (f_u)_x
+    // TODO: Eigen::Tensor to be replaced with exotica::Hessian
     virtual Eigen::Tensor<T, 3> fxx(const StateVector& x, const ControlVector& u);
     virtual Eigen::Tensor<T, 3> fuu(const StateVector& x, const ControlVector& u);
     virtual Eigen::Tensor<T, 3> fxu(const StateVector& x, const ControlVector& u);
@@ -126,6 +127,7 @@ public:
     /// \brief Simulates the dynamic system from starting state x using control u for t seconds
     ///
     /// Simulates the system and steps the simulation by timesteps dt for a total time of t using the specified integration scheme starting from state x and with controls u.
+    // TODO: To be deprecated - or at least remove its use - as it's difficult to get partial derivatives.
     StateVector Simulate(const StateVector& x, const ControlVector& u, T t);
 
     /// \brief Return the difference of two state vectors.
@@ -195,6 +197,8 @@ public:
     //  returns: Two-column matrix, first column contains low control limits,
     //      second - the high control limits
     const Eigen::MatrixXd& get_control_limits();
+
+    /// \brief Sets the control limits
     void set_control_limits(Eigen::VectorXdRefConst control_limits_low, Eigen::VectorXdRefConst control_limits_high);
 
     /// \brief Returns whether state limits are available
@@ -203,8 +207,10 @@ public:
         return has_state_limits_;
     }
 
+    /// \brief Clamps the passed in state to the state limits
     void ClampToStateLimits(Eigen::Ref<Eigen::VectorXd> state_in);
 
+    /// \brief Returns a control vector corresponding to the state vector assuming zero acceleration
     virtual ControlVector InverseDynamics(const StateVector& state);
 
     /// \brief Integrates without performing dynamics.
@@ -221,12 +227,12 @@ protected:
     int num_state_ = -1;             ///< Size of state space (num_positions + num_velocities)
     int num_state_derivative_ = -1;  ///< Size of the tangent vector to the state space (2 * num_velocities)
 
-    bool has_second_order_derivatives_ = false;
+    bool has_second_order_derivatives_ = false;          ///< Whether this solver provides second order derivatives. If false (default), assumed to be all zeros.
     bool second_order_derivatives_initialized_ = false;  ///< Whether fxx, fxu and fuu have been initialized to 0.
 
-    bool has_state_limits_ = false;
-    Eigen::VectorXd state_limits_lower_;
-    Eigen::VectorXd state_limits_upper_;
+    bool has_state_limits_ = false;       ///< Whether the solver specifies state limits
+    Eigen::VectorXd state_limits_lower_;  ///< Lower state limits (configuration and velocity)
+    Eigen::VectorXd state_limits_upper_;  ///< Upper state limits (configuration and velocity)
 
     T dt_ = 0.01;                              ///< Internal timestep used for integration. Defaults to 10ms.
     Integrator integrator_ = Integrator::RK1;  ///< Chosen integrator. Defaults to Euler (RK1).
@@ -235,6 +241,7 @@ protected:
     Eigen::MatrixXd control_limits_;  ///< ControlLimits. Default is empty vector.
 
     /// \brief Integrates the dynamic system from state x with controls u applied for one timestep dt using the selected integrator.
+    // TODO: To be deprecated in favour of explicit call to Integrate in Simulate
     virtual StateVector SimulateOneStep(const StateVector& x, const ControlVector& u);
 
     void InitializeSecondOrderDerivatives();

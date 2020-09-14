@@ -78,8 +78,6 @@ void AbstractDynamicsSolver<T, NX, NU>::SetDt(double dt_in)
 template <typename T, int NX, int NU>
 Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const StateVector& x, const ControlVector& u)
 {
-    assert(num_positions_ == num_velocities_);  // If this is not true, we should have specialised methods.
-
     switch (integrator_)
     {
         // Forward Euler (RK1), symplectic Euler
@@ -91,9 +89,12 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
             Integrate(x, xdot, dt_, xout);
             return xout;
         }
-        // Explicit trapezoid rule (RK2)
+        // NB: RK2 and RK4 are currently deactivated as we do not yet have correct derivatives for state transitions.
+        /*// Explicit trapezoid rule (RK2)
         case Integrator::RK2:
         {
+            assert(num_positions_ == num_velocities_);  // If this is not true, we should have specialised methods.
+
             StateVector xdot0 = f(x, u);
             StateVector x1est = x + dt_ * xdot0;  // explicit Euler step
             StateVector xdot1 = f(x1est, u);
@@ -104,6 +105,8 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
         // Runge-Kutta 4
         case Integrator::RK4:
         {
+            assert(num_positions_ == num_velocities_);  // If this is not true, we should have specialised methods.
+
             StateVector k1 = dt_ * f(x, u);
             StateVector k2 = dt_ * f(x + 0.5 * k1, u);
             StateVector k3 = dt_ * f(x + 0.5 * k2, u);
@@ -111,7 +114,7 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
             StateVector dx = (k1 + k4) / 6. + (k2 + k3) / 3.;
 
             return x + dx;
-        }
+        }*/
         default:
             ThrowPretty("Not implemented!");
     };

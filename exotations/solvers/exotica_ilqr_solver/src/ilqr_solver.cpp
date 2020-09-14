@@ -73,12 +73,9 @@ void ILQRSolver::BackwardPass()
     {
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         dynamics_solver_->ComputeDerivatives(x, u);
-        Eigen::MatrixXd Ak = dynamics_solver_->get_fx(), Bk = dynamics_solver_->get_fu(),
+        Eigen::MatrixXd Ak = dynamics_solver_->get_Fx(), Bk = dynamics_solver_->get_Fu(),
                         Q = dt * prob_->get_Q(t);
 
-        // eq. 13-16
-        Ak.noalias() = Ak * dt + Eigen::MatrixXd::Identity(Ak.rows(), Ak.cols());
-        Bk.noalias() = Bk * dt;
         // this inverse is common for all factors
         // TODO: use LLT
         const Eigen::MatrixXd _inv =

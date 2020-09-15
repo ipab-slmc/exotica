@@ -65,8 +65,6 @@ public:
     void Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout) override;
 
 private:
-    StateVector SimulateOneStep(const StateVector& x, const ControlVector& u) override;
-
     pinocchio::Model model_;
     std::unique_ptr<pinocchio::Data> pinocchio_data_;
 

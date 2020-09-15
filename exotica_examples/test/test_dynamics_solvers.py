@@ -31,15 +31,13 @@ class TestDynamicsSolver(unittest.TestCase):
         check_dynamics_solver_derivatives('exotica/PinocchioDynamicsSolver',
                                           u'{exotica_examples}/resources/robots/lwr_simplified.urdf',
                                           u'{exotica_examples}/resources/robots/lwr_simplified.srdf',
-                                          u'arm',
-                                          do_test_integrators=False)
+                                          u'arm')
 
     def test_pinocchio_gravity_compensation_dynamics_solver(self):
         check_dynamics_solver_derivatives('exotica/PinocchioDynamicsSolverWithGravityCompensation',
                                           u'{exotica_examples}/resources/robots/lwr_simplified.urdf',
                                           u'{exotica_examples}/resources/robots/lwr_simplified.srdf',
-                                          u'arm',
-                                          do_test_integrators=False)
+                                          u'arm')
 
 
 if __name__ == '__main__':

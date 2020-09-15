@@ -32,17 +32,17 @@ def random_state(ds):
     return x
 
 
-def explicit_euler(x, dx, dt):
+def explicit_euler(x, dx, dt, ds=None):
     return x + dt * dx
 
 
-def semiimplicit_euler(x, dx, dt):
-    nq = int(x.shape[0] / 2)
-    q_current = x[:nq]
-    v_current = x[nq:]
-    a = dx[nq:]
+def semiimplicit_euler(x, dx, dt, ds=None):
+    assert ds is not None
+    q = x[:ds.nq].copy()
+    v = x[ds.nq:].copy()
+    a = dx[ds.nq:].copy()
 
-    dx_new = np.concatenate([dt * v_current + (dt*dt) * a, dt * a])
+    dx_new = np.concatenate([dt * v + (dt*dt) * a, dt * a])
     return x + dx_new
 
 
@@ -117,10 +117,55 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
         }
         for integrator in [exo.Integrator.RK1, exo.Integrator.SymplecticEuler]:
             ds.integrator = integrator
-            for dt in [0.001]:
+            for dt in [0.001, 0.01, 1.0]:
                 print("Testing integrator", integrator, "dt=", dt)
                 np.testing.assert_allclose(ds.integrate(
-                    x, dx, dt), python_integrators[integrator](x, dx, dt))
+                    x, dx, dt), python_integrators[integrator](x, dx, dt, ds))
+
+    # Check state transition function and its derivative for each integration scheme
+    for integrator in [exo.Integrator.RK1, exo.Integrator.SymplecticEuler]:
+        print("Testing state transition for", integrator, "dt=", ds.dt)
+        ds.integrator = integrator
+        eps = 1e-5
+        Fx_fd = np.zeros((ds.ndx, ds.ndx))
+        original_integrator = ds.integrator
+        for i in range(ds.ndx):
+            dx = np.zeros((ds.ndx))
+            dx[i] = eps / 2.0
+            ds.integrator = exo.Integrator.RK1
+            x_plus = ds.integrate(x, dx, 1.0)
+            x_minus = ds.integrate(x, -dx, 1.0)
+            ds.integrator = original_integrator
+            F_plus = ds.F(x_plus, u)
+            F_minus = ds.F(x_minus, u)
+            Fx_fd[:,i] = ds.state_delta(F_plus, F_minus) / eps
+
+        Fu_fd = np.zeros((ds.ndx, ds.nu))
+        for i in range(ds.nu):
+            du = np.zeros((ds.nu))
+            du[i] = eps / 2.0
+            u_plus = u + du
+            u_minus = u - du
+            F_plus = ds.F(x, u_plus)
+            F_minus = ds.F(x, u_minus)
+            Fu_fd[:,i] = ds.state_delta(F_plus, F_minus) / eps
+
+        # Run several times to catch the "adding rather than resetting bug"
+        ds.compute_derivatives(x, u)
+        ds.compute_derivatives(x, u)
+        ds.compute_derivatives(x, u)
+
+        # print("Fx_fd\n", Fx_fd)
+        # print("ds.get_Fx()\n", ds.get_Fx())
+        # print((Fx_fd-ds.get_Fx()))
+        # print(np.abs(Fx_fd-ds.get_Fx()) < 1e-5)
+        # print("Fu_fd\n", Fu_fd)
+        # print("ds.get_Fu()\n", ds.get_Fu())
+        # print("Fu-diff\n",(Fu_fd-ds.get_Fu()))
+        # print(np.abs(Fu_fd-ds.get_Fu()) < 1e-5)
+
+        np.testing.assert_allclose(ds.get_Fx(), Fx_fd, rtol=1e-5, atol=1e-5)
+        np.testing.assert_allclose(ds.get_Fu(), Fu_fd, rtol=1e-5, atol=1e-5)
 
     # Check state delta and its derivatives
     if ds.nq != ds.nv:

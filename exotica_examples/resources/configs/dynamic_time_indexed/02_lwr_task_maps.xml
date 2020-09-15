@@ -1,8 +1,9 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>-->
-    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+    <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
+        <RegularizationRate>0.1</RegularizationRate>
     </AnalyticDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">

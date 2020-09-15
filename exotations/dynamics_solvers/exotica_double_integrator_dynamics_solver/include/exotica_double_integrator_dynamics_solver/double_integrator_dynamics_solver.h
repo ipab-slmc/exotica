@@ -50,6 +50,7 @@ public:
 private:
     Eigen::MatrixXd A_;
     Eigen::MatrixXd B_;
+    Integrator last_integrator_;
 };
 }  // namespace exotica
 

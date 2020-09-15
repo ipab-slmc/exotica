@@ -63,7 +63,12 @@ Eigen::VectorXd DoubleIntegratorDynamicsSolver::f(const StateVector& x, const Co
 
 void DoubleIntegratorDynamicsSolver::ComputeDerivatives(const StateVector& x, const ControlVector& u)
 {
-    // Nothing to do here.
+    // If the integrator changed, set up state transition derivatives again:
+    if (integrator_ != last_integrator_)
+    {
+        DynamicsSolver::ComputeDerivatives(x, u);
+        last_integrator_ = integrator_;
+    }
 }
 
 Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)

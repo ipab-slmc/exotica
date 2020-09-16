@@ -1125,6 +1125,15 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
     time_indexed_sampling_problem.def("is_valid", (bool (TimeIndexedSamplingProblem::*)(Eigen::VectorXdRefConst, const double&)) & TimeIndexedSamplingProblem::IsValid);
 
+    py::enum_<ControlCostLossTermType>(module, "ControlCostLossTermType")
+        // BimodalHuber = 3, SuperHuber = 4, <-- skipped as not actively used right now.
+        .value("Undefined", ControlCostLossTermType::Undefined)
+        .value("L2", ControlCostLossTermType::L2)
+        .value("SmoothL1", ControlCostLossTermType::SmoothL1)
+        .value("Huber", ControlCostLossTermType::Huber)
+        .value("NormalizedHuber", ControlCostLossTermType::NormalizedHuber)
+        .export_values();
+
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
         .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, Eigen::VectorXdRefConst, int)) & DynamicTimeIndexedShootingProblem::Update)
         .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, int)) & DynamicTimeIndexedShootingProblem::Update)
@@ -1134,6 +1143,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)
         .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
         .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
+        .def_property("loss_type", &DynamicTimeIndexedShootingProblem::get_loss_type, &DynamicTimeIndexedShootingProblem::set_loss_type)
+        .def_property("control_cost_weight", &DynamicTimeIndexedShootingProblem::get_control_cost_weight, &DynamicTimeIndexedShootingProblem::set_control_cost_weight)
         .def("get_Q", &DynamicTimeIndexedShootingProblem::get_Q)
         .def("set_Q", &DynamicTimeIndexedShootingProblem::set_Q)
         .def_readonly("Phi", &DynamicTimeIndexedShootingProblem::Phi)

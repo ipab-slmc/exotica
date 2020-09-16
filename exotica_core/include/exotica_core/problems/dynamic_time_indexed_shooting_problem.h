@@ -131,6 +131,10 @@ public:
         }
     }
 
+    const ControlCostLossTermType& get_loss_type() const { return loss_type_; }
+    void set_loss_type(const ControlCostLossTermType& loss_type_in) { loss_type_ = loss_type_in; }
+    double get_control_cost_weight() const { return control_cost_weight_; }
+    void set_control_cost_weight(const double control_cost_weight_in) { control_cost_weight_ = control_cost_weight_in; }
 protected:
     /// \brief Checks the desired time index for bounds and supports -1 indexing.
     inline void ValidateTimeIndex(int& t_in) const

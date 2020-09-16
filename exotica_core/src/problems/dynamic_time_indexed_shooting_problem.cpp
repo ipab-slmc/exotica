@@ -69,45 +69,40 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
     if (loss_type_ == ControlCostLossTermType::Undefined) ThrowPretty("Unknown loss type: " << parameters_.LossType);
 
     // L1 Rate
-    if (parameters_.LossType == "SmoothL1")
+    if (parameters_.L1Rate.size() == 1)
     {
-        if (parameters_.L1Rate.size() == 0)
-        {
-            ThrowPretty("L1Rate not set.");  // TODO: set default...
-        }
-        else if (parameters_.L1Rate.size() == 1)
-        {
-            l1_rate_.setConstant(scene_->get_num_controls(), parameters_.L1Rate(0));
-        }
-        else if (parameters_.L1Rate.size() == scene_->get_num_controls())
-        {
-            l1_rate_ = parameters_.L1Rate;
-        }
-        else
-        {
-            ThrowPretty("L1Rate has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.L1Rate.size());
-        }
+        l1_rate_.setConstant(scene_->get_num_controls(), parameters_.L1Rate(0));
+    }
+    else if (parameters_.L1Rate.size() == scene_->get_num_controls())
+    {
+        l1_rate_ = parameters_.L1Rate;
+    }
+    else if (parameters_.L1Rate.size() != 0)
+    {
+        ThrowPretty("L1Rate has wrong size: expected " << scene_->get_num_controls() << ", 1, or 0 (default), got " << parameters_.L1Rate.size());
+    }
+    // Default
+    else
+    {
+        l1_rate_.setConstant(scene_->get_num_controls(), 1);
     }
 
     // Huber Rate
-    if (parameters_.LossType == "Huber" || parameters_.LossType == "SuperHuber" || parameters_.LossType == "BiModalHuber" || parameters_.LossType == "NormalizedHuber")
+    if (parameters_.HuberRate.size() == 1)
     {
-        if (parameters_.HuberRate.size() == 0)
-        {
-            ThrowPretty("HuberRate not set.");  // TODO: set default...
-        }
-        else if (parameters_.HuberRate.size() == 1)
-        {
-            huber_rate_.setConstant(scene_->get_num_controls(), parameters_.HuberRate(0));
-        }
-        else if (parameters_.HuberRate.size() == scene_->get_num_controls())
-        {
-            huber_rate_ = parameters_.HuberRate;
-        }
-        else
-        {
-            ThrowPretty("HuberRate has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.HuberRate.size());
-        }
+        huber_rate_.setConstant(scene_->get_num_controls(), parameters_.HuberRate(0));
+    }
+    else if (parameters_.HuberRate.size() == scene_->get_num_controls())
+    {
+        huber_rate_ = parameters_.HuberRate;
+    }
+    else if (parameters_.HuberRate.size() != 0)
+    {
+        ThrowPretty("HuberRate has wrong size: expected " << scene_->get_num_controls() << ", 1, or 0, got " << parameters_.HuberRate.size());
+    }
+    else
+    {
+        huber_rate_.setConstant(scene_->get_num_controls(), 1);
     }
 
     // BimodalHuber modes

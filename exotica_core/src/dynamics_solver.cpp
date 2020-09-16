@@ -133,8 +133,10 @@ void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const St
     {
         // Forward Euler (RK1)
         case Integrator::RK1:
+        {
             xout.noalias() = x + dt * dx;
-            break;
+        }
+        break;
 
         // Semi-implicit Euler
         case Integrator::SymplecticEuler:

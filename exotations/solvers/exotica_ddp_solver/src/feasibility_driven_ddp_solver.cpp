@@ -514,7 +514,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         }
         if (IsNaN(xnext_.lpNorm<Eigen::Infinity>()))
         {
-            WARNING_NAMED("NaN in ForwardPass", "forward_error - xnext_ isn't finite at t=" << t);
+            WARNING_NAMED("NaN in ForwardPass", "forward_error - xnext_ isn't finite at t=" << t << ": x=" << xs_try_[t].transpose() << ", u=" << us_try_[t].transpose() << ", xnext=" << xnext_.transpose());
             return;
         }
     }
@@ -651,10 +651,12 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 
         if (IsNaN(Vx_[t].lpNorm<Eigen::Infinity>()))
         {
+            HIGHLIGHT("Vx_[" << t << "] is NaN: " << Vx_[t].transpose());
             return false;
         }
         if (IsNaN(Vxx_[t].lpNorm<Eigen::Infinity>()))
         {
+            HIGHLIGHT("Vxx_[" << t << "] is NaN");
             return false;
         }
     }
@@ -666,6 +668,7 @@ void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
     // Quu_inv_[t].noalias() = Quu_[t].inverse();
     // K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     // k_[t].noalias() = Quu_inv_[t] * Qu_[t];
+    // return;
 
     while (true)
     {

@@ -36,97 +36,76 @@
 
 namespace exotica
 {
-inline double huber_cost(double x, double delta)
+inline double huber_cost(double x, double beta)
 {
-    return delta * delta * (std::sqrt(1 + std::pow(x / delta, 2)) - 1.0);
+    if (std::abs(x) < beta)
+        return 0.5 * x * x;
+    else
+        return beta * (std::abs(x) - 0.5 * beta);
 }
 
-inline double huber_jacobian(double x, double delta)
+inline double huber_jacobian(double x, double beta)
 {
-    return x / (std::sqrt(1.0 + x * x / (delta * delta)));
+    if (std::abs(x) < beta)
+        return x;
+    if (x < 0)
+        return -beta;
+    return beta;
 }
 
-inline double huber_hessian(double x, double delta)
+inline double huber_hessian(double x, double beta)
 {
-    return std::pow(delta, 4) * std::sqrt(1.0 + x * x / (delta * delta)) / (std::pow(delta * delta + x * x, 2));
+    if (std::abs(x) < beta)
+        return 1;
+    return 0;
 }
 
-inline double super_huber_cost(double x, double delta, double factor)
+
+
+
+inline double smooth_l1_cost(double x, double beta)
 {
-    return pow(delta, 2) * (pow(1 + pow(x, 2) / pow(delta, 2), factor) - 1);
+    if (std::abs(x) < beta)
+        return 0.5 * x * x / beta;
+    return std::abs(x) - 0.5 * beta;
 }
 
-inline double super_huber_jacobian(double x, double delta, double factor)
+inline double smooth_l1_jacobian(double x, double beta)
 {
-    return 2 * factor * x * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (1 + pow(x, 2) / pow(delta, 2));
+    if (std::abs(x) < beta)
+        return x / beta;
+    if (x < -beta)
+        return -1.0;
+    return 1.0;
+
 }
 
-inline double super_huber_hessian(double x, double delta, double factor)
+inline double smooth_l1_hessian(double x, double beta)
 {
-    return 2 * factor * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (1 + pow(x, 2) / pow(delta, 2)) + 4 * pow(factor, 2) * pow(x, 2) * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (pow(delta, 2) * pow(1 + pow(x, 2) / pow(delta, 2), 2)) - 4 * factor * pow(x, 2) * pow(1 + pow(x, 2) / pow(delta, 2), factor) / (pow(delta, 2) * pow(1 + pow(x, 2) / pow(delta, 2), 2));
+    if (std::abs(x) < beta)
+        return 1.0/beta;
+    return 0.0;
 }
 
-inline double smooth_l1_cost(double x, double alpha)
+
+
+inline double pseudo_huber_cost(double x, double beta)
 {
-    return 1.0 / alpha * (std::log(1.0 + std::exp(-alpha * x)) + std::log(1.0 + std::exp(alpha * x)));
+    return beta * beta * (std::sqrt(1 + std::pow(x / beta, 2)) - 1.0);
 }
 
-inline double smooth_l1_jacobian(double x, double alpha)
+inline double pseudo_huber_jacobian(double x, double beta)
 {
-    return 1.0 / (1 + std::exp(-alpha * x)) - 1.0 / (1 + std::exp(alpha * x));
+    return x / (std::sqrt(1.0 + x * x / (beta * beta)));
 }
 
-inline double smooth_l1_hessian(double x, double alpha)
+inline double pseudo_huber_hessian(double x, double beta)
 {
-    return 2 * alpha * std::exp(alpha * x) / std::pow(1 + std::exp(alpha * x), 2);
+    return std::pow(beta, 4) * std::sqrt(1.0 + x * x / (beta * beta)) / (std::pow(beta * beta + x * x, 2));
 }
 
-inline double bimodal_huber_cost(double x, double delta, double mode1, double mode2)
-{
-    return huber_cost(x - mode1, delta) + huber_cost(x - mode2, delta) - huber_cost(x - (mode1 + mode2) / 2, delta) - huber_cost(mode1, delta);
-}
 
-inline double bimodal_huber_jacobian(double x, double delta, double mode1, double mode2)
-{
-    return huber_jacobian(x - mode1, delta) + huber_jacobian(x - mode2, delta) - huber_jacobian(x - (mode1 + mode2) / 2, delta);
-}
 
-inline double bimodal_huber_hessian(double x, double delta, double mode1, double mode2)
-{
-    return huber_hessian(x - mode1, delta) + huber_hessian(x - mode2, delta) - huber_hessian(x - (mode1 + mode2) / 2, delta);
-}
-
-inline double normalized_huber_cost(double x, double delta)
-{
-    return (
-               1.0 * (delta * delta + 1.0) * (std::sqrt(std::pow(x / delta, 2) + 1.0) - 1.0)) /
-           (std::sqrt(1 + 1 / (delta * delta)) * (delta + 1.0));
-}
-
-inline double normalized_huber_jacobian(double x, double delta)
-{
-    const double epsilon = 1e-7;
-    x = x + epsilon;
-
-    return (
-               1.0 * std::pow(x / delta, 2) * (delta * delta + 1.0)) /
-           (x * std::sqrt((delta * delta + 1.0) / (delta * delta)) * (delta + 1.0) * std::sqrt(
-                                                                                         std::pow(x / delta, 2) + 1.0));
-}
-
-inline double normalized_huber_hessian(double x, double delta)
-{
-    const double epsilon = 1e-7;
-    x = x + epsilon;
-
-    return (
-               (delta * delta + 1) * (std::pow(x / delta, 2) * std::pow(std::pow(x / delta, 2) + 1.0, 1.5) -
-                                      std::pow(x / delta, 4) * std::pow(std::pow(x / delta, 2) + 1.0, 0.5))
-
-                   ) /
-           (x * x * std::sqrt((delta * delta + 1) / (delta * delta)) * (delta + 1.0) * std::pow(
-                                                                                           std::pow(x / delta, 2) + 1.0, 2));
-}
 
 }  // namespace exotica
 

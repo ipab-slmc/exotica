@@ -44,9 +44,7 @@ enum ControlCostLossTermType
     L2 = 0,
     SmoothL1 = 1,
     Huber = 2,
-    BimodalHuber = 3,
-    SuperHuber = 4,
-    NormalizedHuber = 5
+    PseudoHuber = 3,
 };
 
 class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instantiable<DynamicTimeIndexedShootingProblemInitializer>
@@ -125,9 +123,42 @@ public:
 
     void OnSolverIterationEnd()
     {
-        if (parameters_.LossType == "SmoothL1")
+        if (parameters_.LossType == "AdaptiveSmoothL1")
         {
-            l1_rate_ = (l1_rate_ * parameters_.L1IncreaseRate).cwiseMin(parameters_.MaxL1Rate);
+            // Adaptive SmoothL1 Rule
+            //      from "RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"
+            const double momentum = 0.9;
+
+            Eigen::VectorXd new_smooth_l1_mean_ = Eigen::VectorXd::Zero(scene_->get_num_controls());
+            Eigen::VectorXd new_smooth_l1_std_ = Eigen::VectorXd::Zero(scene_->get_num_controls());
+
+            for (int t = 0; t < T_; ++t)
+            {
+                for (int ui = 0; ui < scene_->get_num_controls(); ++ ui)
+                {
+                    new_smooth_l1_mean_[ui] += std::abs(U_.col(t)[ui]);
+                }
+            }
+
+            new_smooth_l1_mean_ /= T_;
+            
+            for (int t = 0; t < T_; ++t)
+            {
+                for (int ui = 0; ui < scene_->get_num_controls(); ++ ui)
+                {
+                    new_smooth_l1_std_[ui] += (std::abs(U_.col(t)[ui]) - new_smooth_l1_mean_[ui]) * (std::abs(U_.col(t)[ui]) - new_smooth_l1_mean_[ui]);
+                }
+            }
+
+            new_smooth_l1_std_ /= T_;
+
+            smooth_l1_mean_ = smooth_l1_mean_ * momentum + new_smooth_l1_mean_ * (1 - momentum);        
+            smooth_l1_std_ = smooth_l1_std_ * momentum + new_smooth_l1_std_ * (1 - momentum);
+
+            for (int ui = 0; ui < scene_->get_num_controls(); ++ ui)
+            {
+                l1_rate_[ui] = std::max(0.0, std::min(l1_rate_[ui], smooth_l1_mean_[ui] - smooth_l1_std_[ui]));
+            }
         }
     }
 
@@ -193,6 +224,8 @@ protected:
     Eigen::VectorXd l1_rate_;
     Eigen::VectorXd huber_rate_;
     Eigen::VectorXd bimodal_huber_mode1_, bimodal_huber_mode2_;
+
+    Eigen::VectorXd smooth_l1_mean_, smooth_l1_std_;
 };
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;
 }  // namespace exotica

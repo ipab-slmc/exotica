@@ -51,19 +51,18 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
     if (parameters_.LossType == "L2") loss_type_ = ControlCostLossTermType::L2;
 
     // L1
-    if (parameters_.LossType == "SmoothL1") loss_type_ = ControlCostLossTermType::SmoothL1;
+    if (parameters_.LossType == "SmoothL1" || parameters_.LossType == "AdaptiveSmoothL1") loss_type_ = ControlCostLossTermType::SmoothL1;
+
+    if (parameters_.LossType == "AdaptiveSmoothL1")
+    {
+        smooth_l1_mean_ = Eigen::VectorXd::Zero(scene_->get_num_controls());
+        smooth_l1_std_ = Eigen::VectorXd::Zero(scene_->get_num_controls());
+    }
 
     // Huber
     if (parameters_.LossType == "Huber") loss_type_ = ControlCostLossTermType::Huber;
 
-    // SuperHuber
-    if (parameters_.LossType == "SuperHuber") loss_type_ = ControlCostLossTermType::SuperHuber;
-
-    // NormalizedHuber
-    if (parameters_.LossType == "NormalizedHuber") loss_type_ = ControlCostLossTermType::NormalizedHuber;
-
-    // BimodalHuber
-    if (parameters_.LossType == "BiModalHuber") loss_type_ = ControlCostLossTermType::BimodalHuber;
+    if (parameters_.LossType == "PseudoHuber") loss_type_ = ControlCostLossTermType::PseudoHuber;
 
     // If still undefined, throw.
     if (loss_type_ == ControlCostLossTermType::Undefined) ThrowPretty("Unknown loss type: " << parameters_.LossType);
@@ -105,45 +104,6 @@ void DynamicTimeIndexedShootingProblem::InstantiateCostTerms(const DynamicTimeIn
         huber_rate_.setConstant(scene_->get_num_controls(), 1);
     }
 
-    // BimodalHuber modes
-    if (parameters_.LossType == "BiModalHuber")
-    {
-        // BimodalHuber mode 1
-        if (parameters_.Mode1.size() == 0)
-        {
-            ThrowPretty("Mode1 not set.");  // TODO: set default...
-        }
-        else if (parameters_.Mode1.size() == 1)
-        {
-            bimodal_huber_mode1_.setConstant(scene_->get_num_controls(), parameters_.Mode1(0));
-        }
-        else if (parameters_.Mode1.size() == scene_->get_num_controls())
-        {
-            bimodal_huber_mode1_ = parameters_.Mode1;
-        }
-        else
-        {
-            ThrowPretty("Mode1 has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.Mode1.size());
-        }
-
-        // BimodalHuber mode 1
-        if (parameters_.Mode2.size() == 0)
-        {
-            ThrowPretty("Mode2 not set.");  // TODO: set default...
-        }
-        else if (parameters_.Mode2.size() == 1)
-        {
-            bimodal_huber_mode2_.setConstant(scene_->get_num_controls(), parameters_.Mode2(0));
-        }
-        else if (parameters_.Mode2.size() == scene_->get_num_controls())
-        {
-            bimodal_huber_mode2_ = parameters_.Mode2;
-        }
-        else
-        {
-            ThrowPretty("Mode2 has wrong size: expected " << scene_->get_num_controls() << ", got " << parameters_.Mode2.size());
-        }
-    }
     control_cost_weight_ = parameters_.ControlCostWeight;
 }
 
@@ -837,20 +797,14 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t)
         if (loss_type_ == ControlCostLossTermType::SmoothL1)
             control_cost_hessian_[t](iu, iu) += smooth_l1_hessian(U_.col(t)[iu], l1_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::SuperHuber)
-            control_cost_hessian_[t](iu, iu) += super_huber_hessian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-
         // if huber_rate is 0, huber is undefined
         //  this is a shortcut for disabling the loss
         else if (loss_type_ == ControlCostLossTermType::Huber && huber_rate_(iu) != 0)
             control_cost_hessian_[t](iu, iu) += huber_hessian(U_.col(t)[iu], huber_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::NormalizedHuber && huber_rate_(iu) != 0)
-            control_cost_hessian_[t](iu, iu) += normalized_huber_hessian(U_.col(t)[iu], huber_rate_(iu));
+        else if (loss_type_ == ControlCostLossTermType::PseudoHuber && huber_rate_(iu) != 0)
+            control_cost_hessian_[t](iu, iu) += pseudo_huber_hessian(U_.col(t)[iu], huber_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::BimodalHuber && huber_rate_(iu) != 0)
-            control_cost_hessian_[t](iu, iu) += bimodal_huber_hessian(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
     return control_cost_weight_ * control_cost_hessian_[t];
 }
@@ -886,15 +840,9 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
         else if (loss_type_ == ControlCostLossTermType::Huber && huber_rate_(iu) != 0)
             cost += huber_cost(U_.col(t)[iu], huber_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::NormalizedHuber && huber_rate_(iu) != 0)
-            cost += normalized_huber_cost(U_.col(t)[iu], huber_rate_(iu));
+        else if (loss_type_ == ControlCostLossTermType::PseudoHuber && huber_rate_(iu) != 0)
+            cost += pseudo_huber_cost(U_.col(t)[iu], huber_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::SuperHuber)
-            cost += super_huber_cost(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
-
-        else if (loss_type_ == ControlCostLossTermType::BimodalHuber && huber_rate_(iu) != 0)
-            cost += bimodal_huber_cost(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
     }
     if (!std::isfinite(cost))
     {
@@ -933,14 +881,9 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
         else if (loss_type_ == ControlCostLossTermType::Huber && huber_rate_(iu) != 0)
             control_cost_jacobian_[t](iu) += huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::NormalizedHuber && huber_rate_(iu) != 0)
-            control_cost_jacobian_[t](iu) += normalized_huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
+        else if (loss_type_ == ControlCostLossTermType::PseudoHuber && huber_rate_(iu) != 0)
+            control_cost_jacobian_[t](iu) += pseudo_huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
 
-        else if (loss_type_ == ControlCostLossTermType::BimodalHuber && huber_rate_(iu) != 0)
-            control_cost_jacobian_[t](iu) += bimodal_huber_jacobian(
-                U_.col(t)[iu], huber_rate_(iu), bimodal_huber_mode1_(iu), bimodal_huber_mode2_(iu));
-        else if (loss_type_ == ControlCostLossTermType::SuperHuber)
-            control_cost_jacobian_[t](iu) += super_huber_jacobian(U_.col(t)[iu], huber_rate_(iu), parameters_.SuperHuberFactor);
     }
     return control_cost_weight_ * control_cost_jacobian_[t];
 }

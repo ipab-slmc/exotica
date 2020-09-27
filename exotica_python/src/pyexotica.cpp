@@ -695,18 +695,12 @@ PYBIND11_MODULE(_pyexotica, module)
                                   .def("huber_cost", &huber_cost)
                                   .def("huber_jacobian", &huber_jacobian)
                                   .def("huber_hessian", &huber_hessian)
-                                  .def("normalized_huber_cost", &normalized_huber_cost)
-                                  .def("normalized_huber_jacobian", &normalized_huber_jacobian)
-                                  .def("normalized_huber_hessian", &normalized_huber_hessian)
-                                  .def("super_huber_cost", &super_huber_cost)
-                                  .def("super_huber_jacobian", &super_huber_jacobian)
-                                  .def("super_huber_hessian", &super_huber_hessian)
                                   .def("smooth_l1_cost", &smooth_l1_cost)
                                   .def("smooth_l1_jacobian", &smooth_l1_jacobian)
                                   .def("smooth_l1_hessian", &smooth_l1_hessian)
-                                  .def("bimodal_huber_cost", &bimodal_huber_cost)
-                                  .def("bimodal_huber_jacobian", &bimodal_huber_jacobian)
-                                  .def("bimodal_huber_hessian", &bimodal_huber_hessian);
+                                  .def("pseudo_huber_cost", &pseudo_huber_cost)
+                                  .def("pseudo_huber_jacobian", &pseudo_huber_jacobian)
+                                  .def("pseudo_huber_hessian", &pseudo_huber_hessian);
 
     py::class_<Timer, std::shared_ptr<Timer>> timer(module, "Timer");
     timer.def(py::init());
@@ -1131,7 +1125,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .value("L2", ControlCostLossTermType::L2)
         .value("SmoothL1", ControlCostLossTermType::SmoothL1)
         .value("Huber", ControlCostLossTermType::Huber)
-        .value("NormalizedHuber", ControlCostLossTermType::NormalizedHuber)
+        .value("PseudoHuber", ControlCostLossTermType::PseudoHuber)
         .export_values();
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")

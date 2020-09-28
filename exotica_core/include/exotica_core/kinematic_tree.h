@@ -150,7 +150,7 @@ public:
     std::map<std::string, std::vector<double>> GetUsedJointLimits() const;
     int GetNumControlledJoints() const;
     int GetNumModelJoints() const;
-    void PublishFrames();
+    void PublishFrames(const std::string tf_prefix="exotica");
 
     const std::vector<std::string>& GetControlledJointNames() const
     {

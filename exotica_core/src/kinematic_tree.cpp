@@ -707,7 +707,7 @@ void KinematicTree::UpdateTree()
     }
 }
 
-void KinematicTree::PublishFrames()
+void KinematicTree::PublishFrames(const std::string tf_prefix)
 {
     if (Server::IsRos())
     {
@@ -718,7 +718,7 @@ void KinematicTree::PublishFrames()
             {
                 tf::Transform T;
                 tf::transformKDLToTF(element.lock()->frame, T);
-                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", GetRootFrameName()), tf::resolve("exotica", element.lock()->segment.getName()));
+                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, element.lock()->segment.getName()));
                 ++i;
             }
             Server::SendTransform(debug_tree_);
@@ -727,9 +727,9 @@ void KinematicTree::PublishFrames()
             {
                 tf::Transform T;
                 tf::transformKDLToTF(frame.temp_B, T);
-                debug_frames_[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", GetRootFrameName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
+                debug_frames_[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
                 tf::transformKDLToTF(frame.temp_AB, T);
-                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
+                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
                 ++i;
             }
             Server::SendTransform(debug_frames_);
@@ -750,7 +750,7 @@ void KinematicTree::PublishFrames()
                     mrk.id = i;
                     mrk.ns = "CollisionObjects";
                     mrk.color = GetColor(tree_[i].lock()->color);
-                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                    mrk.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
                     mrk.pose.orientation.w = 1.0;
                     mrk.type = visualization_msgs::Marker::MESH_RESOURCE;
                     mrk.mesh_resource = tree_[i].lock()->shape_resource_path;
@@ -771,7 +771,7 @@ void KinematicTree::PublishFrames()
                         mrk.id = i;
                         mrk.ns = "CollisionObjects";
                         mrk.color = GetColor(tree_[i].lock()->color);
-                        mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                        mrk.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
                         mrk.pose.orientation.w = 1.0;
                         marker_array_msg_.markers.push_back(mrk);
                     }
@@ -782,7 +782,7 @@ void KinematicTree::PublishFrames()
                         octomap::OcTree my_octomap = *std::static_pointer_cast<const shapes::OcTree>(tree_[i].lock()->shape)->octree.get();
                         octomap_msgs::Octomap octomap_msg;
                         octomap_msgs::binaryMapToMsg(my_octomap, octomap_msg);
-                        octomap_msg.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                        octomap_msg.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
                         octomap_pub_.publish(octomap_msg);
                     }
                 }

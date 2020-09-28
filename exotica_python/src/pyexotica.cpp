@@ -1328,7 +1328,7 @@ PYBIND11_MODULE(_pyexotica, module)
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");
     kinematic_tree.def_readwrite("debug_mode", &KinematicTree::debug);
-    kinematic_tree.def("publish_frames", &KinematicTree::PublishFrames);
+    kinematic_tree.def("publish_frames", &KinematicTree::PublishFrames, py::arg("tf_prefix") = "exotica");
     kinematic_tree.def("get_root_frame_name", &KinematicTree::GetRootFrameName);
     kinematic_tree.def("get_root_joint_name", &KinematicTree::GetRootJointName);
     kinematic_tree.def("get_kinematic_chain", &KinematicTree::GetKinematicChain);

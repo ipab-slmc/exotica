@@ -134,17 +134,17 @@ public:
 
             for (int t = 0; t < T_; ++t)
             {
-                for (int ui = 0; ui < scene_->get_num_controls(); ++ ui)
+                for (int ui = 0; ui < scene_->get_num_controls(); ++ui)
                 {
                     new_smooth_l1_mean_[ui] += std::abs(U_.col(t)[ui]);
                 }
             }
 
             new_smooth_l1_mean_ /= T_;
-            
+
             for (int t = 0; t < T_; ++t)
             {
-                for (int ui = 0; ui < scene_->get_num_controls(); ++ ui)
+                for (int ui = 0; ui < scene_->get_num_controls(); ++ui)
                 {
                     new_smooth_l1_std_[ui] += (std::abs(U_.col(t)[ui]) - new_smooth_l1_mean_[ui]) * (std::abs(U_.col(t)[ui]) - new_smooth_l1_mean_[ui]);
                 }
@@ -152,10 +152,10 @@ public:
 
             new_smooth_l1_std_ /= T_;
 
-            smooth_l1_mean_ = smooth_l1_mean_ * momentum + new_smooth_l1_mean_ * (1 - momentum);        
+            smooth_l1_mean_ = smooth_l1_mean_ * momentum + new_smooth_l1_mean_ * (1 - momentum);
             smooth_l1_std_ = smooth_l1_std_ * momentum + new_smooth_l1_std_ * (1 - momentum);
 
-            for (int ui = 0; ui < scene_->get_num_controls(); ++ ui)
+            for (int ui = 0; ui < scene_->get_num_controls(); ++ui)
             {
                 l1_rate_[ui] = std::max(0.0, std::min(l1_rate_[ui], smooth_l1_mean_[ui] - smooth_l1_std_[ui]));
             }

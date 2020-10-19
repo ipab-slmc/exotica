@@ -60,9 +60,6 @@ inline double huber_hessian(double x, double beta)
     return 0;
 }
 
-
-
-
 inline double smooth_l1_cost(double x, double beta)
 {
     if (std::abs(x) < beta)
@@ -77,17 +74,14 @@ inline double smooth_l1_jacobian(double x, double beta)
     if (x < -beta)
         return -1.0;
     return 1.0;
-
 }
 
 inline double smooth_l1_hessian(double x, double beta)
 {
     if (std::abs(x) < beta)
-        return 1.0/beta;
+        return 1.0 / beta;
     return 0.0;
 }
-
-
 
 inline double pseudo_huber_cost(double x, double beta)
 {
@@ -103,9 +97,6 @@ inline double pseudo_huber_hessian(double x, double beta)
 {
     return std::pow(beta, 4) * std::sqrt(1.0 + x * x / (beta * beta)) / (std::pow(beta * beta + x * x, 2));
 }
-
-
-
 
 }  // namespace exotica
 

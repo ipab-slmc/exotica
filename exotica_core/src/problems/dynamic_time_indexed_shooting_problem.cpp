@@ -804,7 +804,6 @@ Eigen::MatrixXd DynamicTimeIndexedShootingProblem::GetControlCostHessian(int t)
 
         else if (loss_type_ == ControlCostLossTermType::PseudoHuber && huber_rate_(iu) != 0)
             control_cost_hessian_[t](iu, iu) += pseudo_huber_hessian(U_.col(t)[iu], huber_rate_(iu));
-
     }
     return control_cost_weight_ * control_cost_hessian_[t];
 }
@@ -842,7 +841,6 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
 
         else if (loss_type_ == ControlCostLossTermType::PseudoHuber && huber_rate_(iu) != 0)
             cost += pseudo_huber_cost(U_.col(t)[iu], huber_rate_(iu));
-
     }
     if (!std::isfinite(cost))
     {
@@ -883,7 +881,6 @@ Eigen::VectorXd DynamicTimeIndexedShootingProblem::GetControlCostJacobian(int t)
 
         else if (loss_type_ == ControlCostLossTermType::PseudoHuber && huber_rate_(iu) != 0)
             control_cost_jacobian_[t](iu) += pseudo_huber_jacobian(U_.col(t)[iu], huber_rate_(iu));
-
     }
     return control_cost_weight_ * control_cost_jacobian_[t];
 }

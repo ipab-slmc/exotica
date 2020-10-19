@@ -707,7 +707,7 @@ void KinematicTree::UpdateTree()
     }
 }
 
-void KinematicTree::PublishFrames(const std::string tf_prefix)
+void KinematicTree::PublishFrames(const std::string& tf_prefix)
 {
     if (Server::IsRos())
     {

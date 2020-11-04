@@ -455,7 +455,7 @@ public:
                     // This requires having the properties added to the generic Initializer, even if the base initializer does not contain them.
                     // HIGHLIGHT(initializer_name << ": Ignoring property '" << key_str << "'")
                     ret.AddProperty(Property(key_str, false, boost::any(PyAsStdString(value_py))));
-                    WARNING("Adding property '" << key_str << "' even though Initializer type '" << initializer_name << "' does not know this property.");
+                    // WARNING("Adding property '" << key_str << "' even though Initializer type '" << initializer_name << "' does not know this property.");
                 }
             }
         }

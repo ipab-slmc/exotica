@@ -439,6 +439,7 @@ public:
             while (PyDict_Next(dict, &pos, &key, &value_py))
             {
                 const std::string key_str = PyAsStdString(key);
+
                 if (ret.properties_.count(key_str))
                 {
                     if (!AddPropertyFromDict(ret.properties_.at(key_str), value_py))
@@ -449,7 +450,12 @@ public:
                 }
                 else
                 {
-                    HIGHLIGHT(initializer_name << ": Ignoring property '" << key_str << "'")
+                    // 2020-11-04: Replaced the ignoring behaviour with a warning that still adds the property to the initializer.
+                    // This resolves issue #719: Sometimes (e.g. for SphereCollision ), we do casting to derived types inside a TaskMap.
+                    // This requires having the properties added to the generic Initializer, even if the base initializer does not contain them.
+                    // HIGHLIGHT(initializer_name << ": Ignoring property '" << key_str << "'")
+                    ret.AddProperty(Property(key_str, false, boost::any(PyAsStdString(value_py))));
+                    WARNING("Adding property '" << key_str << "' even though Initializer type '" << initializer_name << "' does not know this property.");
                 }
             }
         }

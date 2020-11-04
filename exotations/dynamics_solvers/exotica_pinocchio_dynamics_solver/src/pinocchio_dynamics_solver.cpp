@@ -103,6 +103,7 @@ void PinocchioDynamicsSolver::ComputeDerivatives(const StateVector& x, const Con
             pinocchio::dIntegrate(model_, x.head(num_positions_), x.tail(num_velocities_), Fx_.topLeftCorner(num_velocities_, num_velocities_), pinocchio::ARG0, pinocchio::ADDTO);
             Fx_.bottomRightCorner(num_velocities_, num_velocities_).diagonal().array() += 1.0;
 
+            Fu_.topRows(num_velocities_).setZero();
             Fu_.bottomRows(num_velocities_).noalias() = dt_ * da_du;
             pinocchio::dIntegrateTransport(model_, x.head(num_positions_), x.tail(num_velocities_), Fu_.topRows(num_velocities_), pinocchio::ARG1);
         }

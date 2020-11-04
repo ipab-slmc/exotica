@@ -177,7 +177,7 @@ void AddInitializers(py::module& module)
     for (Initializer& i : initializers)
     {
         std::string full_name = i.GetName();
-        std::string name = full_name.substr(8);
+        std::string name = full_name.substr(8);  // This removes the prefix "exotica/"
         known_initializers[full_name] = CreateInitializer(i);
         inits.def((name + "Initializer").c_str(), [i]() { return CreateInitializer(i); }, (name + "Initializer constructor.").c_str());
     }
@@ -341,8 +341,13 @@ public:
                 {
                     if (!PyToInit(PyList_GetItem(value_py, 0), tmp))
                     {
+                        WARNING("Could not create initializer :'(");
                         return false;
                     }
+                }
+                else
+                {
+                    WARNING("List size is greater than 1 - this should not happen: " << n);
                 }
                 target.Set(tmp);
             }
@@ -351,6 +356,7 @@ public:
                 Initializer tmp;
                 if (!PyToInit(value_py, tmp))
                 {
+                    WARNING("Could not convert Python value to exotica::Initializer");
                     return false;
                 }
                 target.Set(tmp);
@@ -367,11 +373,16 @@ public:
                 {
                     if (!PyToInit(PyList_GetItem(value_py, i), vec[i]))
                     {
+                        WARNING("Could not parse initializer in vector of initializers: #" << i);
                         return false;
                     }
                 }
                 target.Set(vec);
                 return true;
+            }
+            else
+            {
+                HIGHLIGHT("InitializerVectorType failed PyList_Check");
             }
         }
         else
@@ -384,13 +395,25 @@ public:
 
     bool PyToInit(PyObject* source, Initializer& ret)
     {
-        if (!PyTuple_CheckExact(source)) return false;
+        if (!PyTuple_CheckExact(source))
+        {
+            WARNING_NAMED("PyToInit", "Failed exact tuple check.");
+            return false;
+        }
 
         int tuple_size = PyTuple_Size(source);
-        if (tuple_size < 1 || tuple_size > 2) return false;
+        if (tuple_size < 1 || tuple_size > 2)
+        {
+            WARNING_NAMED("PyToInit", "Wrong sized tuple for exotica::Initializer: " << tuple_size);
+            return false;
+        }
 
         PyObject* const name_py = PyTuple_GetItem(source, 0);
-        if (!IsPyString(name_py)) return false;
+        if (!IsPyString(name_py))
+        {
+            WARNING_NAMED("PyToInit", "First element of exotica::Initializer-tuple is not a string.");
+            return false;
+        }
         const std::string initializer_name = PyAsStdString(name_py);
 
         const auto& it = known_initializers.find(initializer_name);
@@ -404,7 +427,11 @@ public:
         if (tuple_size == 2)
         {
             PyObject* const dict = PyTuple_GetItem(source, 1);
-            if (!PyDict_Check(dict)) return false;
+            if (!PyDict_Check(dict))
+            {
+                WARNING_NAMED("PyToInit", "Second element of exotica::Initializer-tuple is not a dict.");
+                return false;
+            }
 
             PyObject *key, *value_py;
             Py_ssize_t pos = 0;

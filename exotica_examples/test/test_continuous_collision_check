@@ -14,7 +14,7 @@ def get_problem_initializer(collision_scene, URDF):
     return ('exotica/UnconstrainedEndPoseProblem',
             {'Name': 'TestProblem',
              'PlanningScene': [('exotica/Scene',
-                                {'CollisionScene': collision_scene,
+                                {'CollisionScene': [(collision_scene, {'Name': 'MyCollisionScene'})],
                                  'JointGroup': 'group1',
                                  'Name': 'TestScene',
                                  'Debug': '0',
@@ -24,7 +24,7 @@ def get_problem_initializer(collision_scene, URDF):
 
 class TestClass(unittest.TestCase):
     def test_continuous_collision(self):
-        collision_scene = "CollisionSceneFCLLatest"
+        collision_scene = "exotica/CollisionSceneFCLLatest"
 
         urdfs_to_test = ['{exotica_examples}/test/resources/primitive_sphere_vs_primitive_sphere_distance.urdf', '{exotica_examples}/test/resources/mesh_vs_mesh_distance.urdf']
 

@@ -54,7 +54,7 @@ void AnalyticDDPSolver::BackwardPass()
 
     // concatenation axis for tensor products
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
-    constexpr Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
+    const Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
     Eigen::Tensor<double, 1> Vx_tensor;
 
     Eigen::VectorXd x(NX_), u(NU_);  // TODO: Replace

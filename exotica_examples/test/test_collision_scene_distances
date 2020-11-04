@@ -22,7 +22,7 @@ def get_problem_initializer(collision_scene, URDF):
     return ('exotica/UnconstrainedEndPoseProblem',
             {'Name': 'TestProblem',
              'PlanningScene': [('exotica/Scene',
-                                {'CollisionScene': collision_scene,
+                                {'CollisionScene': [(collision_scene, {'Name': 'MyCollisionScene'})],
                                  'JointGroup': 'group1',
                                  'Name': 'TestScene',
                                  'Debug': '0',
@@ -657,7 +657,7 @@ def test_mesh_vs_mesh_penetrating(collision_scene):
 
 # Cf. Issue #364 for tracking deactivated tests.
 class TestClass(unittest.TestCase):
-    collision_scene = 'CollisionSceneFCLLatest'
+    collision_scene = 'exotica/CollisionSceneFCLLatest'
     def test_sphere_vs_sphere_distance(self):
         test_sphere_vs_sphere_distance(TestClass.collision_scene)
 

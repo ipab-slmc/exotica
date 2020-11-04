@@ -182,8 +182,15 @@ void DynamicTimeIndexedShootingProblem::Instantiate(const DynamicTimeIndexedShoo
     //     0
     bool full_noise_set = false;
     Ci_.assign(NX, Eigen::MatrixXd::Zero(NX, NU));
-    for (int i = 0; i < NU; ++i)
-        Ci_[NX - NU + i](NX - NU + i, i) = parameters_.C_rate;
+    if (NX <= NU)
+    {
+        for (int i = 0; i < NU; ++i)
+            Ci_.at(NX - NU + i)(NX - NU + i, i) = parameters_.C_rate;
+    }
+    else
+    {
+        ThrowPretty("Noise does not work for systems that have NU > NX. This should be fixed in the future.");
+    }
 
     if (this->parameters_.C.rows() > 0)
     {

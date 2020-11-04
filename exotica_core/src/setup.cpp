@@ -129,6 +129,19 @@ std::vector<Initializer> Setup::GetInitializers()
             continue;
         }
     }
+    std::vector<std::string> collision_scenes = Instance()->collision_scenes_.getDeclaredClasses();
+    for (const std::string& s : collision_scenes)
+    {
+        try
+        {
+            AppendInitializer(std::static_pointer_cast<InstantiableBase>(CreateCollisionScene(s, false)), ret);
+        }
+        catch (std::exception& e)
+        {
+            WARNING_NAMED("Setup::GetInitializers", "CollisionScene '" << s << "' not built. Won't be able to instantiate.");
+            continue;
+        }
+    }
     std::vector<std::string> dynamics_solvers = Instance()->dynamics_solvers_.getDeclaredClasses();
     for (const std::string& s : dynamics_solvers)
     {

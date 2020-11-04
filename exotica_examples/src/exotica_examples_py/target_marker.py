@@ -37,7 +37,7 @@ class TargetMarker:
         self.int_marker.pose = list_to_pose(pose)
         self.position_exo = exo.KDLFrame(pose)
         self.position = kdl.Frame(
-            kdl.Rotation.Quaternion(self.int_marker.pose.orientation.x, self.int_marker.pose.orientation.y, self.int_marker.pose.orientation.z, self.int_marker.pose.orientation.w), 
+            kdl.Rotation.Quaternion(self.int_marker.pose.orientation.x, self.int_marker.pose.orientation.y, self.int_marker.pose.orientation.z, self.int_marker.pose.orientation.w),
             kdl.Vector(self.int_marker.pose.position.x, self.int_marker.pose.position.y, self.int_marker.pose.position.z))
 
         # create a grey box marker
@@ -87,8 +87,7 @@ class TargetMarker:
 
     def process_feedback(self, feedback):
         self.position = kdl.Frame(
-            kdl.Rotation.Quaternion(feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w), 
+            kdl.Rotation.Quaternion(feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w),
             kdl.Vector(feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z))
         self.position_exo = exo.KDLFrame([feedback.pose.position.x, feedback.pose.position.y, feedback.pose.position.z,
             feedback.pose.orientation.x, feedback.pose.orientation.y, feedback.pose.orientation.z, feedback.pose.orientation.w])
-    

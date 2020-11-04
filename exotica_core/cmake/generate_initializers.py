@@ -111,41 +111,41 @@ def declaration(data):
     else:
       return ""
 
-def parser(type):
+def parser(type_in):
     parser = ""
-    if type == 'std::string':
-        return "boost::any_cast<" + type + ">(prop.Get())"
-    elif type == 'exotica::Initializer' or type == 'Initializer':
+    if type_in == 'std::string':
+        return "boost::any_cast<" + type_in + ">(prop.Get())"
+    elif type_in == 'exotica::Initializer' or type_in == 'Initializer':
         return "prop.IsInitializerVectorType()?boost::any_cast<std::vector<exotica::Initializer>>(prop.Get()).at(0):boost::any_cast<exotica::Initializer>(prop.Get())"
-    elif type == 'std::vector<Initializer>' or type == 'std::vector<exotica::Initializer>':
+    elif type_in == 'std::vector<Initializer>' or type_in == 'std::vector<exotica::Initializer>':
         return "boost::any_cast<std::vector<exotica::Initializer>>(prop.Get())"
-    elif type == 'Eigen::VectorXd':
+    elif type_in == 'Eigen::VectorXd':
         parser = "ParseVector<double,Eigen::Dynamic>"
-    elif type == 'Eigen::Vector4d':
+    elif type_in == 'Eigen::Vector4d':
         parser = "ParseVector<double,4>"
-    elif type == 'Eigen::Vector3d':
+    elif type_in == 'Eigen::Vector3d':
         parser = "ParseVector<double,3>"
-    elif type == 'Eigen::Vector2d':
+    elif type_in == 'Eigen::Vector2d':
         parser = 'ParseVector<double,2>'
-    elif type == 'Eigen::VectorXi':
+    elif type_in == 'Eigen::VectorXi':
         parser = "ParseVector<int,Eigen::Dynamic>"
-    elif type == 'bool':
+    elif type_in == 'bool':
         parser = "ParseBool"
-    elif type == 'double':
+    elif type_in == 'double':
         parser = "ParseDouble"
-    elif type == 'int':
+    elif type_in == 'int':
         parser = "ParseInt"
-    elif type == 'std::vector<std::string>':
+    elif type_in == 'std::vector<std::string>':
         parser = "ParseList"
-    elif type == 'std::vector<int>':
+    elif type_in == 'std::vector<int>':
         parser = "ParseIntList"
-    elif type == 'std::vector<bool>':
+    elif type_in == 'std::vector<bool>':
         parser = "ParseBoolList"
     else:
-        eprint("Unknown data type '" + type + "'")
+        eprint("Unknown data type '" + type_in + "'")
         sys.exit(2)
 
-    return "prop.IsStringType()?" + parser + "(boost::any_cast<std::string>(prop.Get())):boost::any_cast<" + type + ">(prop.Get())"
+    return "prop.IsStringType()?" + parser + "(boost::any_cast<std::string>(prop.Get())):boost::any_cast<" + type_in + ">(prop.Get())"
 
 
 def copy(data):
@@ -288,7 +288,7 @@ def parse_line(line, line_number, function_name):
         sys.exit(2)
 
     value = None
-    type = ""
+    field_type = ""
     name = ""
     if not required:
         eq = line.find("=")
@@ -300,15 +300,15 @@ def parse_line(line, line_number, function_name):
             eq = last
         name_start = line[0:eq].strip().rfind(" ")
         name = line[name_start:eq].strip()
-        type = line[9:name_start].strip()
+        field_type = line[9:name_start].strip()
         if not has_default_arg:
             eprint("Optional parameter '" + name + "' requires a default argument!")
     else:
         name_start = line[0:last].strip().rfind(" ")
         name = line[name_start:last].strip()
-        type = line[9:name_start].strip()
+        field_type = line[9:name_start].strip()
 
-    return {'Required' : required, 'Type' : type, 'Name' : name, 'Value' : value}
+    return {'Required' : required, 'Type' : field_type, 'Name' : name, 'Value' : value}
 
 def parse_file(file_name):
     with open(file_name) as f:

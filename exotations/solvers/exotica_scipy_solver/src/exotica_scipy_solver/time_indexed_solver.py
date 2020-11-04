@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 
-from scipy.optimize import minimize, Bounds, LinearConstraint, NonlinearConstraint, BFGS, SR1
+from scipy.optimize import minimize, Bounds, LinearConstraint, NonlinearConstraint, SR1 # BFGS
 import numpy as np
 from time import time
 
@@ -9,7 +9,7 @@ from time import time
 class SciPyTimeIndexedSolver(object):
     '''
     Uses SciPy to solve a constrained TimeIndexedProblem. Options for SciPy minimize
-    can be found here: 
+    can be found here:
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
     '''
 
@@ -70,7 +70,7 @@ class SciPyTimeIndexedSolver(object):
         else:
             if (self.problem.inequality.length_Phi > 0):
                 cons.append(NonlinearConstraint(self.neq_constraint_fun, 0., np.inf, jac=self.neq_constraint_jac, hess=self.hessian_update_strategy))
-            
+
             if (self.problem.equality.length_Phi):
                 cons.append(NonlinearConstraint(self.eq_constraint_fun, 0., 0., jac=self.eq_constraint_jac, hess=self.hessian_update_strategy))
 

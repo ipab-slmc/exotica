@@ -9,7 +9,7 @@ from time import time
 class SciPyEndPoseSolver(object):
     '''
     Uses SciPy to solve a constrained EndPoseProblem. Options for SciPy minimize
-    can be found here: 
+    can be found here:
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
     '''
     def __init__(self, problem=None, method=None, debug=False):
@@ -67,7 +67,7 @@ class SciPyEndPoseSolver(object):
             
             if (self.eq_constraint_fun(np.zeros((self.problem.N,))).shape[0] > 0):
                 cons.append(NonlinearConstraint(self.eq_constraint_fun, 0., 0., jac=self.eq_constraint_jac, hess=SR1()))
-            
+
 
         # Bounds
         bounds = None
@@ -75,7 +75,7 @@ class SciPyEndPoseSolver(object):
             bounds = Bounds(self.problem.get_bounds()[:,0], self.problem.get_bounds()[:,1])
 
         s = time()
-        res = minimize(self.cost_fun, 
+        res = minimize(self.cost_fun,
                     x0,
                     method=self.method,
                     bounds=bounds,

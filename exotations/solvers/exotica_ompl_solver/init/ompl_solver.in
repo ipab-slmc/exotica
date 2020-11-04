@@ -19,3 +19,8 @@ Optional int RandomSeed = -1;  // Only set if not -1
 Optional Eigen::VectorXd Projection = Eigen::VectorXd();
 Optional double Epsilon = 0.0;
 Optional int FinalInterpolationLength = 0;
+
+// Planar base / SE(2) StateSpace Options
+Optional bool IsDubinsStateSpace = false;
+Optional double DubinsStateSpaceTurningRadius = 1.0;
+Optional bool DubinsStateSpaceIsSymmetric = false;

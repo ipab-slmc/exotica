@@ -35,6 +35,7 @@
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>
 #include <ompl/base/StateValidityChecker.h>
+#include <ompl/base/spaces/DubinsStateSpace.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE2StateSpace.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
@@ -181,6 +182,47 @@ public:
         }
     };
     OMPLSE2RNStateSpace(OMPLSolverInitializer init);
+
+    ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
+    void SetBounds(SamplingProblemPtr &prob) override;
+    void ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const override;
+    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const override;
+    void StateDebug(const Eigen::VectorXd &q) const override;
+
+private:
+    unsigned int dim_ = 3;
+};
+
+class OMPLDubinsRNStateSpace : public OMPLStateSpace
+{
+public:
+    class StateType : public ompl::base::CompoundStateSpace::StateType
+    {
+    public:
+        StateType() : CompoundStateSpace::StateType()
+        {
+        }
+
+        const ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace() const
+        {
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+        }
+
+        ompl::base::RealVectorStateSpace::StateType &RealVectorStateSpace()
+        {
+            return *as<ompl::base::RealVectorStateSpace::StateType>(1);
+        }
+
+        const ompl::base::DubinsStateSpace::StateType &DubinsStateSpace() const
+        {
+            return *as<ompl::base::DubinsStateSpace::StateType>(0);
+        }
+        ompl::base::SE2StateSpace::StateType &DubinsStateSpace()
+        {
+            return *as<ompl::base::DubinsStateSpace::StateType>(0);
+        }
+    };
+    OMPLDubinsRNStateSpace(OMPLSolverInitializer init);
 
     ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
     void SetBounds(SamplingProblemPtr &prob) override;

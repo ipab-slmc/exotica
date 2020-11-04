@@ -36,6 +36,7 @@ namespace testing
 {
 namespace internal
 {
+#if !ROS_VERSION_MINIMUM(1, 15, 0)
 enum GTestColor
 {
     COLOR_DEFAULT,
@@ -43,8 +44,8 @@ enum GTestColor
     COLOR_GREEN,
     COLOR_YELLOW
 };
-
-extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
+#endif
+extern void ColoredPrintf(testing::internal::GTestColor color, const char* fmt, ...);
 }
 }
 #define PRINTF(...)                                                                        \
@@ -306,9 +307,9 @@ TEST(ExoticaProblems, UnconstrainedEndPoseProblem)
         if (!(J[1] == J[2]))
             ADD_FAILURE() << "Cost Jacobians are inconsistent!";
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -342,9 +343,9 @@ TEST(ExoticaProblems, BoundedEndPoseProblem)
         if (!(J[1] == J[2]))
             ADD_FAILURE() << "Cost Jacobians are inconsistent!";
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -416,9 +417,9 @@ TEST(ExoticaProblems, EndPoseProblem)
         if (!(J[4] == J[5]))
             ADD_FAILURE() << "EndPoseProblem: Inequality Jacobians are inconsistent!";
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -460,9 +461,9 @@ TEST(ExoticaProblems, UnconstrainedTimeIndexedProblem)
                 ADD_FAILURE() << "Cost Jacobians are inconsistent!";
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -504,9 +505,9 @@ TEST(ExoticaProblems, BoundedTimeIndexedProblem)
                 ADD_FAILURE() << "BoundedTimeIndexedProblem: cost Jacobians are inconsistent!";
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -586,9 +587,9 @@ TEST(ExoticaProblems, TimeIndexedProblem)
                 ADD_FAILURE() << "Inequality Jacobians are inconsistent!";
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -603,9 +604,9 @@ TEST(ExoticaProblems, SamplingProblem)
         TEST_COUT << "Testing valid state";
         if (!problem->IsValid(x)) ADD_FAILURE() << "Start state is invalid!";
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -620,9 +621,9 @@ TEST(ExoticaProblems, TimeIndexedSamplingProblem)
         TEST_COUT << "Testing valid state";
         if (!problem->IsValid(x, 0.0)) ADD_FAILURE() << "Start state is invalid!";
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 

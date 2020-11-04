@@ -341,6 +341,12 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVec
     const int nx = get_num_state();
     const int ndx = get_num_state_derivative();
 
+    // This finite differencing only works with RK1 due to Integrate(x, u, dt)
+    // We thus store the previous Integrator, set it to RK1, then set it back
+    // afterwards.
+    Integrator previous_integrator = integrator_;
+    integrator_ = Integrator::RK1;  // Note, this by-passes potentially overriden virtual set_integrator callbacks
+
     // Finite differences
     Eigen::MatrixXd fx_fd(ndx, ndx);
     constexpr double eps = 1e-6;
@@ -355,6 +361,9 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVec
 
         fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
     }
+
+    // Reset integrator
+    integrator_ = previous_integrator;
 
     return fx_fd;
 }

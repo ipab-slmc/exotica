@@ -128,14 +128,14 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
         ds.integrator = integrator
         eps = 1e-5
         Fx_fd = np.zeros((ds.ndx, ds.ndx))
-        original_integrator = ds.integrator
         for i in range(ds.ndx):
             dx = np.zeros((ds.ndx))
             dx[i] = eps / 2.0
+            # For finite-diff, we need to use RK1 to compute x_plus, x_minus
             ds.integrator = exo.Integrator.RK1
             x_plus = ds.integrate(x, dx, 1.0)
             x_minus = ds.integrate(x, -dx, 1.0)
-            ds.integrator = original_integrator
+            ds.integrator = integrator
             F_plus = ds.F(x_plus, u)
             F_minus = ds.F(x_minus, u)
             Fx_fd[:,i] = ds.state_delta(F_plus, F_minus) / eps

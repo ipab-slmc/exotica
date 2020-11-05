@@ -36,6 +36,7 @@ namespace testing
 {
 namespace internal
 {
+#if !ROS_VERSION_MINIMUM(1, 15, 0)
 enum GTestColor
 {
     COLOR_DEFAULT,
@@ -43,6 +44,7 @@ enum GTestColor
     COLOR_GREEN,
     COLOR_YELLOW
 };
+#endif
 
 extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
 }
@@ -92,7 +94,11 @@ public:
     {
         Server::Instance()->GetModel("robot_description", urdf_string_, srdf_string_);
         scene.reset(new Scene());
-        Initializer init("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}});
+        Initializer init("Scene", {
+                                      {"Name", std::string("MyScene")},
+                                      {"JointGroup", std::string("arm")},
+                                      {"DoNotInstantiateCollisionScene", std::string("1")},
+                                  });
         scene->InstantiateInternal(SceneInitializer(init));
 
         KinematicsRequest request;
@@ -221,9 +227,9 @@ TEST(ExoticaCore, testKinematicJacobian)
         TestClass test;
         EXPECT_TRUE(test_jacobian(test));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 
@@ -235,9 +241,9 @@ TEST(ExoticaCore, testKinematicHessian)
         TestClass test;
         EXPECT_TRUE(test_hessian(test));
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        ADD_FAILURE() << "Uncaught exception!";
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
     }
 }
 

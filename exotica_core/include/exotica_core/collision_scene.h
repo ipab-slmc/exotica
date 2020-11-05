@@ -50,7 +50,8 @@ class Scene;
 class AllowedCollisionMatrix
 {
 public:
-    AllowedCollisionMatrix() {}
+    AllowedCollisionMatrix() = default;
+    ~AllowedCollisionMatrix() = default;
     AllowedCollisionMatrix(const AllowedCollisionMatrix& acm) { entries_ = acm.entries_; }
     inline void clear() { entries_.clear(); }
     inline bool hasEntry(const std::string& name) const { return entries_.find(name) == entries_.end(); }

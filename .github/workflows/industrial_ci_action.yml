@@ -7,7 +7,7 @@ name: CI
 on: [push, pull_request] # on all pushes and PRs
 
 jobs:
-  industrial_ci:
+  CI:
     strategy:
       matrix:
         env:

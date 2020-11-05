@@ -26,7 +26,6 @@ set(SYSTEM_DEPENDS
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS cmake_modules ${CATKIN_DEPENDS})
-find_package(Boost REQUIRED COMPONENTS signals)
 find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

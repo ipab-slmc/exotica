@@ -52,6 +52,12 @@ inline fcl::Transform3d transformKDLToFCL(const KDL::Frame& frame)
     return ret;
 }
 
+void transformFCLToKDL(const fcl::Transform3d& tf, KDL::Frame& frame)
+{
+    Eigen::Map<Eigen::Vector3d>(frame.p.data) = tf.translation();
+    Eigen::Map<Eigen::Matrix3d>(frame.M.data) = tf.linear().matrix();
+}
+
 inline bool IsRobotLink(std::shared_ptr<KinematicElement> e)
 {
     return e->is_robot_link || e->closest_robot_link.lock();
@@ -971,8 +977,8 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
 #endif
     }
 
-    tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf1), ret.contact_tf1);
-    tf::transformEigenToKDL(static_cast<Eigen::Isometry3d>(result.contact_tf2), ret.contact_tf2);
+    transformFCLToKDL(result.contact_tf1, ret.contact_tf1);
+    transformFCLToKDL(result.contact_tf2, ret.contact_tf2);
 
 #ifdef CONTINUOUS_COLLISION_DEBUG
     if (!ret.contact_pos.allFinite())

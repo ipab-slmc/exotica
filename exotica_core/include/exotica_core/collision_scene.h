@@ -50,9 +50,17 @@ class Scene;
 class AllowedCollisionMatrix
 {
 public:
-    AllowedCollisionMatrix() = default;
-    ~AllowedCollisionMatrix() = default;
-    AllowedCollisionMatrix(const AllowedCollisionMatrix& acm) { entries_ = acm.entries_; }
+    AllowedCollisionMatrix() {}
+    ~AllowedCollisionMatrix() {}
+    AllowedCollisionMatrix(const AllowedCollisionMatrix& acm) : entries_(acm.entries_) {}
+    AllowedCollisionMatrix& operator=(const AllowedCollisionMatrix& other)
+    {
+        if (this != &other)
+        {
+            entries_ = other.entries_;
+        }
+        return *this;
+    }
     inline void clear() { entries_.clear(); }
     inline bool hasEntry(const std::string& name) const { return entries_.find(name) == entries_.end(); }
     inline void setEntry(const std::string& name1, const std::string& name2) { entries_[name1].insert(name2); }

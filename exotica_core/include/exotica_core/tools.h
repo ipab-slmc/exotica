@@ -42,8 +42,15 @@
 #include <exotica_core/version.h>
 
 #include <geometric_shapes/shapes.h>
-#include <octomap/OcTree.h>
 #include <std_msgs/ColorRGBA.h>
+
+// TODO: Remove once OctoMap is updated.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Werror=deprecated-copy"
+
+#include <octomap/OcTree.h>
+
+#pragma GCC diagnostic pop
 
 /**
  * \brief A double-wrapper MACRO functionality for generating unique object names: The actual functionality is provided by EX_UNIQ (for 'exotica unique')

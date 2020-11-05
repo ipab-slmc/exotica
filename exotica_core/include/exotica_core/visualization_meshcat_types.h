@@ -152,7 +152,6 @@ struct ObjectData
 template <typename T>
 struct Object
 {
-    Object() = default;
     MetaData metadata = MetaData(4.5, "Object");
     ObjectData object;
     std::vector<Material> materials;
@@ -163,7 +162,6 @@ struct Object
 template <typename T>
 struct MeshObject
 {
-    MeshObject() = default;
     MetaData metadata = MetaData(4.5, "Object");
     T object;
     std::vector<Material> materials;
@@ -256,7 +254,7 @@ struct GeometryMesh : Geometry
 
         data.ptr = buffer.data();
         data.size = buffer.size();
-    };
+    }
 
     GeometryMesh(const GeometryMesh& other) : Geometry(other.type, other.uuid)
     {
@@ -267,20 +265,42 @@ struct GeometryMesh : Geometry
         format = other.format;
         data.ptr = buffer.data();
         data.size = buffer.size();
-    };
+    }
+
+    GeometryMesh& operator=(const GeometryMesh& other)
+    {
+        if (this != &other)
+        {
+            type = other.type;
+            uuid = other.uuid;
+            buffer = other.buffer;
+            url = other.url;
+            resources = other.resources;
+            matrix = other.matrix;
+            format = other.format;
+            data.ptr = buffer.data();
+            data.size = buffer.size();
+        }
+        return *this;
+    }
+
     std::vector<char> buffer;
     std::string file_name;
     std::string format;
     msgpack_raw_ref data;
     std::string url;
     std::map<std::string, std::string> resources;
-    std::vector<double> matrix = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+    std::vector<double> matrix = {1.0, 0.0, 0.0, 0.0,
+                                  0.0, 1.0, 0.0, 0.0,
+                                  0.0, 0.0, 1.0, 0.0,
+                                  0.0, 0.0, 0.0, 1.0};
     MSGPACK_DEFINE(uuid, type, format, resources, url, data, matrix)
 };
 
 struct ArrayFloat
 {
     ArrayFloat() = default;
+    ~ArrayFloat() = default;
 
     ArrayFloat(double* data_in, unsigned int size)
     {
@@ -341,9 +361,9 @@ struct GeometryMeshBufferData
     GeometryMeshBufferData(shapes::ShapePtr shape_in)
     {
         std::shared_ptr<shapes::Mesh> shape = std::static_pointer_cast<shapes::Mesh>(shape_in);
-        attributes["position"] = ArrayFloat(shape->vertices, shape->vertex_count * 3);
+        attributes.insert(std::make_pair<std::string, ArrayFloat>("position", ArrayFloat(shape->vertices, shape->vertex_count * 3)));
         if (shape->vertex_normals)
-            attributes["normal"] = ArrayFloat(shape->vertex_normals, shape->vertex_count * 3);
+            attributes.insert(std::make_pair<std::string, ArrayFloat>("normal", ArrayFloat(shape->vertex_normals, shape->vertex_count * 3)));
         index = ArrayInt(shape->triangles, shape->triangle_count * 3);
     }
 

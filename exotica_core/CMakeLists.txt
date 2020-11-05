@@ -154,7 +154,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverl
 
 ## Quick fixes to get Noetic to compile:
 # - ZMQ is using deprecated send() declarations - remove once fixed for Noetic
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations)
+# - -Wno-deprecated-copy needs to be appended here to avoid issues with pragmas for Melodic
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations -Wno-deprecated-copy)
 
 # TODO: if you have time, remove these ignored warnings and fix them
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-reorder)

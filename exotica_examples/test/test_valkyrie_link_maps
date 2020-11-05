@@ -17,7 +17,7 @@ class TestClass(unittest.TestCase):
         for key in true_output:
             if self.scene.controlled_joint_to_collision_link_map[key] != true_output[key]:
                 print('Different output for', key, 'True:', true_output[key], 'vs', 'Returned:', self.scene.controlled_joint_to_collision_link_map[key])
-                assert False
+                raise AssertionError("Different output.")
 
 
 if __name__ == '__main__':

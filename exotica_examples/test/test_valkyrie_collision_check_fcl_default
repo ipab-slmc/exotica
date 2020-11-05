@@ -17,16 +17,16 @@ class TestClass(unittest.TestCase):
         ik_scene = ik_problem.get_scene()
 
         # Check number of collision robot links
-        assert (len(ik_scene.get_collision_robot_links()) == 79)
+        np.testing.assert_equal(len(ik_scene.get_collision_robot_links()), 79)
 
         # Check number of collision world links
-        assert (len(ik_scene.get_collision_world_links()) == 0)
+        np.testing.assert_equal(len(ik_scene.get_collision_world_links()), 0)
 
         # Testing is_state_valid(True, 0.0) - with self-collision
-        assert (ik_scene.is_state_valid(True, 0.0) == True)
+        np.testing.assert_equal(ik_scene.is_state_valid(True, 0.0), True)
 
         # Testing is_state_valid(False, 0.0) - without self-collision
-        assert (ik_scene.is_state_valid(False, 0.0) == True)
+        np.testing.assert_equal(ik_scene.is_state_valid(False, 0.0), True)
 
 
 if __name__ == '__main__':

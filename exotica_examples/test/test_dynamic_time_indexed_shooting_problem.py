@@ -26,7 +26,7 @@ def check_state_cost_jacobian_at_t(problem, t):
         problem.update(x, u, t)
     J_solver = problem.get_state_cost_jacobian(t).copy()
     J_numdiff = np.zeros_like(J_solver)
-    assert J_numdiff.shape[0] == ds.ndx
+    np.testing.assert_equal(J_numdiff.shape[0], ds.ndx)
 
     eps = 1e-6
     for i in range(ds.ndx):
@@ -66,7 +66,8 @@ def check_state_cost_hessian_at_t(problem, t):
         problem.update(x, u, t)
     H_solver = problem.get_state_cost_hessian(t).copy()
     H_numdiff = np.zeros_like(H_solver)
-    assert H_numdiff.shape[0] == ds.ndx and H_numdiff.shape[1] == ds.ndx
+    np.testing.assert_equal(H_numdiff.shape[0], ds.ndx)
+    np.testing.assert_equal(H_numdiff.shape[1], ds.ndx)
 
     eps = 1e-6
     for i in range(ds.ndx):
@@ -108,7 +109,7 @@ def check_control_cost_jacobian_at_t(problem, t):
     problem.update(x, u, t)
     J_solver = problem.get_control_cost_jacobian(t).copy()
     J_numdiff = np.zeros_like(J_solver)
-    assert J_numdiff.shape[0] == ds.nu
+    np.testing.assert_equal(J_numdiff.shape[0], ds.nu)
 
     eps = 1e-6
     for i in range(ds.nu):
@@ -138,7 +139,8 @@ def check_control_cost_hessian_at_t(problem, t):
     problem.update(x, u, t)
     H_solver = problem.get_control_cost_hessian(t).copy()
     H_numdiff = np.zeros_like(H_solver)
-    assert H_numdiff.shape[0] == ds.nu and H_numdiff.shape[1] == ds.nu
+    np.testing.assert_equal(H_numdiff.shape[0], ds.nu)
+    np.testing.assert_equal(H_numdiff.shape[1], ds.nu)
 
     eps = 1e-6
     for i in range(ds.nu):

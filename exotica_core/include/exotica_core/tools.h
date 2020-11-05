@@ -46,7 +46,7 @@
 
 // TODO: Remove once OctoMap is updated.
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Werror=deprecated-copy"
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
 
 #include <octomap/OcTree.h>
 

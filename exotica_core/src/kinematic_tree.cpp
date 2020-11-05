@@ -37,10 +37,17 @@
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_model/robot_model.h>
 #include <octomap_msgs/Octomap.h>
-#include <octomap_msgs/conversions.h>
 #include <tf_conversions/tf_kdl.h>
 #include <kdl/frames_io.hpp>
 #include <kdl_parser/kdl_parser.hpp>
+
+// TODO: Remove once OctoMap is updated.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+
+#include <octomap_msgs/conversions.h>
+
+#pragma GCC diagnostic pop
 
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/server.h>

@@ -43,11 +43,13 @@ class TargetMarker:
         # create a grey box marker
         visual_marker = Marker()
         visual_marker.type = marker_shape
-        assert len(marker_size) == 3
+        if len(marker_size) != 3:
+            raise RuntimeError("Length of marker_size needs to be 3.")
         visual_marker.scale.x = marker_size[0]
         visual_marker.scale.y = marker_size[1]
         visual_marker.scale.z = marker_size[2]
-        assert len(marker_color) == 4
+        if len(marker_color) != 4:
+            raise RuntimeError("Length of marker_color needs to be 4.")
         visual_marker.color.r = marker_color[0]
         visual_marker.color.g = marker_color[1]
         visual_marker.color.b = marker_color[2]

@@ -13,7 +13,8 @@ def parseSceneFile(file_name, debug=False):
     objects = {}
 
     # Get name of scene
-    assert data[0][0] == "(" and data[0][-2:] == ")+"
+    if data[0][0] != "(" or data[0][-2:] != ")+":
+        raise RuntimeError("Invalid scene file - does not start with (SceneName)+.")
     sceneName = data[0].replace("(", "").replace(")+", "")
 
     if debug:
@@ -132,7 +133,8 @@ if __name__ == "__main__":
     sdf_file = os.path.abspath(sys.argv[2])
 
     # Check that scene exists
-    assert(os.path.exists(scene_file))
+    if not os.path.exists(scene_file):
+        raise RuntimeError("Scene file does not exist!")
     if os.path.exists(sdf_file):
         print("WARNING: SDF exists, will be overwritten.")
 

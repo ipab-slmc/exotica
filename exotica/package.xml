@@ -21,7 +21,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <exec_depend>exotica_aico_solver</exec_depend>
-  <exec_depend>exotica_collision_scene_fcl</exec_depend>
   <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>
   <exec_depend>exotica_core</exec_depend>
   <exec_depend>exotica_core_task_maps</exec_depend>

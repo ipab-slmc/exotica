@@ -61,7 +61,6 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    ScenePtr scene_;                     ///< Scene pointer.
     double backward_difference_params_;  ///< Binomial coefficient parameters.
     int N_;                              ///< Number of dofs for robot.
     Eigen::VectorXd q_;                  ///< Log of previous joint state.

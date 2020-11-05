@@ -55,7 +55,6 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    ScenePtr scene_;                         ///< Scene pointer.
     int N_;                                  ///< Number of dofs for robot.
     int two_times_N_;                        ///< Two multiplied by the number of dofs for robot (task space dimension).
     Eigen::VectorXd current_joint_state_;    ///< Log of current joint state.

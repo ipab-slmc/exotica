@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -73,9 +73,23 @@ struct TimeIndexedTask : public Task
 {
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
+
+    void Update(const TaskSpaceVector& big_Phi,
+                Eigen::MatrixXdRefConst big_dPhi_dx,
+                Eigen::MatrixXdRefConst big_dPhi_du,
+                HessianRefConst big_ddPhi_ddx,
+                HessianRefConst big_ddPhi_ddu,
+                HessianRefConst big_ddPhi_dxdu,
+                int t);
+    void Update(const TaskSpaceVector& big_Phi,
+                Eigen::MatrixXdRefConst big_dPhi_dx,
+                Eigen::MatrixXdRefConst big_dPhi_du,
+                int t);
+
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian, int t);
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, int t);
     void Update(const TaskSpaceVector& big_Phi, int t);
+
     void ReinitializeVariables(int _T, std::shared_ptr<PlanningProblem> _prob, const TaskSpaceVector& _Phi);
 
     inline void ValidateTimeIndex(int& t_in) const;
@@ -94,7 +108,12 @@ struct TimeIndexedTask : public Task
     std::vector<Eigen::VectorXd> ydiff;
     std::vector<TaskSpaceVector> Phi;
     std::vector<Hessian> hessian;
+    std::vector<Hessian> ddPhi_ddx;
+    std::vector<Hessian> ddPhi_ddu;
+    std::vector<Hessian> ddPhi_dxdu;
     std::vector<Eigen::MatrixXd> jacobian;
+    std::vector<Eigen::MatrixXd> dPhi_dx;
+    std::vector<Eigen::MatrixXd> dPhi_du;
     std::vector<Eigen::MatrixXd> S;
     int T;
 };

@@ -94,7 +94,7 @@ robot_model::RobotModelPtr Server::LoadModel(const std::string& name, const std:
         ROS_INFO_STREAM("Using robot_description at " << robot_description_param);
         model = robot_model_loader::RobotModelLoader(robot_description_param, false).getModel();
     }
-    else if ((urdf == "" || srdf == "") && IsRos())
+    else if ((urdf == "" && srdf == "") && IsRos())
     {
         model = robot_model_loader::RobotModelLoader(name, false).getModel();
     }
@@ -102,6 +102,11 @@ robot_model::RobotModelPtr Server::LoadModel(const std::string& name, const std:
     else if (PathExists(urdf) && PathExists(srdf))
     {
         model = LoadModelImpl(LoadFile(urdf), LoadFile(srdf));
+    }
+    // URDF loaded from file, SRDF empty
+    else if (PathExists(urdf) && srdf == "")
+    {
+        model = LoadModelImpl(LoadFile(urdf), srdf);
     }
     // URDF and SRDF are passed in as strings
     else if (urdf != "" && srdf != "")

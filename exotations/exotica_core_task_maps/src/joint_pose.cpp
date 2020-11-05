@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,42 +33,31 @@ REGISTER_TASKMAP_TYPE("JointPose", exotica::JointPose);
 
 namespace exotica
 {
-void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Wrong size of Phi!");
     for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
-        phi(i) = x(joint_map_[i]) - joint_ref_(i);
+        phi(i) = q(joint_map_[i]) - joint_ref_(i);
     }
 }
 
-void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (phi.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != static_cast<int>(joint_map_.size()) || jacobian.cols() != num_controlled_joints_) ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
-    jacobian.setZero();
     for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
-        phi(i) = x(joint_map_[i]) - joint_ref_(i);
+        phi(i) = q(joint_map_[i]) - joint_ref_(i);
         jacobian(i, joint_map_[i]) = 1.0;
     }
 }
 
-// void JointPose::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot)
-// {
-//     if (phi.rows() != joint_map_.size()) ThrowNamed("Wrong size of Phi!");
-//     if (jacobian.rows() != joint_map_.size() || jacobian.cols() != num_controlled_joints_) ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
-//     if (Jdot.rows() != joint_map_.size() || Jdot.cols() != num_controlled_joints_) ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
-//     jacobian.setZero();
-//     Jdot.setZero();
-//     for (int i = 0; i < joint_map_.size(); ++i)
-//     {
-//         phi(i) = x(joint_map_[i]) - joint_ref_(i);
-//         phidot(i) = x(joint_map_[i] + num_controlled_joints_) - joint_ref_(i + joint_map_.size());
-//         jacobian(i, joint_map_[i]) = 1.0;
-//         Jdot(i, joint_map_[i]) = 1.0;
-//     }
-// }
+void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    // Hessian is 0
+    Update(q, phi, jacobian);
+}
 
 void JointPose::AssignScene(ScenePtr scene)
 {
@@ -111,4 +100,23 @@ int JointPose::TaskSpaceDim()
 {
     return joint_map_.size();
 }
+
+const std::vector<int>& JointPose::get_joint_map() const
+{
+    return joint_map_;
+}
+
+const Eigen::VectorXd& JointPose::get_joint_ref() const
+{
+    return joint_ref_;
+}
+
+void JointPose::set_joint_ref(Eigen::VectorXdRefConst ref)
+{
+    if (ref.size() == joint_ref_.size())
+        joint_ref_ = ref;
+    else
+        ThrowPretty("Wrong size - expected " << joint_ref_.size() << ", but received " << ref.size());
+}
+
 }  // namespace exotica

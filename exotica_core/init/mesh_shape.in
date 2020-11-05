@@ -1,0 +1,7 @@
+class MeshShape
+
+extend <exotica_core/shape>
+
+Required std::string MeshFilePath;
+Optional Eigen::Vector3d Scale = Eigen::Vector3d::Ones();
+Optional std::string Type = "Mesh";  // DO NOT CHANGE

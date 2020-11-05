@@ -8,14 +8,13 @@
         <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
         <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
         <DynamicsSolver>
-          <QuadrotorDynamicsSolver dt="0.05" Integrator="RK4"/>
+          <QuadrotorDynamicsSolver dt="0.05"/>
         </DynamicsSolver>
       </Scene>
     </PlanningScene>
    
     <T>50</T>
     <tau>0.05</tau>
-    <dt>0.05</dt>
     <Q_rate>1e3</Q_rate>
     <R_rate>1</R_rate>
   </DynamicTimeIndexedShootingProblem>

@@ -18,6 +18,7 @@ set(CATKIN_DEPENDS
 
 ## system dependencies
 set(SYSTEM_DEPENDS
+  Boost
   EIGEN3
   TinyXML2
   ZeroMQ
@@ -73,6 +74,14 @@ AddInitializer(
   bounded_end_pose_problem
   dynamic_time_indexed_shooting_problem
   dynamics_solver
+  collision_scene
+
+  shape
+  box_shape
+  cylinder_shape
+  mesh_shape
+  octree_shape
+  sphere_shape
 )
 GenInitializers()
 
@@ -90,6 +99,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
   ${TinyXML2_INCLUDE_DIRS}
   ${ZeroMQ_INCLUDE_DIRS}
   ${MSGPACK_INCLUDE_DIRS}
@@ -105,6 +115,7 @@ add_library(${PROJECT_NAME}
   src/visualization_moveit.cpp
   src/visualization_meshcat.cpp
   src/scene.cpp
+  src/collision_scene.cpp
   src/trajectory.cpp
   src/property.cpp
   src/kinematic_tree.cpp
@@ -132,22 +143,23 @@ add_library(${PROJECT_NAME}
 
   ${exotica_core_BINARY_DIR}/generated/version.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 # mark all warnings as errors
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra) # -Werror 
+target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 # enable additional warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
+# These work too: -Wstrict-overflow=5 -Wswitch-default -Wundef)
 
 # TODO: if you have time, remove these ignored warnings and fix them
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-reorder -Wno-unused-but-set-variable)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-reorder)
 
 # Ignore Eigen::Tensor warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-ignored-attributes)
 
 # TODO: if you have even more time, uncomment these warnings and fix them :-)
 # https://stackoverflow.com/a/9862800
-#target_compile_options(${PROJECT_NAME} PRIVATE -pedantic -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef)
+# target_compile_options(${PROJECT_NAME} PRIVATE -pedantic -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel)
 
 ## Install
 install(TARGETS ${PROJECT_NAME}
@@ -162,4 +174,8 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_autodiff test/test_autodiff.cpp)
   target_link_libraries(test_autodiff ${catkin_LIBRARIES} ${PROJECT_NAME})
   add_dependencies(test_autodiff ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+
+  catkin_add_gtest(test_kinematics test/test_kinematics.cpp)
+  target_link_libraries(test_kinematics ${catkin_LIBRARIES} ${PROJECT_NAME})
+  add_dependencies(test_kinematics ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 endif()

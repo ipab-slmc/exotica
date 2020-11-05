@@ -9,6 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
 )
 
+AddInitializer(collision_scene_fcl)
+GenInitializers()
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(LIBFCL REQUIRED fcl)
@@ -37,7 +40,7 @@ target_link_libraries(${PROJECT_NAME}
   ${LIBFCL_LIBRARIES}
 )
 
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

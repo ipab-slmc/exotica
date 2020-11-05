@@ -34,6 +34,7 @@
 
 #include <exotica_core_task_maps/center_of_mass.h>
 #include <exotica_core_task_maps/collision_distance.h>
+#include <exotica_core_task_maps/control_regularization.h>
 #include <exotica_core_task_maps/distance.h>
 #include <exotica_core_task_maps/eff_axis_alignment.h>
 #include <exotica_core_task_maps/eff_box.h>
@@ -60,13 +61,17 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
 
     py::module::import("pyexotica");
 
+    py::class_<ControlRegularization, std::shared_ptr<ControlRegularization>, TaskMap>(module, "ControlRegularization")
+        .def_property_readonly("joint_map", &ControlRegularization::get_joint_map)
+        .def_property_readonly("joint_ref", &ControlRegularization::get_joint_ref);  // TODO: Make write-able
+
     py::class_<EffFrame, std::shared_ptr<EffFrame>, TaskMap>(module, "EffFrame")
-        .def_readonly("rotation_type", &EffFrame::rotation_type_);
+        .def_property_readonly("rotation_type", &EffFrame::get_rotation_type);
 
     py::class_<EffPosition, std::shared_ptr<EffPosition>, TaskMap>(module, "EffPosition");
 
     py::class_<EffOrientation, std::shared_ptr<EffOrientation>, TaskMap>(module, "EffOrientation")
-        .def_readonly("rotation_type", &EffOrientation::rotation_type_);
+        .def_property_readonly("rotation_type", &EffOrientation::get_rotation_type);
 
     py::class_<EffAxisAlignment, std::shared_ptr<EffAxisAlignment>, TaskMap>(module, "EffAxisAlignment")
         .def("get_axis", &EffAxisAlignment::GetAxis)
@@ -98,8 +103,8 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
     py::class_<Distance, std::shared_ptr<Distance>, TaskMap>(module, "Distance");
 
     py::class_<JointPose, std::shared_ptr<JointPose>, TaskMap>(module, "JointPose")
-        .def_readonly("joint_map", &JointPose::joint_map_)
-        .def_readwrite("joint_ref", &JointPose::joint_ref_);
+        .def_property_readonly("joint_map", &JointPose::get_joint_map)
+        .def_property("joint_ref", &JointPose::get_joint_ref, &JointPose::set_joint_ref);
 
     py::class_<JointTorqueMinimizationProxy, std::shared_ptr<JointTorqueMinimizationProxy>, TaskMap>(module, "JointTorqueMinimizationProxy")
         .def_property("h", &JointTorqueMinimizationProxy::get_h, &JointTorqueMinimizationProxy::set_h);

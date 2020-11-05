@@ -34,6 +34,10 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/16_kpiece_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/17_quadrotor_collision_avoidance.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/18_ilqr_pendulum.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/19_ddp_quadrotor_sphere.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/20_sparse_fddp_pendulum.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/21_sparse_fddp_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/22_boxfddp_cartpole.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -43,10 +47,11 @@ solver = exo.Setup.load_solver(configs[problem_idx])
 problem = solver.get_problem()
 solution = solver.solve()
 
-print('Solver terminated with: ', problem.termination_criterion)
+print('Solver terminated with:', problem.termination_criterion)
+print('Solver took:', solver.get_planning_time())
 if problem.termination_criterion == exo.TerminationCriterion.Divergence:
     print('Solver Diverged!')
-    exit(0)
+    # exit(0)
 
 if solution.shape[0] == 0:
     print('No solution found!')
@@ -54,6 +59,23 @@ if solution.shape[0] == 0:
 
 costs = problem.get_cost_evolution()
 import matplotlib.pyplot as plt
+
+# print(['{0:.3f}'.format(x[0]) for x in solution])
+
+# Controls
+plt.figure(figsize=(7, 7))
+plt.title('Solution (Controls)')
+plt.plot(solution)
+plt.grid()
+plt.hlines(0, 0, len(solution[:,0]))
+plt.show()
+
+# State
+plt.figure()
+plt.title('State')
+plt.plot(problem.X[:problem.get_scene().num_positions,:].T)
+plt.show()
+
 plt.figure()
 plt.plot(range(len(costs[1])), costs[1])
 plt.xlabel('Iteration')
@@ -63,8 +85,7 @@ plt.xlim(0, len(costs[1])-1)
 plt.grid()
 plt.show()
 
-
-visualization = exo.Visualization(problem.get_scene())
+visualization = exo.VisualizationMoveIt(problem.get_scene())
 visualization.display_trajectory(
     problem.X[:problem.num_positions, :].T
 )
@@ -79,8 +100,10 @@ while True:
         for t in range(problem.T - 1):
             update_start = time()
             u = solution[t,:]
-            # u = problem.U[:,t]
-            # print(u)
+            
+            # if np.abs(u) < 1:
+                # u = [0]
+            #print(u)
 
             # u = solver.get_feedback_control(
             #     problem.X[:,t], t

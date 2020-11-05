@@ -75,9 +75,11 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     //  4) Compute d, J
     double& d = phi(0);
     {
+        KDL::Frame arel, brel;
+        Eigen::MatrixXd J_a(6, scene_->GetKinematicTree().GetNumControlledJoints()), J_b(6, scene_->GetKinematicTree().GetNumControlledJoints());
         for (const auto& proxy : proxies)
         {
-            bool is_robot_to_robot = (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
+            bool is_robot_to_robot = (proxy.e1 != nullptr && proxy.e2 != nullptr) && (proxy.e1->is_robot_link || proxy.e1->closest_robot_link.lock()) && (proxy.e2->is_robot_link || proxy.e2->closest_robot_link.lock());
             double& margin = is_robot_to_robot ? robot_margin_ : world_margin_;
 
             if (proxy.distance < margin)
@@ -88,28 +90,37 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
                 if (updateJacobian)
                 {
                     // Jacobian
-                    KDL::Frame arel = KDL::Frame(proxy.e1->frame.Inverse(KDL::Vector(
-                        proxy.contact1(0), proxy.contact1(1), proxy.contact1(2))));
-                    KDL::Frame brel = KDL::Frame(proxy.e2->frame.Inverse(KDL::Vector(
-                        proxy.contact2(0), proxy.contact2(1), proxy.contact2(2))));
-
-                    if (!linear_)
+                    if (proxy.e1 != nullptr)
                     {
-                        Eigen::MatrixXd tmpJ = scene_->GetKinematicTree().Jacobian(
-                            proxy.e1, arel, nullptr, KDL::Frame());
-                        J += (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
-                        tmpJ = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr,
-                                                                   KDL::Frame());
-                        J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * tmpJ.topRows<3>());
+                        arel = KDL::Frame(proxy.e1->frame.Inverse(KDL::Vector(proxy.contact1.x(), proxy.contact1.y(), proxy.contact1.z())));
+                        J_a = scene_->GetKinematicTree().Jacobian(proxy.e1, arel, nullptr, KDL::Frame());
                     }
                     else
                     {
-                        Eigen::MatrixXd tmpJ = scene_->GetKinematicTree().Jacobian(
-                            proxy.e1, arel, nullptr, KDL::Frame());
-                        J += 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
-                        tmpJ = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr,
-                                                                   KDL::Frame());
-                        J -= 1 / margin * (proxy.normal1.transpose() * tmpJ.topRows<3>());
+                        arel = arel.Identity();
+                        J_a.setZero();
+                    }
+
+                    if (proxy.e2 != nullptr)
+                    {
+                        brel = KDL::Frame(proxy.e2->frame.Inverse(KDL::Vector(proxy.contact2.x(), proxy.contact2.y(), proxy.contact2.z())));
+                        J_b = scene_->GetKinematicTree().Jacobian(proxy.e2, brel, nullptr, KDL::Frame());
+                    }
+                    else
+                    {
+                        brel = brel.Identity();
+                        J_b.setZero();
+                    }
+
+                    if (!linear_)
+                    {
+                        J += (2. / (margin * margin)) * (proxy.normal1.transpose() * J_a.topRows<3>());
+                        J -= (2. / (margin * margin)) * (proxy.normal1.transpose() * J_b.topRows<3>());
+                    }
+                    else
+                    {
+                        J += 1 / margin * (proxy.normal1.transpose() * J_a.topRows<3>());
+                        J -= 1 / margin * (proxy.normal1.transpose() * J_b.topRows<3>());
                     }
                 }
             }

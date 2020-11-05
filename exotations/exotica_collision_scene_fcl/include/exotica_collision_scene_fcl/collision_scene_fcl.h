@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,12 @@
 #ifndef EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
 #define EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_
 
+#include <unordered_map>
+
 #include <exotica_core/collision_scene.h>
 #include <exotica_core/tools/conversions.h>
+
+#include <exotica_collision_scene_fcl/collision_scene_fcl_initializer.h>
 
 #include <fcl/BVH/BVH_model.h>
 #include <fcl/broadphase/broadphase.h>
@@ -46,7 +50,7 @@
 
 namespace exotica
 {
-class CollisionSceneFCL : public CollisionScene
+class CollisionSceneFCL : public CollisionScene, public Instantiable<CollisionSceneFCLInitializer>
 {
 public:
     struct CollisionData
@@ -91,11 +95,11 @@ private:
     std::shared_ptr<fcl::CollisionObject> ConstructFclCollisionObject(long i, std::shared_ptr<KinematicElement> element);
     static void CheckCollision(fcl::CollisionObject* o1, fcl::CollisionObject* o2, CollisionData* data);
 
-    std::map<std::string, std::shared_ptr<fcl::CollisionObject>> fcl_cache_;
+    std::unordered_map<std::string, std::shared_ptr<fcl::CollisionObject>> fcl_cache_;
 
     std::vector<fcl::CollisionObject*> fcl_objects_;
     std::vector<std::weak_ptr<KinematicElement>> kinematic_elements_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_COLLISION_SCENE_FCL_COLLISION_SCENE_FCL_H_

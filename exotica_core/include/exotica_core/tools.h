@@ -40,6 +40,9 @@
 #include <exotica_core/tools/timer.h>
 #include <exotica_core/tools/uncopyable.h>
 #include <exotica_core/version.h>
+
+#include <geometric_shapes/shapes.h>
+#include <octomap/OcTree.h>
 #include <std_msgs/ColorRGBA.h>
 
 /**
@@ -84,11 +87,15 @@ inline std_msgs::ColorRGBA GetColor(const Eigen::Vector4d& rgba)
 void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
              Eigen::VectorXd& vert);
 
+std::shared_ptr<octomap::OcTree> LoadOctree(const std::string& file_path);
+
+std::shared_ptr<shapes::Shape> LoadOctreeAsShape(const std::string& file_path);
+
 void SaveMatrix(std::string file_name,
                 const Eigen::Ref<const Eigen::MatrixXd> mat);
 
 template <typename T>
-std::vector<std::string> getKeys(std::map<std::string, T> map)
+std::vector<std::string> GetKeys(std::map<std::string, T> map)
 {
     std::vector<std::string> ret;
     for (auto& it : map) ret.push_back(it.first);
@@ -102,6 +109,17 @@ std::string ParsePath(const std::string& path);
 std::string LoadFile(const std::string& path);
 
 bool PathExists(const std::string& path);
+
+/// \brief Argument position.
+///        Used as parameter to refer to an argument.
+enum ArgumentPosition
+{
+    ARG0 = 0,
+    ARG1 = 1,
+    ARG2 = 2,
+    ARG3 = 3,
+    ARG4 = 4
+};
 }
 
 namespace

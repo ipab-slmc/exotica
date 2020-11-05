@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+    <AICOSolver Name="MySolver" Debug="0"/>
+
+    <UnconstrainedTimeIndexedProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <Trajectories>
+                    <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
+                </Trajectories>
+                <CollisionScene>
+                    <CollisionSceneFCLLatest Name="MyCollisionScene"/>
+                </CollisionScene>
+                <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <JointPose Name="Pose">
+                <JointRef>2.16939 1.313509 -2.2954 1.94413 -0.276843 0.567194 0</JointRef>
+            </JointPose>
+            <SmoothCollisionDistance Name="Collision">
+                <Debug>0</Debug>
+                <WorldMargin>0.2</WorldMargin>
+                <CheckSelfCollision>0</CheckSelfCollision>
+                <Linear>1</Linear>
+            </SmoothCollisionDistance>
+        </Maps>
+
+        <Cost>
+            <Task Task="Pose" Rho="1e3"/>
+            <Task Task="Collision" Rho="1"/>
+        </Cost>
+
+        <T>100</T>
+        <tau>0.03</tau>
+        <Wrate>1e3</Wrate>
+        <W> 7 6 5 4 3 2 1 </W>
+        <StartState>0 0.1 0 0 0 0 0</StartState>
+    </UnconstrainedTimeIndexedProblem>
+</PlannerDemoConfig>

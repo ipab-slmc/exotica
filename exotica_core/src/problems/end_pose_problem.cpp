@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ void EndPoseProblem::Instantiate(const EndPoseProblemInitializer& init)
         }
     }
     if (flags_ & KIN_J) jacobian = Eigen::MatrixXd(length_jacobian, N);
-    if (flags_ & KIN_J_DOT) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
+    if (flags_ & KIN_H) hessian.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
 
     if (init.LowerBound.rows() == N)
     {
@@ -159,15 +159,18 @@ void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
     scene_->Update(x, t_start);
     Phi.SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian.setZero();
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
         for (int i = 0; i < length_jacobian; ++i) hessian(i).setZero();
     for (int i = 0; i < tasks_.size(); ++i)
     {
         if (tasks_[i]->is_used)
         {
-            if (flags_ & KIN_J_DOT)
+            if (flags_ & KIN_H)
             {
-                tasks_[i]->Update(x, Phi.data.segment(tasks_[i]->start, tasks_[i]->length), jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian.segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x,
+                                  Phi.data.segment(tasks_[i]->start, tasks_[i]->length),
+                                  jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  hessian.segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else if (flags_ & KIN_J)
             {
@@ -179,7 +182,7 @@ void EndPoseProblem::Update(Eigen::VectorXdRefConst x)
             }
         }
     }
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         cost.Update(Phi, jacobian, hessian);
         inequality.Update(Phi, jacobian, hessian);

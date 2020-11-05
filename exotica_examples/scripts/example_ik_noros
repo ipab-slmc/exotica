@@ -4,6 +4,7 @@ import signal
 import pyexotica as exo
 from pyexotica.publish_trajectory import sig_int_handler
 from numpy import array
+import numpy as np
 import math
 from time import sleep
 
@@ -20,15 +21,13 @@ dt = 1.0/20.0
 t = 0.0
 q = array([0.0]*7)
 print('Publishing IK')
-timer = exo.Timer()
 signal.signal(signal.SIGINT, sig_int_handler)
 while True:
     try:
-        timer.reset()
         problem.set_goal('Position', figure_eight(t))
         problem.start_state = q
         q = solver.solve()[0]
-        print('Solution found in ' + str (timer.get_duration()) + 's ' + str(q))
+        print('Solution found in ' + str (solver.get_planning_time()) + 's ' + str(q) + ' in ' + str(len(problem.get_cost_evolution()[0])) + ' iterations')
         sleep(dt)
         t = t + dt
     except KeyboardInterrupt:

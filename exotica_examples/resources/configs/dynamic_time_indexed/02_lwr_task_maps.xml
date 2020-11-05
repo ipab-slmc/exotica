@@ -1,13 +1,14 @@
 <?xml version="1.0" ?>
 <DynamicTimeIndexedProblemConfig>-->
-    <AnalyticDDPSolver Name="ControlLimitedDDPSolver">
+    <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>1000</MaxIterations>
-        <!-- <UseSecondOrderDynamics>1</UseSecondOrderDynamics> -->
         <RegularizationRate>0.1</RegularizationRate>
     </AnalyticDDPSolver>
-    
+
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <!-- DerivativeOrder=2 required for unit tests -->
+        <DerivativeOrder>2</DerivativeOrder>
         <PlanningScene>
             <Scene>
                 <JointGroup>arm</JointGroup>
@@ -16,11 +17,17 @@
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
 
                 <DynamicsSolver>
-                    <PinocchioDynamicsSolver Name="solver" Integrator="RK1">
+                    <PinocchioDynamicsSolver Name="MyDynamicsSolver">
                         <ControlLimitsLow>-156</ControlLimitsLow>
                         <ControlLimitsHigh>156</ControlLimitsHigh>
-                        <dt>0.01</dt>
+                        <dt>0.05</dt>
                     </PinocchioDynamicsSolver>
+
+                    <!-- <PinocchioDynamicsSolverWithGravityCompensation Name="MyDynamicsSolver">
+                        <ControlLimitsLow>-20</ControlLimitsLow>
+                        <ControlLimitsHigh>20</ControlLimitsHigh>
+                        <dt>0.05</dt>
+                    </PinocchioDynamicsSolverWithGravityCompensation> -->
                 </DynamicsSolver>
             </Scene>
         </PlanningScene>
@@ -35,15 +42,14 @@
         </Maps>
 
         <Cost>
-            <!-- <Task Task="JL" Rho="0.01"/> -->
+            <Task Task="JL" Rho="0.01"/>
 
-            <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100.0"/>
+            <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100"/>
         </Cost>
-        
-        <T>150</T>
-        <tau>0.01</tau>
-        <dt>0.01</dt>
-        
+
+        <T>20</T>
+        <tau>0.05</tau>
+
         <!-- Penalize large velocities/ stay within control limits. -->
         <Q>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Q>
         <Q_rate>1e-5</Q_rate>
@@ -52,10 +58,10 @@
         <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf>
         <Qf_rate>100</Qf_rate>
 
-        <R_rate>1e-5</R_rate>
+        <R_rate>1e-8</R_rate>
         <StartState>1e-3 1e-3 1e-3  1e-3 1e-3 1e-3 1e-3 0 0 0 0 0 0 0</StartState>
         <GoalState> 0 0 0  0 0 0 0 0 0 0 0 0 0 0</GoalState>
 
-        <WarmStartWithInverseDynamics>1</WarmStartWithInverseDynamics>
+        <!-- <WarmStartWithInverseDynamics>1</WarmStartWithInverseDynamics> -->
     </DynamicTimeIndexedShootingProblem>
 </DynamicTimeIndexedProblemConfig>

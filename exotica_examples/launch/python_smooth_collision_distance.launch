@@ -1,0 +1,9 @@
+<launch>
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
+
+  <node launch-prefix="$(arg launch_prefix)" pkg="exotica_examples" type="example_smooth_collision_distance" name="example_smooth_collision_node_distance" output="screen" />
+
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find exotica_examples)/resources/rviz.rviz" />
+</launch>

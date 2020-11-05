@@ -5,7 +5,7 @@
   <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
-  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
   <author>Yiming Yang</author>
   <author>Michael Camilleri</author>
 

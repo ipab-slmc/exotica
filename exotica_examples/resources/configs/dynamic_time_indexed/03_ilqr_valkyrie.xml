@@ -5,25 +5,25 @@
     <ILQRSolver Name="ILQRSolver">
         <Debug>1</Debug>
         <MaxIterations>10</MaxIterations>
-        <!-- <RegularizationRate>1</RegularizationRate> -->
     </ILQRSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <DerivativeOrder>2</DerivativeOrder>
         <PlanningScene>
-        <Scene>
-            <JointGroup>whole_body</JointGroup>
-            <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
-            <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
-            <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+            <Scene>
+                <JointGroup>whole_body</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
 
-            <DynamicsSolver>
-                <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
-                    <dt>0.01</dt>
-                    <ControlLimitsLow>-5</ControlLimitsLow>
-                    <ControlLimitsHigh>5</ControlLimitsHigh>
-                </DoubleIntegratorDynamicsSolver>
-            </DynamicsSolver>
-        </Scene>
+                <DynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver">
+                        <dt>0.01</dt>
+                        <ControlLimitsLow>-5</ControlLimitsLow>
+                        <ControlLimitsHigh>5</ControlLimitsHigh>
+                    </DoubleIntegratorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
         </PlanningScene>
 
         <Maps>
@@ -73,10 +73,10 @@
             <Task Task="FootPosition" Rho="40"/>
             <Task Task="StraightBack" Rho="1"/>
             <!-- <Task Task="Pose" Rho="1e3"/> -->
-            
+
             <Task Task="Position" Goal="0.5 0 1" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10.0"/>
         </Cost>
-        
+
         <T>200</T>
         <tau>0.01</tau>
 

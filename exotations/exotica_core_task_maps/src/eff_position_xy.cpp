@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2019-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,24 @@ void EffPositionXY::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Ei
     {
         phi(i * 2) = kinematics[0].Phi(i).p[0];
         phi(i * 2 + 1) = kinematics[0].Phi(i).p[1];
-        jacobian.middleRows(i * 2, 2) = kinematics[0].jacobian[i].data.topRows<2>();
+        jacobian.middleRows<2>(i * 2) = kinematics[0].jacobian[i].data.topRows<2>();
+    }
+}
+
+void EffPositionXY::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    if (phi.rows() != kinematics[0].Phi.rows() * 2) ThrowNamed("Wrong size of Phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() * 2 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
+    {
+        phi(i * 2) = kinematics[0].Phi(i).p[0];
+        phi(i * 2 + 1) = kinematics[0].Phi(i).p[1];
+        jacobian.middleRows<2>(i * 2) = kinematics[0].jacobian[i].data.topRows<2>();
+
+        for (int j = 0; j < 2; ++j)
+        {
+            hessian(i * 2 + j).block(0, 0, jacobian.cols(), jacobian.cols()) = kinematics[0].hessian[i](j);
+        }
     }
 }
 

@@ -39,7 +39,14 @@ void FeasibilityDrivenDDPSolver::Instantiate(const FeasibilityDrivenDDPSolverIni
     base_parameters_ = AbstractDDPSolverInitializer(FeasibilityDrivenDDPSolverInitializer(parameters_));
 
     clamp_to_control_limits_in_forward_pass_ = base_parameters_.ClampControlsInForwardPass;
-    initial_regularization_rate_ = parameters_.RegularizationRate;
+    initial_regularization_rate_ = base_parameters_.RegularizationRate;
+    th_stepinc_ = base_parameters_.ThresholdRegularizationIncrease;
+    th_stepdec_ = base_parameters_.ThresholdRegularizationDecrease;
+
+    th_stop_ = parameters_.GradientToleranceConvergenceThreshold;
+    th_gradient_tolerance_ = parameters_.GradientTolerance;
+    th_acceptstep_ = parameters_.DescentStepAcceptanceThreshold;
+    th_acceptnegstep_ = parameters_.AscentStepAcceptanceThreshold;
 }
 
 void AbstractFeasibilityDrivenDDPSolver::AllocateData()
@@ -66,7 +73,7 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
     dx_.resize(T + 1);
 
     FuTVxx_p_.resize(T);
-    Quu_llt_.resize(T);
+    Quu_ldlt_.resize(T);
     Quuk_.resize(T);
 
     for (int t = 0; t < T; ++t)
@@ -94,7 +101,7 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
         dx_[t] = Eigen::VectorXd::Zero(NDX_);
 
         FuTVxx_p_[t] = Eigen::MatrixXd::Zero(NU_, NDX_);
-        Quu_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(NU_);
+        Quu_ldlt_[t] = Eigen::LDLT<Eigen::MatrixXd>(NU_);
         Quuk_[t] = Eigen::VectorXd(NU_);
     }
     Vxx_.back() = Eigen::MatrixXd::Zero(NDX_, NDX_);
@@ -104,6 +111,27 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
 
     FxTVxx_p_ = Eigen::MatrixXd::Zero(NDX_, NDX_);
     fTVxx_p_ = Eigen::VectorXd::Zero(NDX_);
+
+    Quu_inv_.assign(T, Eigen::MatrixXd(NU_, NU_));
+    fx_.assign(T, Eigen::MatrixXd(NDX_, NDX_));
+    fu_.assign(T, Eigen::MatrixXd(NDX_, NU_));
+
+    // If T changed, we need to re-allocate.
+    last_T_ = T_;
+}
+
+void AbstractFeasibilityDrivenDDPSolver::SpecifyProblem(PlanningProblemPtr pointer)
+{
+    AbstractDDPSolver::SpecifyProblem(pointer);
+
+    T_ = prob_->get_T();
+    dt_ = dynamics_solver_->get_dt();
+
+    NU_ = prob_->GetScene()->get_num_controls();
+    NX_ = prob_->GetScene()->get_num_state();              // State vector size
+    NDX_ = prob_->GetScene()->get_num_state_derivative();  // Tangent vector size
+
+    AllocateData();
 }
 
 void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
@@ -112,40 +140,43 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
     Timer planning_timer, backward_pass_timer, line_search_timer;
 
     T_ = prob_->get_T();
-    NU_ = prob_->get_num_controls();
-    NX_ = prob_->get_num_positions() + prob_->get_num_velocities();  // State vector size
-    NDX_ = 2 * prob_->get_num_velocities();                          // TODO: for now but this is incorrect // Tangent vector size
-    dt_ = dynamics_solver_->get_dt();
+    if (T_ != last_T_) AllocateData();
 
+    dt_ = dynamics_solver_->get_dt();
     control_limits_ = dynamics_solver_->get_control_limits();
 
-    AllocateData();
-    Eigen::MatrixXd X_warm = prob_->get_X();
-    X_warm.col(0) = prob_->ApplyStartState();  // Apply start state
-    auto U_warm = prob_->get_U();
+    const Eigen::MatrixXd& X_warm = prob_->get_X();
+    const Eigen::MatrixXd& U_warm = prob_->get_U();
     for (int t = 0; t < T_ - 1; ++t)
     {
         xs_[t] = X_warm.col(t);
         us_[t] = U_warm.col(t);
     }
+    xs_[0] = prob_->ApplyStartState();  // Apply start state
     xs_.back() = X_warm.col(T_ - 1);
     is_feasible_ = false;  // We assume the first iteration is always infeasible. TODO: Make this configurable
 
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
+    control_cost_evolution_.assign(GetNumberOfMaxIterations() + 1, std::numeric_limits<double>::quiet_NaN());
+    steplength_evolution_.assign(GetNumberOfMaxIterations() + 1, std::numeric_limits<double>::quiet_NaN());
+    regularization_evolution_.assign(GetNumberOfMaxIterations() + 1, std::numeric_limits<double>::quiet_NaN());
     prob_->PreUpdate();
     solution.resize(T_ - 1, NU_);
 
     // Initial roll-out to get initial cost
     cost_ = 0.0;
+    control_cost_ = 0.0;
     for (int t = 0; t < T_ - 1; ++t)
     {
         prob_->Update(xs_[t], us_[t], t);
-        cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+        control_cost_ += dt_ * prob_->GetControlCost(t);
+        cost_ += dt_ * prob_->GetStateCost(t);
     }
     // Reset shooting nodes so we can warm-start from state trajectory
     prob_->set_X(X_warm);
-    cost_ += prob_->GetStateCost(T_ - 1);
+    cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
     prob_->SetCostEvolution(0, cost_);
+    control_cost_evolution_.at(0) = control_cost_;
 
     xreg_ = std::max(regmin_, initial_regularization_rate_);
     ureg_ = std::max(regmin_, initial_regularization_rate_);
@@ -156,6 +187,9 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
     bool recalcDiff = true;
     int iter;
+
+    // double time_taken_setup_ = planning_timer.GetDuration();
+
     for (iter = 1; iter <= GetNumberOfMaxIterations(); ++iter)
     {
         // Check whether user interrupted (Ctrl+C)
@@ -174,7 +208,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             IncreaseRegularization();
             if (xreg_ == regmax_)
             {
-                WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
+                if (debug_) WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "State regularization exceeds maximum regularization: " << xreg_ << " > " << regmax_)
                 diverged = true;
                 break;
             }
@@ -187,7 +221,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
         if (diverged)
         {
-            WARNING("Terminating: Divergence in ComputeDirection / BackwardPass.");
+            if (debug_) WARNING("Terminating: Divergence in ComputeDirection / BackwardPass.");
             break;
         }
 
@@ -205,13 +239,15 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             dVexp_ = steplength_ * (d_[0] + 0.5 * steplength_ * d_[1]);
 
             if (dVexp_ >= 0)
-            {  // descend direction
+            {  // descent direction
                 if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_)
                 {
                     was_feasible_ = is_feasible_;
-                    SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
+                    SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1.0));
                     cost_ = cost_try_;
+                    control_cost_ = control_cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
+                    control_cost_evolution_.at(iter) = control_cost_;
                     recalcDiff = true;
                     break;
                 }
@@ -220,22 +256,28 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             {  // reducing the gaps by allowing a small increment in the cost value
                 if (dV_ > th_acceptnegstep_ * dVexp_)
                 {
-                    if (debug_) INFO_NAMED("FDDP", "Ascent direction: " << dV_ << " > " << th_acceptnegstep_ * dVexp_)
+                    // if (debug_) INFO_NAMED("FDDP", "Ascent direction: " << dV_ << " > " << th_acceptnegstep_ * dVexp_)
                     was_feasible_ = is_feasible_;
                     SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1));
                     cost_ = cost_try_;
+                    control_cost_ = control_cost_try_;
                     prob_->SetCostEvolution(iter, cost_);
+                    control_cost_evolution_.at(iter) = control_cost_;
                     break;
                 }
-                else
-                {
-                    if (debug_) INFO_NAMED("FDDP", "Ascent direction, but not accepted: " << dV_ << " < " << th_acceptnegstep_ * dVexp_)
-                }
+                // else
+                // {
+                //     if (debug_) INFO_NAMED("FDDP", "Ascent direction, but not accepted: " << dV_ << " < " << th_acceptnegstep_ * dVexp_)
+                // }
             }
 
             prob_->SetCostEvolution(iter, cost_);
+            control_cost_evolution_.at(iter) = control_cost_;
         }
         time_taken_forward_pass_ = line_search_timer.GetDuration();
+
+        steplength_evolution_.at(iter) = steplength_;
+        regularization_evolution_.at(iter) = xreg_;
 
         if (debug_)
         {
@@ -272,9 +314,13 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
         }
         CheckStoppingCriteria();
 
-        if (was_feasible_ && stop_ < th_stop_)
+        // Stop is only exactly zero if all dimensions of Qu_[t] have been
+        // artificially set to 0. This is e.g. the case for a Control-Limited
+        // variant (BoxFDDP). However, we do not want to stop at the first
+        // saturation of all dimensions.
+        if (was_feasible_ && stop_ < th_stop_ && stop_ != 0.0)
         {
-            HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Convergence: " << stop_ << " < " << th_stop_)
+            if (debug_) HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Convergence: " << stop_ << " < " << th_stop_)
             converged = true;
             break;
         }
@@ -284,20 +330,32 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             WARNING_NAMED("FeasibilityDrivenDDPSolver::Solve", "Terminating: Divergence in ForwardPass.");
             break;
         }
+
+        // Check gradient tolerance
+        if (was_feasible_ && std::abs(-d_[1]) < th_gradient_tolerance_)
+        {
+            if (debug_) HIGHLIGHT_NAMED("FeasibilityDrivenDDPSolver::Solve", "Gradient tolerance: " << -d_[1] << " < " << th_gradient_tolerance_)
+            prob_->termination_criterion = TerminationCriterion::GradientTolerance;
+            break;
+        }
+
+        prob_->OnSolverIterationEnd();
     }
 
     if (diverged) prob_->termination_criterion = TerminationCriterion::Divergence;
     if (converged) prob_->termination_criterion = TerminationCriterion::Convergence;
-    if (!converged && iter == GetNumberOfMaxIterations()) prob_->termination_criterion = TerminationCriterion::IterationLimit;
+    if (!converged && iter == GetNumberOfMaxIterations() + 1) prob_->termination_criterion = TerminationCriterion::IterationLimit;
 
     // Store the best solution found over all iterations
     for (int t = 0; t < T_ - 1; ++t)
     {
         solution.row(t) = us_[t].transpose();
-        prob_->Update(us_[t], t);
+        // prob_->Update(us_[t], t);
     }
 
     planning_time_ = planning_timer.GetDuration();
+
+    // HIGHLIGHT(std::setprecision(4) << "Setup: " << time_taken_setup_ * 1e3 << "\tBwd: " << time_taken_backward_pass_ * 1e3 << "\tFwd: " << time_taken_forward_pass_ * 1e3 << "\tSolve = " << (planning_time_ - time_taken_setup_)*1e3 << "\talpha=" << steplength_)
 }
 
 void AbstractFeasibilityDrivenDDPSolver::IncreaseRegularization()
@@ -421,6 +479,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         ThrowPretty("Invalid argument: invalid step length, value should be between 0. to 1. - got=" << steplength);
     }
     cost_try_ = 0.;
+    control_cost_try_ = 0.;
     xnext_ = prob_->get_X(0);
     for (int t = 0; t < T_ - 1; ++t)
     {
@@ -444,7 +503,9 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
 
         prob_->Update(xs_try_[t], us_try_[t], t);  // Performs integration and update of cost
         xnext_ = prob_->get_X(t + 1);
-        cost_try_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+
+        control_cost_try_ += dt_ * prob_->GetControlCost(t);
+        cost_try_ += dt_ * prob_->GetStateCost(t);
 
         if (IsNaN(cost_try_))
         {
@@ -453,7 +514,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         }
         if (IsNaN(xnext_.lpNorm<Eigen::Infinity>()))
         {
-            WARNING_NAMED("NaN in ForwardPass", "forward_error - xnext_ isn't finite at t=" << t);
+            WARNING_NAMED("NaN in ForwardPass", "forward_error - xnext_ isn't finite at t=" << t << ": x=" << xs_try_[t].transpose() << ", u=" << us_try_[t].transpose() << ", xnext=" << xnext_.transpose());
             return;
         }
     }
@@ -468,7 +529,7 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
         prob_->GetScene()->GetDynamicsSolver()->Integrate(xnext_, fs_.back() * (steplength - 1), 1., xs_try_.back());
     }
     prob_->UpdateTerminalState(xs_try_.back());
-    cost_try_ += prob_->GetStateCost(T_ - 1);
+    cost_try_ += prob_->GetStateCost(T_ - 1) + control_cost_try_;
 
     if (IsNaN(cost_try_))
     {
@@ -489,13 +550,15 @@ bool AbstractFeasibilityDrivenDDPSolver::ComputeDirection(const bool recalcDiff)
 double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
 {
     cost_ = 0;
+    control_cost_ = 0;
     // Running cost
     for (int t = 0; t < T_ - 1; ++t)
     {
-        cost_ += dt_ * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
+        control_cost_ += dt_ * prob_->GetControlCost(t);
+        cost_ += dt_ * prob_->GetStateCost(t);
     }
     // Terminal cost
-    cost_ += prob_->GetStateCost(T_ - 1);
+    cost_ += prob_->GetStateCost(T_ - 1) + control_cost_;
 
     if (!is_feasible_)
     {
@@ -535,22 +598,23 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
         const Eigen::MatrixXd& Vxx_p = Vxx_[t + 1];
         const Eigen::VectorXd& Vx_p = Vx_[t + 1];
 
-        Qxx_[t] = dt_ * prob_->GetStateCostHessian(t);
-        Qxu_[t] = dt_ * prob_->GetStateControlCostHessian().transpose();
-        Quu_[t] = dt_ * prob_->GetControlCostHessian();
-        Qx_[t] = dt_ * prob_->GetStateCostJacobian(t);
-        Qu_[t] = dt_ * prob_->GetControlCostJacobian(t);
+        Qxx_[t].noalias() = dt_ * prob_->GetStateCostHessian(t);
+        Qxu_[t].noalias() = dt_ * prob_->GetStateControlCostHessian().transpose();
+        Quu_[t].noalias() = dt_ * prob_->GetControlCostHessian(t);
+        Qx_[t].noalias() = dt_ * prob_->GetStateCostJacobian(t);
+        Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t);
 
-        fx_ = dt_ * dynamics_solver_->fx(xs_[t], us_[t]) + Eigen::MatrixXd::Identity(NDX_, NDX_);
-        fu_ = dt_ * dynamics_solver_->fu(xs_[t], us_[t]);
+        dynamics_solver_->ComputeDerivatives(xs_[t], us_[t]);
+        fx_[t].noalias() = dynamics_solver_->get_Fx();
+        fu_[t].noalias() = dynamics_solver_->get_Fu();
 
-        FxTVxx_p_.noalias() = fx_.transpose() * Vxx_p;
-        FuTVxx_p_[t].noalias() = fu_.transpose() * Vxx_p;
-        Qxx_[t].noalias() += FxTVxx_p_ * fx_;
-        Qxu_[t].noalias() += FxTVxx_p_ * fu_;
-        Quu_[t].noalias() += FuTVxx_p_[t] * fu_;
-        Qx_[t].noalias() += fx_.transpose() * Vx_p;
-        Qu_[t].noalias() += fu_.transpose() * Vx_p;
+        FxTVxx_p_.noalias() = fx_[t].transpose() * Vxx_p;
+        FuTVxx_p_[t].noalias() = fu_[t].transpose() * Vxx_p;
+        Qxx_[t].noalias() += FxTVxx_p_ * fx_[t];
+        Qxu_[t].noalias() += FxTVxx_p_ * fu_[t];
+        Quu_[t].noalias() += FuTVxx_p_[t] * fu_[t];
+        Qx_[t].noalias() += fx_[t].transpose() * Vx_p;
+        Qu_[t].noalias() += fu_[t].transpose() * Vx_p;
 
         if (!std::isnan(ureg_))
         {
@@ -587,10 +651,12 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 
         if (IsNaN(Vx_[t].lpNorm<Eigen::Infinity>()))
         {
+            HIGHLIGHT("Vx_[" << t << "] is NaN: " << Vx_[t].transpose());
             return false;
         }
         if (IsNaN(Vxx_[t].lpNorm<Eigen::Infinity>()))
         {
+            HIGHLIGHT("Vxx_[" << t << "] is NaN");
             return false;
         }
     }
@@ -599,16 +665,36 @@ bool AbstractFeasibilityDrivenDDPSolver::BackwardPassFDDP()
 
 void AbstractFeasibilityDrivenDDPSolver::ComputeGains(const int t)
 {
-    Quu_llt_[t].compute(Quu_[t]);
-    const Eigen::ComputationInfo& info = Quu_llt_[t].info();
-    if (info != Eigen::Success)
+    // Quu_inv_[t].noalias() = Quu_[t].inverse();
+    // K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
+    // k_[t].noalias() = Quu_inv_[t] * Qu_[t];
+    // return;
+
+    while (true)
     {
-        ThrowPretty("backward_error - error in Cholesky decomposition");
+        Quu_ldlt_[t].compute(Quu_[t]);
+        const Eigen::ComputationInfo& info = Quu_ldlt_[t].info();
+        if (info != Eigen::Success)
+        {
+            HIGHLIGHT_NAMED("ComputeGains", "Cholesky failed for reg=" << ureg_ << ", Quu_[t]=\n"
+                                                                       << Quu_[t])
+            Quu_[t].diagonal().array() -= ureg_;
+            IncreaseRegularization();
+            Quu_[t].diagonal().array() += ureg_;
+            if (ureg_ == regmax_) ThrowPretty("backward_error - error in Cholesky decomposition\n"
+                                              << Quu_[t]);
+            // ThrowPretty("backward_error - error in Cholesky decomposition\n"
+            //             << Quu_[t]);
+        }
+        else
+        {
+            break;
+        }
     }
     K_[t] = Qxu_[t].transpose();
-    Quu_llt_[t].solveInPlace(K_[t]);
+    Quu_ldlt_[t].solveInPlace(K_[t]);
     k_[t] = Qu_[t];
-    Quu_llt_[t].solveInPlace(k_[t]);
+    Quu_ldlt_[t].solveInPlace(k_[t]);
 }
 
 }  // namespace exotica

@@ -58,7 +58,7 @@ enum KinematicRequestFlags
     KIN_FK = 0,
     KIN_J = 2,
     KIN_FK_VEL = 4,
-    KIN_J_DOT = 8
+    KIN_H = 8
 };
 
 enum JointLimitType
@@ -120,7 +120,7 @@ struct KinematicResponse
     ArrayFrame Phi;
     ArrayTwist Phi_dot;
     ArrayJacobian jacobian;
-    ArrayJacobian jacobian_dot;
+    ArrayHessian hessian;
 };
 
 /// @brief The KinematicSolution is created from - and maps into - a KinematicResponse.
@@ -136,7 +136,7 @@ public:
     Eigen::Map<ArrayFrame> Phi{nullptr, 0};
     Eigen::Map<ArrayTwist> Phi_dot{nullptr, 0};
     Eigen::Map<ArrayJacobian> jacobian{nullptr, 0};
-    Eigen::Map<ArrayJacobian> jacobian_dot{nullptr, 0};
+    Eigen::Map<ArrayHessian> hessian{nullptr, 0};
 };
 
 class KinematicTree : public Uncopyable
@@ -166,7 +166,7 @@ public:
     const Eigen::VectorXd& GetVelocityLimits() const { return velocity_limits_; }
     int GetNumControlledJoints() const;
     int GetNumModelJoints() const;
-    void PublishFrames();
+    void PublishFrames(const std::string& tf_prefix = "exotica");
 
     const std::vector<std::string>& GetControlledJointNames() const
     {
@@ -197,7 +197,8 @@ public:
     KDL::Frame FK(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
     Eigen::MatrixXd Jacobian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const;
     Eigen::MatrixXd Jacobian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
-    Eigen::MatrixXd Jdot(const KDL::Jacobian& jacobian);
+    exotica::Hessian Hessian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const;
+    exotica::Hessian Hessian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const;
 
     void ResetModel();
     std::shared_ptr<KinematicElement> AddElement(const std::string& name, const Eigen::Isometry3d& transform, const std::string& parent = "", shapes::ShapeConstPtr shape = shapes::ShapeConstPtr(nullptr), const KDL::RigidBodyInertia& inertia = KDL::RigidBodyInertia::Zero(), const Eigen::Vector4d& color = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), const std::vector<VisualElement>& visual = {}, bool is_controlled = false);
@@ -224,7 +225,7 @@ public:
     std::vector<std::string> GetKinematicChainLinks(const std::string& begin, const std::string& end) const;
 
     void SetModelState(Eigen::VectorXdRefConst x);
-    void SetModelState(std::map<std::string, double> x);
+    void SetModelState(const std::map<std::string, double>& x);
     Eigen::VectorXd GetControlledState() const;
 
     const std::vector<std::weak_ptr<KinematicElement>>& GetTree() const { return tree_; }
@@ -232,6 +233,7 @@ public:
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetTreeMap() const { return tree_map_; }
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetCollisionTreeMap() const { return collision_tree_map_; }
     bool DoesLinkWithNameExist(std::string name) const;  //!< Checks whether a link with this name exists in any of the trees
+    std::shared_ptr<KinematicElement> FindKinematicElementByName(const std::string& frame_name);
 
     const std::vector<std::weak_ptr<KinematicElement>>& GetControlledJoints() const { return controlled_joints_; }
     const std::map<std::string, std::weak_ptr<KinematicElement>>& GetControlledJointsMap() const { return controlled_joints_map_; }
@@ -255,8 +257,8 @@ private:
     void UpdateFK();
     void UpdateJ();
     void ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const;
-    void ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const;
-    void UpdateJdot();
+    void UpdateH();
+    void ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobian, exotica::Hessian& hessian) const;
 
     // Joint limits
     // TODO: Add effort limits
@@ -298,6 +300,7 @@ private:
     std::vector<tf::StampedTransform> debug_tree_;
     std::vector<tf::StampedTransform> debug_frames_;
     ros::Publisher shapes_pub_;
+    ros::Publisher octomap_pub_;
     bool debug_scene_changed_;
     visualization_msgs::MarkerArray marker_array_msg_;
     std::string name_;

@@ -61,11 +61,10 @@ public:
     int TaskSpaceDim() override;
 
 private:
-    ScenePtr scene_;                     ///< Scene pointer.
-    double backward_difference_params_;  ///< Binomial cooeficient parameters.
+    double backward_difference_params_;  ///< Binomial coefficient parameters.
     int N_;                              ///< Number of dofs for robot.
     Eigen::VectorXd q_;                  ///< Log of previous joint state.
-    Eigen::VectorXd qbd_;                ///< x+qbd_ is a simplifed estimate of the first time derivative.
+    Eigen::VectorXd qbd_;                ///< x+qbd_ is a simplified estimate of the first time derivative.
     Eigen::MatrixXd I_;                  ///< Identity matrix.
 };
 }

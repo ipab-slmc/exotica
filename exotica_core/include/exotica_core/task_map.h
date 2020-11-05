@@ -55,11 +55,21 @@ public:
     virtual void InstantiateBase(const Initializer& init);
 
     virtual void AssignScene(ScenePtr scene);
-    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi) = 0;
-    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian);
-    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian);
-    virtual int TaskSpaceDim() = 0;
 
+    // Kinematic-only task maps (traditional) use the following update methods:
+    // x renamed to q in declaration: configuration only
+    virtual void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) = 0;
+    virtual void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian);
+    virtual void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian);
+
+    //------------- New TaskMap API -------------
+    // x => full state of q,v
+    // u => controls
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi);
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du);
+    virtual void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu);
+
+    virtual int TaskSpaceDim() = 0;
     virtual int TaskSpaceJacobianDim() { return TaskSpaceDim(); }
     virtual void PreUpdate() {}
     virtual std::vector<TaskVectorEntry> GetLieGroupIndices() { return std::vector<TaskVectorEntry>(); }

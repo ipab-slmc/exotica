@@ -38,9 +38,9 @@ namespace exotica
 //  * ///////////////////////////// Property //////////////////////////////////////
 
 boost::any Property::Get() const { return value_; }
-Property::Property(std::string prop_name) : name_(prop_name), required_(true) {}
-Property::Property(std::string prop_name, bool is_required) : name_(prop_name), required_(is_required) {}
-Property::Property(std::string prop_name, bool is_required, boost::any val) : name_(prop_name), required_(is_required) { value_ = val; }
+Property::Property(const std::string& prop_name) : name_(prop_name), required_(true) {}
+Property::Property(const std::string& prop_name, bool is_required) : name_(prop_name), required_(is_required) {}
+Property::Property(const std::string& prop_name, bool is_required, boost::any val) : name_(prop_name), required_(is_required) { value_ = val; }
 bool Property::IsRequired() const { return required_; }
 bool Property::IsSet() const { return !value_.empty(); }
 bool Property::IsStringType() const { return value_.type() == typeid(std::string); }
@@ -60,15 +60,15 @@ Initializer::Initializer()
 {
 }
 
-Initializer::Initializer(std::string name) : name_(name)
+Initializer::Initializer(const std::string& name) : name_(name)
 {
 }
 
-Initializer::Initializer(std::string name, std::map<std::string, boost::any> properties) : name_(name)
+Initializer::Initializer(const std::string& name, const std::map<std::string, boost::any>& properties) : name_(name)
 {
     for (auto& prop : properties)
     {
-        properties_.emplace(prop.first, Property(prop.first, true, prop.second));
+        AddProperty(Property(prop.first, true, prop.second));
     }
 }
 
@@ -79,31 +79,39 @@ std::string Initializer::GetName() const
 
 void Initializer::AddProperty(const Property& prop)
 {
-    properties_.emplace(prop.GetName(), prop);
+    if (HasProperty(prop.GetName()))
+    {
+        WARNING("Property '" << prop.GetName() << "' already added - overriding.");
+        SetProperty(prop.GetName(), prop.Get());
+    }
+    else
+    {
+        properties_.emplace(prop.GetName(), prop);
+    }
 }
 
-bool Initializer::HasProperty(std::string name) const
+bool Initializer::HasProperty(const std::string& name) const
 {
     return properties_.find(name) != properties_.end();
 }
 
-boost::any Initializer::GetProperty(std::string name) const
+boost::any Initializer::GetProperty(const std::string& name) const
 {
     return properties_.at(name).Get();
 }
 
-void Initializer::SetProperty(std::string name, boost::any value)
+void Initializer::SetProperty(const std::string& name, boost::any value)
 {
     properties_.at(name).Set(value);
 }
 
-void Initializer::SetName(std::string name)
+void Initializer::SetName(const std::string& name)
 {
     name_ = name;
 }
 
 std::vector<std::string> Initializer::GetPropertyNames() const
 {
-    return getKeys(properties_);
+    return GetKeys(properties_);
 }
-}
+}  // namespace exotica

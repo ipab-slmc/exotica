@@ -12,6 +12,7 @@ AddInitializer(
   avoid_look_at_sphere
   center_of_mass
   continuous_joint_pose
+  control_regularization
   interaction_mesh
   eff_position
   eff_position_xy
@@ -42,6 +43,7 @@ AddInitializer(
   manipulability
 
   collision_distance
+  variable_size_collision_distance
   smooth_collision_distance
   sum_of_penetrations
 )
@@ -62,6 +64,7 @@ set(SOURCES
     src/avoid_look_at_sphere.cpp  
     src/center_of_mass.cpp
     src/continuous_joint_pose.cpp
+    src/control_regularization.cpp
     src/interaction_mesh.cpp
     src/eff_position.cpp
     src/eff_position_xy.cpp
@@ -81,6 +84,7 @@ set(SOURCES
     src/sphere_collision.cpp
     src/collision_check.cpp
     src/collision_distance.cpp
+    src/variable_size_collision_distance.cpp
     src/smooth_collision_distance.cpp
     src/sum_of_penetrations.cpp
     src/quasi_static.cpp

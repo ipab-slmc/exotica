@@ -5,7 +5,7 @@
   <description>Kinodynamic Control Solvers from OMPL</description>
 
   <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
-  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
   <author>Traiko Dinev</author>
 
   <license>BSD</license>

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,28 +33,9 @@ REGISTER_TASKMAP_TYPE("EffFrame", exotica::EffFrame);
 
 namespace exotica
 {
-void EffFrame::Instantiate(const EffFrameInitializer &init)
+void EffFrame::Instantiate(const EffFrameInitializer& init)
 {
-    if (init.Type == "Quaternion")
-    {
-        rotation_type_ = RotationType::QUATERNION;
-    }
-    else if (init.Type == "ZYX")
-    {
-        rotation_type_ = RotationType::ZYX;
-    }
-    else if (init.Type == "ZYZ")
-    {
-        rotation_type_ = RotationType::ZYZ;
-    }
-    else if (init.Type == "AngleAxis")
-    {
-        rotation_type_ = RotationType::ANGLE_AXIS;
-    }
-    else if (init.Type == "Matrix")
-    {
-        rotation_type_ = RotationType::MATRIX;
-    }
+    rotation_type_ = GetRotationTypeFromString(init.Type);
     small_stride_ = GetRotationTypeLength(rotation_type_);
     big_stride_ = small_stride_ + 3;
 }
@@ -74,9 +55,7 @@ void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
     if (phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi(i * big_stride_) = kinematics[0].Phi(i).p[0];
-        phi(i * big_stride_ + 1) = kinematics[0].Phi(i).p[1];
-        phi(i * big_stride_ + 2) = kinematics[0].Phi(i).p[2];
+        phi.segment<3>(i * big_stride_) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
     }
 }
@@ -87,11 +66,26 @@ void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::
     if (jacobian.rows() != kinematics[0].jacobian.rows() * 6 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        phi(i * big_stride_) = kinematics[0].Phi(i).p[0];
-        phi(i * big_stride_ + 1) = kinematics[0].Phi(i).p[1];
-        phi(i * big_stride_ + 2) = kinematics[0].Phi(i).p[2];
+        phi.segment<3>(i * big_stride_) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
         phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
-        jacobian.middleRows(i * 6, 6) = kinematics[0].jacobian[i].data;
+        jacobian.middleRows<6>(i * 6) = kinematics[0].jacobian[i].data;
+    }
+}
+
+void EffFrame::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    if (phi.rows() != kinematics[0].Phi.rows() * big_stride_) ThrowNamed("Wrong size of Phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() * 6 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
+    {
+        phi.segment<3>(i * big_stride_) = Eigen::Map<Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
+        phi.segment(i * big_stride_ + 3, small_stride_) = SetRotation(kinematics[0].Phi(i).M, rotation_type_);
+        jacobian.middleRows<6>(i * 6) = kinematics[0].jacobian[i].data;
+
+        for (int j = 0; j < 6; ++j)
+        {
+            hessian(i * 6 + j).block(0, 0, jacobian.cols(), jacobian.cols()) = kinematics[0].hessian[i](j);
+        }
     }
 }
 
@@ -104,4 +98,10 @@ int EffFrame::TaskSpaceJacobianDim()
 {
     return kinematics[0].Phi.rows() * 6;
 }
+
+const RotationType& EffFrame::get_rotation_type() const
+{
+    return rotation_type_;
+}
+
 }  // namespace exotica

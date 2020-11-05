@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -50,28 +50,65 @@ int JointLimit::TaskSpaceDim()
     return N;
 }
 
-void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void JointLimit::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
-    phi.setZero();
 
-    const Eigen::MatrixXd limits = scene_->GetKinematicTree().GetJointLimits();
+    const Eigen::MatrixXd& limits = scene_->GetKinematicTree().GetJointLimits();
     const Eigen::VectorXd& low_limits = limits.col(0);
     const Eigen::VectorXd& high_limits = limits.col(1);
     const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);
 
     // apply lower bounds
-    phi = (x.array() < (low_limits + tau).array()).select(x - low_limits - tau, phi);
+    phi = (q.array() < (low_limits + tau).array()).select(q - low_limits - tau, phi);
     // apply higher bounds
-    phi = (x.array() > (high_limits - tau).array()).select(x - high_limits + tau, phi);
+    phi = (q.array() > (high_limits - tau).array()).select(q - high_limits + tau, phi);
 }
 
-void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void JointLimit::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    phi.setZero();
-    Update(x, phi);
-
     if (jacobian.rows() != N || jacobian.cols() != N) ThrowNamed("Wrong size of jacobian! " << N);
-    jacobian = Eigen::MatrixXd::Identity(N, N);
+    Update(q, phi);
+
+    // The jacobian is piece-wise: It's 0 when within limits, and 1 when outside.
+    const Eigen::MatrixXd& limits = scene_->GetKinematicTree().GetJointLimits();
+    const Eigen::VectorXd& low_limits = limits.col(0);
+    const Eigen::VectorXd& high_limits = limits.col(1);
+    const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);
+    for (int i = 0; i < N; i++)
+    {
+        if (q(i) >= low_limits(i) + tau(i) && q(i) <= high_limits(i) - tau(i))
+        {
+            jacobian(i, i) = 0;
+        }
+        else
+        {
+            jacobian(i, i) = 1;
+        }
+    }
 }
+
+void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    if (hessian.size() != N) ThrowNamed("Wrong size of hessian! " << N);
+    // Hessian is 0.
+    Update(x, phi, jacobian);
+}
+
+void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi)
+{
+    Update(x.head(scene_->get_num_positions()), phi);
+}
+
+void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du)
+{
+    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(N, N));
+}
+
+void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
+{
+    // Hessian is 0.
+    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(N, N));
+}
+
 }  // namespace exotica

@@ -22,7 +22,7 @@ def get_problem_initializer(collision_scene, URDF):
     return ('exotica/UnconstrainedEndPoseProblem',
             {'Name': 'TestProblem',
              'PlanningScene': [('exotica/Scene',
-                                {'CollisionScene': collision_scene,
+                                {'CollisionScene': [(collision_scene, {'Name': 'MyCollisionScene'})],
                                  'JointGroup': 'group1',
                                  'Name': 'TestScene',
                                  'Debug': '0',
@@ -44,12 +44,12 @@ def test_sphere_vs_sphere_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_sphere_vs_primitive_sphere_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
+    np.testing.assert_equal(len(p), 1)
     np.testing.assert_almost_equal(p[0].distance, 1.)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([0.5, 0, 0])
@@ -68,21 +68,21 @@ def test_sphere_vs_sphere_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_sphere_vs_primitive_sphere_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -.4, atol=PENETRATING_DISTANCE_ATOL))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -.4, atol=PENETRATING_DISTANCE_ATOL)
     expected_contact_1 = np.array([0.2, 0, 0])
     expected_contact_2 = np.array([-0.2, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_sphere_vs_primitive_sphere_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -92,21 +92,21 @@ def test_sphere_vs_box_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_sphere_vs_primitive_box_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.5))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.5)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([1, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_sphere_vs_primitive_box_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -116,21 +116,21 @@ def test_sphere_vs_box_touching(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_sphere_vs_primitive_box_touching: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 0.))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 0.)
     expected_contact_1 = np.array([0, 0, 0])
     expected_contact_2 = np.array([0, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_sphere_vs_primitive_box_touching: _distance, Contact Points, Normals: PASSED')
 
 
@@ -140,21 +140,21 @@ def test_sphere_vs_box_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_sphere_vs_primitive_box_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -0.4, atol=PENETRATING_DISTANCE_ATOL))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -0.4, atol=PENETRATING_DISTANCE_ATOL)
     expected_contact_1 = np.array([0.2, 0, 0])
     expected_contact_2 = np.array([-0.2, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_sphere_vs_primitive_box_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -164,21 +164,21 @@ def test_sphere_vs_cylinder_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_sphere_vs_primitive_cylinder_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.5))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.5)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([1, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_sphere_vs_primitive_cylinder_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -188,21 +188,21 @@ def test_sphere_vs_cylinder_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_sphere_vs_primitive_cylinder_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -0.4, atol=PENETRATING_DISTANCE_ATOL))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -0.4, atol=PENETRATING_DISTANCE_ATOL)
     expected_contact_1 = np.array([0.2, 0, 0])
     expected_contact_2 = np.array([-0.2, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_sphere_vs_primitive_cylinder_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -212,7 +212,7 @@ def test_sphere_vs_mesh_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_sphere_vs_mesh_distance: is_state_valid(True): PASSED')
 
     expected_distance = 1
@@ -224,24 +224,24 @@ def test_sphere_vs_mesh_distance(collision_scene):
     p = scene.get_collision_distance("A", "B")
     print(p)
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, expected_distance))
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, expected_distance)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_sphere_vs_mesh_distance: _distance, Contact Points, Normals: PASSED')
 
     # mesh_vs_Sphere Test
     p = scene.get_collision_distance("B", "A")
     print(p)
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, expected_distance))
-    assert(np.isclose(p[0].contact_1, expected_contact_2).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_1).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_2).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_1).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, expected_distance)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_2)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_1)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_2)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_1)
     print('mesh_vs_primitive_sphere_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -251,7 +251,7 @@ def test_sphere_vs_mesh_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_sphere_vs_mesh_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
@@ -261,24 +261,24 @@ def test_sphere_vs_mesh_penetrating(collision_scene):
     expected_contact_2 = np.array([-0.2, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -.4, atol=PENETRATING_DISTANCE_ATOL))
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -.4, atol=PENETRATING_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_sphere_vs_mesh_penetrating: _distance, Contact Points, Normals: PASSED')
 
     # mesh_vs_Sphere Test
     p = scene.get_collision_distance("B", "A")
     print(p)
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1))
-    assert(np.isclose(p[0].contact_1, expected_contact_2).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_1).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_2).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_1).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_2)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_1)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_2)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_1)
     print('mesh_vs_primitive_sphere_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -288,22 +288,22 @@ def test_box_vs_box_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_box_vs_primitive_box_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([0.5, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
     print(p)
-    assert(np.isclose(p[0].contact_1[0], expected_contact_1[0], atol=CLOSE_DISTANCE_ATOL))
-    assert(np.isclose(p[0].contact_2[0], expected_contact_2[0], atol=CLOSE_DISTANCE_ATOL))
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=CLOSE_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=CLOSE_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1[0], expected_contact_1[0], atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2[0], expected_contact_2[0], atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=CLOSE_DISTANCE_ATOL)
     print('primitive_box_vs_primitive_box_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -313,23 +313,23 @@ def test_box_vs_box_touching(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_box_vs_primitive_box_touching: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 0.))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 0.)
     expected_contact_1 = np.array([0, 0, 0])
     expected_contact_2 = np.array([0, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1-p[0].contact_2, np.zeros((3,1))).all())
+    np.testing.assert_allclose(p[0].contact_1-p[0].contact_2, np.zeros((3,)))
     # Only check x-axis as this is face to face contact and thus undefined where y and z are.
-    assert(np.isclose(p[0].contact_1[0], expected_contact_1[0]))
-    assert(np.isclose(p[0].contact_2[0], expected_contact_2[0]))
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].contact_1[0], expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2[0], expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_box_vs_primitive_box_touching: _distance, Contact Points, Normals: PASSED')
 
 
@@ -339,22 +339,22 @@ def test_box_vs_box_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_box_vs_primitive_box_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -.2))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -.2)
     expected_contact_1 = np.array([0.1, 0, 0])
     expected_contact_2 = np.array([-0.1, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
     # Only test the x-component for the contacts as the faces are parallel.
-    assert(np.isclose(p[0].contact_1[0], expected_contact_1[0]))
-    assert(np.isclose(p[0].contact_2[0], expected_contact_2[0]))
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].contact_1[0], expected_contact_1[0])
+    np.testing.assert_allclose(p[0].contact_2[0], expected_contact_2[0])
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_box_vs_primitive_box_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -364,21 +364,21 @@ def test_box_vs_cylinder_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_box_vs_primitive_cylinder_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([0.5, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].contact_1[0], expected_contact_1[0])) # TODO: face center issue
-    assert(np.isclose(p[0].contact_2[0], expected_contact_2[0])) # TODO: face center issue
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].contact_1[0], expected_contact_1[0]) # TODO: face
+    np.testing.assert_allclose(p[0].contact_2[0], expected_contact_2[0]) # TODO: face
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_box_vs_primitive_cylinder_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -388,21 +388,21 @@ def test_box_vs_cylinder_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_box_vs_primitive_cylinder_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -.2, atol=PENETRATING_DISTANCE_ATOL))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -.2, atol=CLOSE_DISTANCE_ATOL)
     expected_contact_1 = np.array([0.1, 0, 0])
     expected_contact_2 = np.array([-0.1, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_box_vs_primitive_cylinder_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -412,7 +412,7 @@ def test_box_vs_mesh_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_box_vs_mesh_distance: is_state_valid(True): PASSED')
 
     expected_contact_1 = np.array([-0.5, 0, 0])
@@ -423,23 +423,23 @@ def test_box_vs_mesh_distance(collision_scene):
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
     print(p)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1))
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_box_vs_mesh_distance: _distance, Contact Points, Normals: PASSED')
 
     # mesh_vs_box
     p = scene.get_collision_distance("B", "A")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1))
-    assert(np.isclose(p[0].contact_1, expected_contact_2).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_1).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_2).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_1).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_2)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_1)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_2)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_1)
     print('mesh_vs_primitive_box_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -449,7 +449,7 @@ def test_box_vs_mesh_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_box_vs_mesh_penetrating: is_state_valid(True): PASSED')
 
     expected_contact_1 = np.array([0.2, 0, 0])
@@ -459,25 +459,25 @@ def test_box_vs_mesh_penetrating(collision_scene):
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
+    np.testing.assert_equal(len(p), 1)
     print(p)
-    assert(np.isclose(p[0].distance, -.2, atol=PENETRATING_DISTANCE_ATOL))
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].distance, -.2, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_box_vs_mesh_penetrating: _distance, Contact Points, Normals: PASSED')
     
     # mesh_vs_box
     p = scene.get_collision_distance("B", "A")
     debug_publish(p, scene)
-    assert(len(p) == 1)
+    np.testing.assert_equal(len(p), 1)
     print(p)
-    assert(np.isclose(p[0].distance, -.2, atol=PENETRATING_DISTANCE_ATOL))
-    assert(np.isclose(p[0].contact_1, expected_contact_2).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_1).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_2).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_1).all())
+    np.testing.assert_allclose(p[0].distance, -.2, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_2)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_1)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_2)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_1)
     print('mesh_vs_primitive_box_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -487,21 +487,21 @@ def test_cylinder_vs_cylinder_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_cylinder_vs_primitive_cylinder_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([0.5, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].contact_1[0], expected_contact_1[0])) # TODO: face center issue
-    assert(np.isclose(p[0].contact_2[0], expected_contact_2[0])) # TODO: face center issue
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].contact_1[0], expected_contact_1[0]) # TODO: face
+    np.testing.assert_allclose(p[0].contact_2[0], expected_contact_2[0]) # TODO: face
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_cylinder_vs_primitive_cylinder_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -511,21 +511,21 @@ def test_cylinder_vs_cylinder_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_cylinder_vs_primitive_cylinder_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, -.2, atol=PENETRATING_DISTANCE_ATOL))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, -.2, atol=CLOSE_DISTANCE_ATOL)
     expected_contact_1 = np.array([0.1, 0, 0])
     expected_contact_2 = np.array([-0.1, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=AFAR_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=AFAR_DISTANCE_ATOL)
     print('primitive_cylinder_vs_primitive_cylinder_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -535,7 +535,7 @@ def test_cylinder_vs_mesh_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('primitive_cylinder_vs_mesh_distance: is_state_valid(True): PASSED')
 
     expected_contact_1 = np.array([-1, 0, 0])
@@ -546,23 +546,23 @@ def test_cylinder_vs_mesh_distance(collision_scene):
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
     print(p)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.5))
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.5)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_cylinder_vs_mesh_distance: _distance, Contact Points, Normals: PASSED')
 
     # mesh vs cylinder
     p = scene.get_collision_distance("B", "A")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1.5))
-    assert(np.isclose(p[0].contact_1, expected_contact_2).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_1).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_2).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_1).all())
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1.5)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_2)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_1)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_2)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_1)
     print('mesh_vs_primitive_cylinder_vs_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -572,7 +572,7 @@ def test_cylinder_vs_mesh_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('primitive_cylinder_vs_mesh_penetrating: is_state_valid(True): PASSED')
 
     expected_contact_1 = np.array([0.2, 0, 0])
@@ -582,25 +582,25 @@ def test_cylinder_vs_mesh_penetrating(collision_scene):
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
+    np.testing.assert_equal(len(p), 1)
     print(p)
-    assert(np.isclose(p[0].distance, -.1, atol=PENETRATING_DISTANCE_ATOL))
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].distance, -.1, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('primitive_cylinder_vs_mesh_penetrating: _distance, Contact Points, Normals: PASSED')
 
     # mesh vs cylinder
     p = scene.get_collision_distance("B", "A")
     debug_publish(p, scene)
-    assert(len(p) == 1)
+    np.testing.assert_equal(len(p), 1)
     print(p)
-    assert(np.isclose(p[0].distance, -.1, atol=PENETRATING_DISTANCE_ATOL))
-    assert(np.isclose(p[0].contact_1, expected_contact_2).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_1).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_2).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_1).all())
+    np.testing.assert_allclose(p[0].distance, -.1, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_2)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_1)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_2)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_1)
     print('mesh_vs_primitive_cylinder_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -610,21 +610,21 @@ def test_mesh_vs_mesh_distance(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == True)
+    np.testing.assert_equal(scene.is_state_valid(True), True)
     print('mesh_vs_mesh_distance: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
-    assert(np.isclose(p[0].distance, 1))
+    np.testing.assert_equal(len(p), 1)
+    np.testing.assert_allclose(p[0].distance, 1., atol=CLOSE_DISTANCE_ATOL)
     expected_contact_1 = np.array([-0.5, 0, 0])
     expected_contact_2 = np.array([0.5, 0, 0])
     expected_normal_1 = np.array([1, 0, 0])
     expected_normal_2 = np.array([-1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1, atol=CLOSE_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2, atol=CLOSE_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1, atol=CLOSE_DISTANCE_ATOL).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2, atol=CLOSE_DISTANCE_ATOL).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1, atol=CLOSE_DISTANCE_ATOL)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2, atol=CLOSE_DISTANCE_ATOL)
     print('mesh_vs_mesh_distance: _distance, Contact Points, Normals: PASSED')
 
 
@@ -634,22 +634,22 @@ def test_mesh_vs_mesh_penetrating(collision_scene):
     prob.update(np.zeros(prob.N,))
     scene = prob.get_scene()
 
-    assert(scene.is_state_valid(True) == False)
+    np.testing.assert_equal(scene.is_state_valid(True), False)
     print('mesh_vs_mesh_penetrating: is_state_valid(True): PASSED')
 
     p = scene.get_collision_distance("A", "B")
     debug_publish(p, scene)
-    assert(len(p) == 1)
+    np.testing.assert_equal(len(p), 1)
     print(p)
-    assert(np.isclose(p[0].distance, -.1, atol=PENETRATING_DISTANCE_ATOL))
+    np.testing.assert_allclose(p[0].distance, -.1, atol=CLOSE_DISTANCE_ATOL)
     expected_contact_1 = np.array([0.2, 0, 0])
     expected_contact_2 = np.array([-0.2, 0, 0])
     expected_normal_1 = np.array([-1, 0, 0])
     expected_normal_2 = np.array([1, 0, 0])
-    assert(np.isclose(p[0].contact_1, expected_contact_1).all())
-    assert(np.isclose(p[0].contact_2, expected_contact_2).all())
-    assert(np.isclose(p[0].normal_1, expected_normal_1).all())
-    assert(np.isclose(p[0].normal_2, expected_normal_2).all())
+    np.testing.assert_allclose(p[0].contact_1, expected_contact_1)
+    np.testing.assert_allclose(p[0].contact_2, expected_contact_2)
+    np.testing.assert_allclose(p[0].normal_1, expected_normal_1)
+    np.testing.assert_allclose(p[0].normal_2, expected_normal_2)
     print('mesh_vs_mesh_penetrating: _distance, Contact Points, Normals: PASSED')
 
 
@@ -657,7 +657,7 @@ def test_mesh_vs_mesh_penetrating(collision_scene):
 
 # Cf. Issue #364 for tracking deactivated tests.
 class TestClass(unittest.TestCase):
-    collision_scene = 'CollisionSceneFCLLatest'
+    collision_scene = 'exotica/CollisionSceneFCLLatest'
     def test_sphere_vs_sphere_distance(self):
         test_sphere_vs_sphere_distance(TestClass.collision_scene)
 

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ void UnconstrainedTimeIndexedProblem::ReinitializeVariables()
     x.assign(T_, Eigen::VectorXd::Zero(N));
     xdiff.assign(T_, Eigen::VectorXd::Zero(N));
     if (flags_ & KIN_J) jacobian.assign(T_, Eigen::MatrixXd(length_jacobian, N));
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         Hessian Htmp;
         Htmp.setConstant(length_jacobian, Eigen::MatrixXd::Zero(N, N));
@@ -142,16 +142,19 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
 
     Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
         for (int i = 0; i < length_jacobian; ++i) hessian[t](i).setZero();
     for (int i = 0; i < num_tasks; ++i)
     {
         // Only update TaskMap if rho is not 0
         if (tasks_[i]->is_used)
         {
-            if (flags_ & KIN_J_DOT)
+            if (flags_ & KIN_H)
             {
-                tasks_[i]->Update(x[t], Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length), jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian), hessian[t].segment(tasks_[i]->start, tasks_[i]->length));
+                tasks_[i]->Update(x[t],
+                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
+                                  jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian),
+                                  hessian[t].segment(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
             }
             else if (flags_ & KIN_J)
             {
@@ -163,7 +166,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
             }
         }
     }
-    if (flags_ & KIN_J_DOT)
+    if (flags_ & KIN_H)
     {
         cost.Update(Phi[t], jacobian[t], hessian[t], t);
     }

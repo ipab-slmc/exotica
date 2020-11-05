@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ fcl::Transform3f KDL2fcl(const KDL::Frame& frame)
 {
     return fcl::Transform3f(fcl::Matrix3f(frame.M.data[0], frame.M.data[1], frame.M.data[2], frame.M.data[3], frame.M.data[4], frame.M.data[5], frame.M.data[6], frame.M.data[7], frame.M.data[8]), fcl::Vec3f(frame.p.x(), frame.p.y(), frame.p.z()));
 }
-}
+}  // namespace fcl_convert
 
 namespace exotica
 {
@@ -333,4 +333,4 @@ std::vector<std::string> CollisionSceneFCL::GetCollisionRobotLinks()
     }
     return tmp;
 }
-}
+}  // namespace exotica

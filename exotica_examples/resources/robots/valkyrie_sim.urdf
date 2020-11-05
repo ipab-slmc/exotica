@@ -2272,7 +2272,7 @@
   <transmission name="torsoYawTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="torsoYaw">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="torsoYaw">
       <node name="/pelvis/waist"/>
@@ -2283,7 +2283,7 @@
   <transmission name="torsoPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="torsoPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="waistPitchActuator">
       <node name="/trunk/pitch_actuator"/>
@@ -2294,7 +2294,7 @@
   <transmission name="torsoRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="torsoRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="waistRollActuator">
       <node name="/trunk/roll_actuator"/>
@@ -2305,7 +2305,7 @@
   <transmission name="leftHipYawTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftHipYaw">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftHipYaw">
       <node name="/pelvis/left_leg_j1"/>
@@ -2316,7 +2316,7 @@
   <transmission name="leftHipRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftHipRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftHipRoll">
       <node name="/left_leg/j2"/>
@@ -2327,7 +2327,7 @@
   <transmission name="leftHipPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftHipPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftHipPitch">
       <node name="/left_leg/j3"/>
@@ -2338,7 +2338,7 @@
   <transmission name="leftKneePitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftKneePitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftKneePitch">
       <node name="/left_leg/j4"/>
@@ -2349,7 +2349,7 @@
   <transmission name="leftAnklePitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftAnklePitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftAnklePitchActuator">
       <node name="/left_leg/ankle/pitch_actuator"/>
@@ -2360,7 +2360,7 @@
   <transmission name="leftAnkleRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftAnkleRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftAnkleRollActuator">
       <node name="/left_leg/ankle/roll_actuator"/>
@@ -2371,7 +2371,7 @@
   <transmission name="rightHipYawTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightHipYaw">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightHipYaw">
       <node name="/pelvis/right_leg_j1"/>
@@ -2382,7 +2382,7 @@
   <transmission name="rightHipRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightHipRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightHipRoll">
       <node name="/right_leg/j2"/>
@@ -2393,7 +2393,7 @@
   <transmission name="rightHipPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightHipPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightHipPitch">
       <node name="/right_leg/j3"/>
@@ -2404,7 +2404,7 @@
   <transmission name="rightKneePitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightKneePitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightKneePitch">
       <node name="/right_leg/j4"/>
@@ -2415,7 +2415,7 @@
   <transmission name="rightAnklePitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightAnklePitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightAnklePitchActuator">
       <node name="/right_leg/ankle/pitch_actuator"/>
@@ -2426,7 +2426,7 @@
   <transmission name="rightAnkleRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightAnkleRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightAnkleRollActuator">
       <node name="/right_leg/ankle/roll_actuator"/>
@@ -2437,7 +2437,7 @@
   <transmission name="leftShoulderPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftShoulderPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftShoulderPitch">
       <node name="/trunk/left_arm_j1"/>
@@ -2448,7 +2448,7 @@
   <transmission name="leftShoulderRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftShoulderRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftShoulderRoll">
       <node name="/left_arm/j2"/>
@@ -2459,7 +2459,7 @@
   <transmission name="leftShoulderYawTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftShoulderYaw">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftShoulderYaw">
       <node name="/left_arm/j3"/>
@@ -2470,7 +2470,7 @@
   <transmission name="leftElbowPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="leftElbowPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="leftElbowPitch">
       <node name="/left_arm/j4"/>
@@ -2514,7 +2514,7 @@
   <transmission name="rightShoulderPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightShoulderPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightShoulderPitch">
       <node name="/trunk/right_arm_j1"/>
@@ -2525,7 +2525,7 @@
   <transmission name="rightShoulderRollTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightShoulderRoll">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightShoulderRoll">
       <node name="/right_arm/j2"/>
@@ -2536,7 +2536,7 @@
   <transmission name="rightShoulderYawTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightShoulderYaw">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightShoulderYaw">
       <node name="/right_arm/j3"/>
@@ -2547,7 +2547,7 @@
   <transmission name="rightElbowPitchTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="rightElbowPitch">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="rightElbowPitch">
       <node name="/right_arm/j4"/>

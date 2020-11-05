@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,19 @@ class JointPose : public TaskMap, public Instantiable<JointPoseInitializer>
 public:
     void AssignScene(ScenePtr scene) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
-    // void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::VectorXdRef phidot, Eigen::MatrixXdRef jacobian, Eigen::MatrixXdRef Jdot) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian) override;
     int TaskSpaceDim() override;
 
-    std::vector<int> joint_map_;  // TODO: Make private with getter
-    Eigen::VectorXd joint_ref_;   // TODO: Make private with getter
+    const std::vector<int>& get_joint_map() const;
+    const Eigen::VectorXd& get_joint_ref() const;
+    void set_joint_ref(Eigen::VectorXdRefConst ref);
 
 private:
-    int num_controlled_joints_;  ///! Number of controlled joints
+    int num_controlled_joints_;   ///! Number of controlled joints
+    std::vector<int> joint_map_;  ///! Subset selection matrix
+    Eigen::VectorXd joint_ref_;   ///! Joint reference value
     void Initialize();
 };
 }

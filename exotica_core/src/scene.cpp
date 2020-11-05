@@ -38,7 +38,14 @@
 #include <exotica_core/setup.h>
 
 #include <exotica_core/attach_link_initializer.h>
+#include <exotica_core/box_shape_initializer.h>
+#include <exotica_core/collision_scene_initializer.h>
+#include <exotica_core/cylinder_shape_initializer.h>
 #include <exotica_core/link_initializer.h>
+#include <exotica_core/mesh_shape_initializer.h>
+#include <exotica_core/octree_shape_initializer.h>
+#include <exotica_core/shape_initializer.h>
+#include <exotica_core/sphere_shape_initializer.h>
 #include <exotica_core/trajectory_initializer.h>
 
 #include <moveit/version.h>
@@ -91,14 +98,10 @@ void Scene::Instantiate(const SceneInitializer& init)
     // Set up debug topics if running in ROS mode
     if (Server::IsRos())
     {
-        ps_pub_ = Server::Advertise<moveit_msgs::PlanningScene>(object_name_ + (object_name_ == "" ? "" : "/") + "PlanningScene", 100, true);
-        proxy_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + (object_name_ == "" ? "" : "/") + "CollisionProxies", 100, true);
+        ps_pub_ = Server::Advertise<moveit_msgs::PlanningScene>(object_name_ + (object_name_ == "" ? "" : "/") + "PlanningScene", 1, true);
+        proxy_pub_ = Server::Advertise<visualization_msgs::Marker>(object_name_ + (object_name_ == "" ? "" : "/") + "CollisionProxies", 1, true);
         if (debug_)
-            HIGHLIGHT_NAMED(
-                object_name_,
-                "Running in debug mode, planning scene will be published to '"
-                    << Server::Instance()->GetName() << "/" << object_name_
-                    << "/PlanningScene'");
+            HIGHLIGHT_NAMED(object_name_, "Running in debug mode, planning scene will be published to '" << Server::Instance()->GetName() << "/" << object_name_ << "/PlanningScene'");
     }
 
     // Note: Using the LoadScene initializer does not support custom offsets/poses, assumes Identity transform to world_frame
@@ -112,7 +115,52 @@ void Scene::Instantiate(const SceneInitializer& init)
     for (const exotica::Initializer& linkInit : init.Links)
     {
         LinkInitializer link(linkInit);
-        AddObject(link.Name, GetFrame(link.Transform), link.Parent, nullptr, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), Eigen::Vector4d::Zero(), false);
+
+        shapes::ShapePtr link_shape = nullptr;
+        Eigen::Vector4d link_color = Eigen::Vector4d::Zero();
+        if (link.Shape.size() == 1)
+        {
+            ShapeInitializer shape(link.Shape[0]);
+            link_color = shape.Color;
+
+            if (shape.Type == "Box")
+            {
+                BoxShapeInitializer box(link.Shape[0]);
+                std::cout << "BOX: " << box.Dimensions.transpose() << std::endl;
+                link_shape.reset(new shapes::Box(box.Dimensions.x(), box.Dimensions.y(), box.Dimensions.z()));
+            }
+            else if (shape.Type == "Cylinder")
+            {
+                CylinderShapeInitializer cylinder(link.Shape[0]);
+                link_shape.reset(new shapes::Cylinder(cylinder.Radius, cylinder.Length));
+            }
+            else if (shape.Type == "Mesh")
+            {
+                MeshShapeInitializer mesh(link.Shape[0]);
+                // TODO: This will not support textures.
+                link_shape.reset(shapes::createMeshFromResource(ParsePath(mesh.MeshFilePath), mesh.Scale));
+            }
+            else if (shape.Type == "Octree")
+            {
+                OctreeShapeInitializer octree(link.Shape[0]);
+                link_shape = LoadOctreeAsShape(ParsePath(octree.OctreeFilePath));
+            }
+            else if (shape.Type == "Sphere")
+            {
+                SphereShapeInitializer sphere(link.Shape[0]);
+                link_shape.reset(new shapes::Sphere(sphere.Radius));
+            }
+            else
+            {
+                ThrowPretty("Unrecognized ShapeType: " << shape.Type);
+            }
+        }
+        else if (link.Shape.size() > 1)
+        {
+            ThrowPretty("Only one Shape per Link allowed, given: " << link.Shape.size());
+        }
+
+        AddObject(link.Name, GetFrame(link.Transform), link.Parent, link_shape, KDL::RigidBodyInertia(link.Mass, GetFrame(link.CenterOfMass).p), link_color, false);  // false since CollisionScene is not yet setup
     }
 
     // Check list of robot links to exclude from CollisionScene
@@ -135,19 +183,32 @@ void Scene::Instantiate(const SceneInitializer& init)
         }
     }
 
-    // Set up CollisionScene
+    // Initialize CollisionScene
     force_collision_ = init.AlwaysUpdateCollisionScene;
-    collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene);
-    collision_scene_->debug_ = this->debug_;
-    collision_scene_->Setup();
-    collision_scene_->AssignScene(shared_from_this());
-    collision_scene_->SetAlwaysExternallyUpdatedCollisionScene(force_collision_);
-    collision_scene_->SetReplacePrimitiveShapesWithMeshes(init.ReplacePrimitiveShapesWithMeshes);
-    collision_scene_->SetWorldLinkPadding(init.WorldLinkPadding);
-    collision_scene_->SetRobotLinkPadding(init.RobotLinkPadding);
-    collision_scene_->SetWorldLinkScale(init.WorldLinkScale);
-    collision_scene_->SetRobotLinkScale(init.RobotLinkScale);
-    collision_scene_->set_replace_cylinders_with_capsules(init.ReplaceCylindersWithCapsules);
+    if (!init.DoNotInstantiateCollisionScene)
+    {
+        if (init.CollisionScene.size() == 0)
+        {
+            // Not set ==> Default to CollisionSceneFCL for backwards compatibility.
+            collision_scene_ = Setup::CreateCollisionScene("CollisionSceneFCL");  // NB: This is an implicit run-time dependency and thus dangerous! But we don't want to break existing configs...
+        }
+        else if (init.CollisionScene.size() == 1)
+        {
+            collision_scene_ = Setup::CreateCollisionScene(init.CollisionScene[0]);
+        }
+        else
+        {
+            // Only one dynamics solver per scene is allowed, i.e., throw if more than one provided:
+            ThrowPretty("Only one CollisionScene per scene allowed - " << init.CollisionScene.size() << " provided");
+        }
+
+        collision_scene_->debug_ = this->debug_;  // Backwards compatibility - TODO: Remove
+        // collision_scene_->ns_ = ns_ + "/" + collision_scene_->GetObjectName();
+        collision_scene_->Setup();  // TODO: Trigger from Initializer
+        collision_scene_->AssignScene(shared_from_this());
+        collision_scene_->SetAlwaysExternallyUpdatedCollisionScene(force_collision_);
+    }
+
     UpdateSceneFrames();
     UpdateInternalFrames(false);
 
@@ -181,7 +242,7 @@ void Scene::Instantiate(const SceneInitializer& init)
             }
         }
     }
-    collision_scene_->SetACM(acm);
+    if (collision_scene_ != nullptr) collision_scene_->SetACM(acm);
 
     // Set up trajectory generators
     for (const exotica::Initializer& it : init.Trajectories)
@@ -207,7 +268,25 @@ void Scene::Instantiate(const SceneInitializer& init)
         dynamics_solver_ = Setup::CreateDynamicsSolver(init.DynamicsSolver.at(0));
         dynamics_solver_->AssignScene(shared_from_this());
         dynamics_solver_->ns_ = ns_ + "/" + dynamics_solver_->GetObjectName();
+
+        num_positions_ = dynamics_solver_->get_num_positions();
+        num_velocities_ = dynamics_solver_->get_num_velocities();
+        num_controls_ = dynamics_solver_->get_num_controls();
+        num_state_ = dynamics_solver_->get_num_state();
+        num_state_derivative_ = dynamics_solver_->get_num_state_derivative();
     }
+    else
+    {
+        num_positions_ = GetKinematicTree().GetNumModelJoints();
+        num_velocities_ = 0;
+        num_controls_ = 0;
+        num_state_ = num_positions_;
+        num_state_derivative_ = GetKinematicTree().GetNumControlledJoints();
+    }
+
+    // Check if the system has a floating-base, and if so, if it contains a quaternion.
+    // Will need to trigger special logic below to handle this (w.r.t. normalisation).
+    has_quaternion_floating_base_ = (GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && num_state_ == num_state_derivative_ + 1);
 
     if (debug_) INFO_NAMED(object_name_, "Exotica Scene initialized");
 }
@@ -238,7 +317,7 @@ void Scene::Update(Eigen::VectorXdRefConst x, double t)
 
     UpdateTrajectoryGenerators(t);
     kinematica_.Update(x);
-    if (force_collision_) collision_scene_->UpdateCollisionObjectTransforms();
+    if (force_collision_ && collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjectTransforms();
     if (debug_) PublishScene();
 }
 
@@ -340,11 +419,12 @@ void Scene::UpdatePlanningSceneWorld(const moveit_msgs::PlanningSceneWorldConstP
 
 void Scene::UpdateCollisionObjects()
 {
-    collision_scene_->UpdateCollisionObjects(kinematica_.GetCollisionTreeMap());
+    if (collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjects(kinematica_.GetCollisionTreeMap());
 }
 
 const CollisionScenePtr& Scene::GetCollisionScene() const
 {
+    if (collision_scene_ == nullptr) ThrowPretty("No CollisionScene initialized!");
     return collision_scene_;
 }
 
@@ -382,19 +462,19 @@ moveit_msgs::PlanningScene Scene::GetPlanningSceneMsg()
     {
         moveit_msgs::LinkPadding padding;
         padding.link_name = robot_link;
-        padding.padding = collision_scene_->GetRobotLinkPadding();
+        padding.padding = (collision_scene_ != nullptr) ? collision_scene_->GetRobotLinkPadding() : 0.0;
         msg.link_padding.push_back(padding);
 
         moveit_msgs::LinkScale scale;
         scale.link_name = robot_link;
-        scale.scale = collision_scene_->GetRobotLinkScale();
+        scale.scale = (collision_scene_ != nullptr) ? collision_scene_->GetRobotLinkScale() : 1.0;
         msg.link_scale.push_back(scale);
     }
 
     // As we cannot apply world link scalings in the message itself, we need to
     // manually scale the objects.
     // TODO(wxm): Recreate as updated poses won't be reflected (e.g. trajectories)
-    if (collision_scene_->GetWorldLinkScale() != 1.0 || collision_scene_->GetWorldLinkPadding() > 0.0)
+    if (collision_scene_ != nullptr && (collision_scene_->GetWorldLinkScale() != 1.0 || collision_scene_->GetWorldLinkPadding() > 0.0))
     {
         for (auto it : msg.world.collision_objects)
         {
@@ -476,11 +556,11 @@ void Scene::SetModelState(Eigen::VectorXdRefConst x, double t, bool update_traj)
     // Update Kinematica internal state
     kinematica_.SetModelState(x);
 
-    if (force_collision_) collision_scene_->UpdateCollisionObjectTransforms();
+    if (force_collision_ && collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjectTransforms();
     if (debug_) PublishScene();
 }
 
-void Scene::SetModelState(std::map<std::string, double> x, double t, bool update_traj)
+void Scene::SetModelState(const std::map<std::string, double>& x, double t, bool update_traj)
 {
     if (request_needs_updating_ && kinematic_request_callback_)
     {
@@ -491,7 +571,7 @@ void Scene::SetModelState(std::map<std::string, double> x, double t, bool update
     // Update Kinematica internal state
     kinematica_.SetModelState(x);
 
-    if (force_collision_) collision_scene_->UpdateCollisionObjectTransforms();
+    if (force_collision_ && collision_scene_ != nullptr) collision_scene_->UpdateCollisionObjectTransforms();
     if (debug_) PublishScene();
 }
 
@@ -841,4 +921,35 @@ void Scene::RemoveTrajectory(const std::string& link)
     it->second.first.lock()->is_trajectory_generated = false;
     trajectory_generators_.erase(it);
 }
+
+int Scene::get_num_positions() const
+{
+    return num_positions_;
+}
+
+int Scene::get_num_velocities() const
+{
+    return num_velocities_;
+}
+
+int Scene::get_num_controls() const
+{
+    return num_controls_;
+}
+
+int Scene::get_num_state() const
+{
+    return num_state_;
+}
+
+int Scene::get_num_state_derivative() const
+{
+    return num_state_derivative_;
+}
+
+bool Scene::get_has_quaternion_floating_base() const
+{
+    return has_quaternion_floating_base_;
+}
+
 }  // namespace exotica

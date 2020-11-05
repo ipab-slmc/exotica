@@ -38,6 +38,15 @@
 
 namespace exotica
 {
+enum ControlCostLossTermType
+{
+    Undefined = -1,
+    L2 = 0,
+    SmoothL1 = 1,
+    Huber = 2,
+    PseudoHuber = 3,
+};
+
 class DynamicTimeIndexedShootingProblem : public PlanningProblem, public Instantiable<DynamicTimeIndexedShootingProblemInitializer>
 {
 public:
@@ -83,35 +92,80 @@ public:
     void DisableStochasticUpdates();
 
     // TODO: Make private and add getter (no need to be public!)
-    TimeIndexedTask cost;  //!< Cost task
-    std::vector<TaskSpaceVector> Phi;
-    std::vector<Eigen::MatrixXd> jacobian;
-    std::vector<Hessian> hessian;
+    TimeIndexedTask cost;                  ///< Cost task
+    std::vector<TaskSpaceVector> Phi;      ///< Stacked TaskMap vector
+    std::vector<Eigen::MatrixXd> dPhi_dx;  ///< Stacked TaskMap Jacobian w.r.t. state
+    std::vector<Eigen::MatrixXd> dPhi_du;  ///< Stacked TaskMap Jacobian w.r.t. control
+    std::vector<Hessian> ddPhi_ddx;        ///< Stacked TaskMap Hessian w.r.t. state
+    std::vector<Hessian> ddPhi_ddu;        ///< Stacked TaskMap Hessian w.r.t. control
+    std::vector<Hessian> ddPhi_dxdu;       ///< Stacked TaskMap Hessian w.r.t. state and control
 
     // TODO: Make private and add getter/setter
-    int length_Phi;
-    int length_jacobian;
-    int num_tasks;
+    int length_Phi;       ///< Length of TaskSpaceVector (Phi => stacked task-maps)
+    int length_jacobian;  ///< Length of tangent vector to Phi
+    int num_tasks;        ///< Number of TaskMaps
 
     double GetStateCost(int t) const;
     double GetControlCost(int t) const;
 
-    Eigen::VectorXd GetStateCostJacobian(int t) const;    ///< lx
-    Eigen::VectorXd GetControlCostJacobian(int t) const;  ///< lu
-    Eigen::MatrixXd GetStateCostHessian(int t) const;     ///< lxx
-    Eigen::MatrixXd GetControlCostHessian() const;        ///< luu
-    Eigen::MatrixXd GetStateControlCostHessian() const
+    Eigen::VectorXd GetStateCostJacobian(int t);    ///< lx
+    Eigen::VectorXd GetControlCostJacobian(int t);  ///< lu
+    Eigen::MatrixXd GetStateCostHessian(int t);     ///< lxx
+    Eigen::MatrixXd GetControlCostHessian(int t);   ///< luu
+    Eigen::MatrixXd GetStateControlCostHessian()
     {
         // NOTE: For quadratic costs this is always 0
         //  thus we return a scalar of size 1 and value 0
         // This is the same as returning an (int)0 but for type safety
         //  we instantiate eigen vectors instead.
-        return Eigen::MatrixXd::Zero(num_controls_, 2 * num_velocities_);
+        return Eigen::MatrixXd::Zero(scene_->get_num_controls(), scene_->get_num_state_derivative());
     };  ///< lxu == lux
 
-    Eigen::VectorXd Dynamics(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
-    Eigen::VectorXd Simulate(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u);
+    void OnSolverIterationEnd()
+    {
+        if (parameters_.LossType == "AdaptiveSmoothL1")
+        {
+            // Adaptive SmoothL1 Rule
+            //      from "RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"
+            const double momentum = 0.9;
 
+            Eigen::VectorXd new_smooth_l1_mean_ = Eigen::VectorXd::Zero(scene_->get_num_controls());
+            Eigen::VectorXd new_smooth_l1_std_ = Eigen::VectorXd::Zero(scene_->get_num_controls());
+
+            for (int t = 0; t < T_; ++t)
+            {
+                for (int ui = 0; ui < scene_->get_num_controls(); ++ui)
+                {
+                    new_smooth_l1_mean_[ui] += std::abs(U_.col(t)[ui]);
+                }
+            }
+
+            new_smooth_l1_mean_ /= T_;
+
+            for (int t = 0; t < T_; ++t)
+            {
+                for (int ui = 0; ui < scene_->get_num_controls(); ++ui)
+                {
+                    new_smooth_l1_std_[ui] += (std::abs(U_.col(t)[ui]) - new_smooth_l1_mean_[ui]) * (std::abs(U_.col(t)[ui]) - new_smooth_l1_mean_[ui]);
+                }
+            }
+
+            new_smooth_l1_std_ /= T_;
+
+            smooth_l1_mean_ = smooth_l1_mean_ * momentum + new_smooth_l1_mean_ * (1 - momentum);
+            smooth_l1_std_ = smooth_l1_std_ * momentum + new_smooth_l1_std_ * (1 - momentum);
+
+            for (int ui = 0; ui < scene_->get_num_controls(); ++ui)
+            {
+                l1_rate_[ui] = std::max(0.0, std::min(l1_rate_[ui], smooth_l1_mean_[ui] - smooth_l1_std_[ui]));
+            }
+        }
+    }
+
+    const ControlCostLossTermType& get_loss_type() const { return loss_type_; }
+    void set_loss_type(const ControlCostLossTermType& loss_type_in) { loss_type_ = loss_type_in; }
+    double get_control_cost_weight() const { return control_cost_weight_; }
+    void set_control_cost_weight(const double control_cost_weight_in) { control_cost_weight_ = control_cost_weight_in; }
 protected:
     /// \brief Checks the desired time index for bounds and supports -1 indexing.
     inline void ValidateTimeIndex(int& t_in) const
@@ -127,6 +181,8 @@ protected:
     }
     void ReinitializeVariables();
 
+    void UpdateTaskMaps(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, int t);
+
     int T_;       ///< Number of time steps
     double tau_;  ///< Time step duration
     bool stochastic_matrices_specified_ = false;
@@ -135,6 +191,7 @@ protected:
     Eigen::MatrixXd X_;       ///< State trajectory (i.e., positions, velocities). Size: num-states x T
     Eigen::MatrixXd U_;       ///< Control trajectory. Size: num-controls x (T-1)
     Eigen::MatrixXd X_star_;  ///< Goal state trajectory (i.e., positions, velocities). Size: num-states x T
+    Eigen::MatrixXd X_diff_;  ///< Difference between X_ and X_star_. Size: ndx x T
 
     Eigen::MatrixXd Qf_;              ///< Final state cost
     std::vector<Eigen::MatrixXd> Q_;  ///< State space penalty matrix (precision matrix), per time index
@@ -143,12 +200,32 @@ protected:
     std::vector<Eigen::MatrixXd> Ci_;  ///< Noise weight terms
     Eigen::MatrixXd CW_;               ///< White noise covariance
 
+    // Pre-allocated variables
+    std::vector<Eigen::MatrixXd> dxdiff_;
+    std::vector<Eigen::VectorXd> state_cost_jacobian_;
+    std::vector<Eigen::MatrixXd> state_cost_hessian_;
+    std::vector<Eigen::VectorXd> general_cost_jacobian_;
+    std::vector<Eigen::MatrixXd> general_cost_hessian_;
+    std::vector<Eigen::VectorXd> control_cost_jacobian_;
+    std::vector<Eigen::MatrixXd> control_cost_hessian_;
+
     std::vector<std::shared_ptr<KinematicResponse>> kinematic_solutions_;
 
     std::mt19937 generator_;
     std::normal_distribution<double> standard_normal_noise_{0, 1};
 
     TaskSpaceVector cost_Phi;
+
+    double control_cost_weight_ = 1;
+    ControlCostLossTermType loss_type_;
+    void InstantiateCostTerms(const DynamicTimeIndexedShootingProblemInitializer& init);
+
+    // sparsity costs
+    Eigen::VectorXd l1_rate_;
+    Eigen::VectorXd huber_rate_;
+    Eigen::VectorXd bimodal_huber_mode1_, bimodal_huber_mode2_;
+
+    Eigen::VectorXd smooth_l1_mean_, smooth_l1_std_;
 };
 typedef std::shared_ptr<exotica::DynamicTimeIndexedShootingProblem> DynamicTimeIndexedShootingProblemPtr;
 }  // namespace exotica

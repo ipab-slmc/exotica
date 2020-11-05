@@ -92,22 +92,23 @@ We must also pass in our initialization arguments seen in the `Scene Initializer
         Optional std::string SRDF = "";
         Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
 
-        // Collision-Scene Specific Parameters
-        Optional std::string CollisionScene = "CollisionSceneFCL";
-        Optional bool AlwaysUpdateCollisionScene = false;
-        Optional bool ReplacePrimitiveShapesWithMeshes = false;
-        Optional bool ReplaceCylindersWithCapsules = false;
-        Optional double WorldLinkScale = 1.0;
-        Optional double RobotLinkScale = 1.0;
-        Optional double WorldLinkPadding = 0.0;
-        Optional double RobotLinkPadding = 0.0;
+        // CollisionScene
+        Optional std::vector<exotica::Initializer> CollisionScene = std::vector<exotica::Initializer>();
+        Optional bool AlwaysUpdateCollisionScene = false;      // Whether each Scene::Update triggers a CollisionScene::UpdateObjectTransforms()
+        Optional bool DoNotInstantiateCollisionScene = false;  // If true, no CollisionScene plug-in will be loaded.
+
+        // DynamicsSolver
+        Optional std::vector<exotica::Initializer> DynamicsSolver = std::vector<exotica::Initializer>();
 
         Optional std::string LoadScene = "";  // to load multiple scenes, separate by semi-colon.
         Optional std::vector<exotica::Initializer> Links = std::vector<exotica::Initializer>();
         Optional std::vector<exotica::Initializer> Trajectories = std::vector<exotica::Initializer>();
         Optional std::vector<exotica::Initializer> AttachLinks = std::vector<exotica::Initializer>();
+
+        // TODO: Move to CollisionScene
         Optional std::vector<std::string> RobotLinksToExcludeFromCollisionScene = std::vector<std::string>();
         Optional std::vector<std::string> WorldLinksToExcludeFromCollisionScene = std::vector<std::string>();
+
 
 
 Here we use the parameters: 

@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <ExoticaWholeBodyIKConfig>
   <IKSolver Name="IK">
-    <MaxIterations>10</MaxIterations>
+    <RegularizationRate>0.1</RegularizationRate>
+    <MaxIterations>1</MaxIterations>
     <MaxStep>0.05</MaxStep>
   </IKSolver>
 

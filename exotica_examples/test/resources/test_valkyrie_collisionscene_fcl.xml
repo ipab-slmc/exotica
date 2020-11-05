@@ -10,7 +10,9 @@
         <Debug>0</Debug>
         <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
-        <CollisionScene>CollisionSceneFCL</CollisionScene>
+        <CollisionScene>
+          <CollisionSceneFCL Name="MyCollisionScene"/>
+        </CollisionScene>
       </Scene>
     </PlanningScene>
     <Maps>

@@ -30,6 +30,7 @@
 #ifndef EXOTICA_CORE_BOX_QP_H_
 #define EXOTICA_CORE_BOX_QP_H_
 
+#include <exotica_core/tools/exception.h>
 #include <Eigen/Dense>
 #include <vector>
 
@@ -43,16 +44,36 @@ typedef struct BoxQPSolution
     std::vector<size_t> clamped_idx;
 } BoxQPSolution;
 
-inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
-                           const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
-                           const Eigen::VectorXd& x_init, const double gamma,
-                           const int max_iterations, const double epsilon, const double lambda)
+inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q, const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high, const Eigen::VectorXd& x_init, const double th_acceptstep, const int max_iterations, const double th_gradient_tolerance, const double lambda, bool use_polynomial_linesearch = true, bool use_cholesky_factorization = true)
 {
-    int it = 0;
-    Eigen::VectorXd delta_xf, x = x_init;
+    if (lambda < 0.) ThrowPretty("lambda needs to be positive.");
+
+    // gamma = acceptance threshold
+    // epsilon = gradient tolerance
+    // lambda = regularization for Cholesky factorization
+    const std::size_t nx = x_init.size();
+
+    Eigen::VectorXd delta_xf(nx), x = x_init;
     std::vector<size_t> clamped_idx, free_idx;
-    Eigen::VectorXd grad = q + H * x_init;
-    Eigen::MatrixXd Hff, Hfc, Hff_inv;
+    Eigen::VectorXd grad(nx);
+    Eigen::MatrixXd Hff(nx, nx), Hfc(nx, nx);
+
+    std::vector<double> alphas_;
+    const std::size_t& n_alphas_ = 10;
+    alphas_.resize(n_alphas_);
+    const Eigen::VectorXd alphas_linear = Eigen::VectorXd::LinSpaced(n_alphas_, 1.0, 0.1);
+    for (std::size_t n = 0; n < n_alphas_; ++n)
+    {
+        if (use_polynomial_linesearch)
+        {
+            alphas_[n] = 1. / pow(2., static_cast<double>(n));
+        }
+        else
+        {
+            alphas_[n] = alphas_linear(n);
+        }
+    }
+    double fold_, fnew_;
 
     // Ensure a feasible warm-start
     for (int i = 0; i < x.size(); ++i)
@@ -60,96 +81,181 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
         x(i) = std::max(std::min(x_init(i), b_high(i)), b_low(i));
     }
 
-    Hff_inv = (Eigen::MatrixXd::Identity(H.rows(), H.cols()) * 1e-5 + H).inverse();
+    BoxQPSolution solution;
+    solution.clamped_idx.reserve(nx);
+    solution.free_idx.reserve(nx);
+    std::size_t num_free, num_clamped;
+    Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;
+    Eigen::VectorXd qf_, xf_, xc_, dxf_, dx_(nx);
 
-    if (grad.norm() <= epsilon)
-        return {Hff_inv, x_init, free_idx, clamped_idx};
-
-    while (grad.norm() > epsilon && it < max_iterations)
+    for (int k = 0; k < max_iterations; ++k)
     {
-        ++it;
-        grad = q + H * x;
-        clamped_idx.clear();
-        free_idx.clear();
+        solution.clamped_idx.clear();
+        solution.free_idx.clear();
 
-        for (int i = 0; i < grad.size(); ++i)
+        // Compute the gradient
+        grad = q;
+        grad.noalias() += H * x;
+
+        // Check if any element is at the limits
+        for (std::size_t i = 0; i < nx; ++i)
         {
-            if ((x(i) == b_low(i) && grad(i) > 0) || (x(i) == b_high(i) && grad(i) < 0))
-                clamped_idx.push_back(i);
+            if ((x(i) == b_low(i) && grad(i) > 0.) || (x(i) == b_high(i) && grad(i) < 0.))
+                solution.clamped_idx.push_back(i);
             else
-                free_idx.push_back(i);
+                solution.free_idx.push_back(i);
         }
+        num_free = solution.free_idx.size();
+        num_clamped = solution.clamped_idx.size();
 
-        if (free_idx.size() == 0)
-            return {Hff_inv, x, free_idx, clamped_idx};
-
-        Hff.resize(free_idx.size(), free_idx.size());
-        Hfc.resize(free_idx.size(), clamped_idx.size());
-
-        if (clamped_idx.size() == 0)
-            Hff = H;
-        else
+        // Check convergence
+        //  a) Either norm of gradient is below threshold
+        //    OR
+        //  b) None of the dimensions is free (all are at boundary)
+        if (grad.lpNorm<Eigen::Infinity>() <= th_gradient_tolerance || num_free == 0)
         {
-            for (size_t i = 0; i < free_idx.size(); ++i)
-                for (size_t j = 0; j < free_idx.size(); ++j)
-                    Hff(i, j) = H(free_idx[i], free_idx[j]);
-
-            for (size_t i = 0; i < free_idx.size(); ++i)
-                for (size_t j = 0; j < clamped_idx.size(); ++j)
-                    Hfc(i, j) = H(free_idx[i], clamped_idx[j]);
-        }
-
-        // NOTE: Array indexing not supported in current eigen version
-        Eigen::VectorXd q_free(free_idx.size()), x_free(free_idx.size()), x_clamped(clamped_idx.size());
-        for (size_t i = 0; i < free_idx.size(); ++i)
-        {
-            q_free(i) = q(free_idx[i]);
-            x_free(i) = x(free_idx[i]);
-        }
-
-        for (size_t j = 0; j < clamped_idx.size(); ++j)
-            x_clamped(j) = x(clamped_idx[j]);
-
-        Hff_inv = (Eigen::MatrixXd::Identity(Hff.rows(), Hff.cols()) * lambda + Hff).inverse();
-
-        if (clamped_idx.size() == 0)
-            delta_xf = -Hff_inv * (q_free)-x_free;
-        else
-            delta_xf = -Hff_inv * (q_free + Hfc * x_clamped) - x_free;
-
-        double f_old = (0.5 * x.transpose() * H * x + q.transpose() * x)(0);
-        const Eigen::VectorXd alpha_space = Eigen::VectorXd::LinSpaced(10, 1.0, 0.1);
-
-        bool armijo_reached = false;
-        Eigen::VectorXd x_new;
-        for (int ai = 0; ai < alpha_space.rows(); ++ai)
-        {
-            const double& alpha = alpha_space[ai];
-
-            x_new = x;
-            for (size_t i = 0; i < free_idx.size(); ++i)
-                x_new(free_idx[i]) = std::max(std::min(
-                                                  x(free_idx[i]) + alpha * delta_xf(i), b_high(i)),
-                                              b_low(i));
-
-            double f_new = (0.5 * x_new.transpose() * H * x_new + q.transpose() * x_new)(0);
-            Eigen::VectorXd x_diff = x - x_new;
-
-            // armijo criterion>
-            double armijo_coef = (f_old - f_new) / (grad.transpose() * x_diff + 1e-5);
-            if (armijo_coef > gamma)
+            // During first iteration return the inverse of the free Hessian
+            if (k == 0 && num_free != 0)
             {
-                armijo_reached = true;
-                x = x_new;
-                break;
+                Hff.resize(num_free, num_free);
+                for (std::size_t i = 0; i < num_free; ++i)
+                {
+                    const std::size_t& fi = solution.free_idx[i];
+                    for (std::size_t j = 0; j < num_free; ++j)
+                    {
+                        Hff(i, j) = H(fi, solution.free_idx[j]);
+                    }
+                }
+                // Add regularization
+                if (lambda != 0.)
+                {
+                    Hff.diagonal().array() += lambda;
+                }
+
+                // Compute the inverse
+                if (use_cholesky_factorization)
+                {
+                    Hff_inv_llt_.compute(Hff);
+                    const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
+                    if (info != Eigen::Success)
+                    {
+                        ThrowPretty("Error during Cholesky decomposition of Hff");
+                    }
+                    solution.Hff_inv.setIdentity(num_free, num_free);
+                    Hff_inv_llt_.solveInPlace(solution.Hff_inv);
+                }
+                else
+                {
+                    solution.Hff_inv = Hff.inverse();
+                }
+            }
+
+            if (num_free == 0)
+            {
+                solution.Hff_inv.resize(num_free, num_free);
+            }
+
+            // Set solution
+            solution.x = x;
+            return solution;
+        }
+
+        // Compute the search direction as Newton step along the free space
+        qf_.resize(num_free);
+        xf_.resize(num_free);
+        xc_.resize(num_clamped);
+        dxf_.resize(num_free);
+        Hff.resize(num_free, num_free);
+        Hfc.resize(num_free, num_clamped);
+        for (std::size_t i = 0; i < num_free; ++i)
+        {
+            const std::size_t& fi = solution.free_idx[i];
+            qf_(i) = q(fi);
+            xf_(i) = x(fi);
+            for (std::size_t j = 0; j < num_free; ++j)
+            {
+                Hff(i, j) = H(fi, solution.free_idx[j]);
+            }
+            for (std::size_t j = 0; j < num_clamped; ++j)
+            {
+                const std::size_t cj = solution.clamped_idx[j];
+                xc_(j) = x(cj);
+                Hfc(i, j) = H(fi, cj);
             }
         }
+        if (lambda != 0.)
+        {
+            Hff.diagonal().array() += lambda;
+        }
 
-        // break if no step made
-        if (!armijo_reached) break;
+        // Compute the inverse
+        if (use_cholesky_factorization)
+        {
+            Hff_inv_llt_.compute(Hff);
+            const Eigen::ComputationInfo& info = Hff_inv_llt_.info();
+            if (info != Eigen::Success)
+            {
+                ThrowPretty("Error during Cholesky decomposition of Hff (iter=" << k << "):\n"
+                                                                                << Hff << "\n"
+                                                                                << "H:\n"
+                                                                                << H << "\nnum_free: " << num_free << " num_clamped: " << num_clamped << " lambda: " << lambda);
+            }
+            solution.Hff_inv.setIdentity(num_free, num_free);
+            Hff_inv_llt_.solveInPlace(solution.Hff_inv);
+        }
+        else
+        {
+            solution.Hff_inv = Hff.inverse();
+        }
+
+        dxf_ = -qf_;
+        if (num_clamped != 0)
+        {
+            dxf_.noalias() -= Hfc * xc_;
+        }
+        if (use_cholesky_factorization)
+        {
+            Hff_inv_llt_.solveInPlace(dxf_);
+        }
+        else
+        {
+            dxf_ = solution.Hff_inv * dxf_;
+        }
+        dxf_ -= xf_;
+        dx_.setZero();
+        for (std::size_t i = 0; i < num_free; ++i)
+        {
+            dx_(solution.free_idx[i]) = dxf_(i);
+        }
+
+        // Try different step lengths
+        Eigen::VectorXd xnew_(nx);
+        fold_ = 0.5 * x.dot(H * x) + q.dot(x);
+        for (std::vector<double>::const_iterator it = alphas_.begin(); it != alphas_.end(); ++it)
+        {
+            double steplength = *it;
+            for (std::size_t i = 0; i < nx; ++i)
+            {
+                xnew_(i) = std::max(std::min(x(i) + steplength * dx_(i), b_high(i)), b_low(i));
+            }
+            fnew_ = 0.5 * xnew_.dot(H * xnew_) + q.dot(xnew_);
+            if (fold_ - fnew_ > th_acceptstep * grad.dot(x - xnew_))
+            {
+                x = xnew_;
+                break;
+            }
+
+            // If line-search fails, return.
+            if (it == alphas_.end() - 1)
+            {
+                solution.x = x;
+                return solution;
+            }
+        }
     }
 
-    return {Hff_inv, x, free_idx, clamped_idx};
+    solution.x = x;
+    return solution;
 }
 
 inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
@@ -160,7 +266,7 @@ inline BoxQPSolution BoxQP(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
     constexpr double gamma = 0.1;
     constexpr int max_iterations = 100;
     constexpr double lambda = 1e-5;
-    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda);
+    return BoxQP(H, q, b_low, b_high, x_init, gamma, max_iterations, epsilon, lambda, true, true);
 }
 }  // namespace exotica
 

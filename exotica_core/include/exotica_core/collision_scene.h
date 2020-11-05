@@ -136,11 +136,14 @@ struct CollisionProxy
 };
 
 /// The class of collision scene
-class CollisionScene : public Uncopyable
+class CollisionScene : public Object, public Uncopyable, public virtual InstantiableBase
 {
 public:
     CollisionScene() {}
     virtual ~CollisionScene() {}
+    /// \brief Instantiates the base properties of the CollisionScene
+    virtual void InstantiateBase(const Initializer& init);
+
     /// @brief Setup additional construction that requires initialiser parameter
     virtual void Setup() {}
     /// @brief Returns whether two collision objects/shapes are allowed to collide by name.
@@ -148,7 +151,8 @@ public:
     /// @param o2 Name of the frame of the other collision object (e.g., base_link_collision_0)
     /// @return true The two objects are allowed to collide.
     /// @return false The two objects are excluded, e.g., by an ACM.
-    virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self) { ThrowPretty("Not implemented!"); }
+    virtual bool IsAllowedToCollide(const std::string& o1, const std::string& o2, const bool& self);
+
     /// \brief Checks if the whole robot is valid (collision only).
     /// @param self Indicate if self collision check is required.
     /// @return True, if the state is collision free..
@@ -320,6 +324,9 @@ protected:
 
     /// Replace cylinders with capsules internally
     bool replace_cylinders_with_capsules_ = false;
+
+    /// Filename for config file (YAML) which contains shape replacements
+    std::string robot_link_replacement_config_ = "";
 };
 
 typedef std::shared_ptr<CollisionScene> CollisionScenePtr;

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, Wolfgang Merkt
+// Copyright (c) 2018-2020, Wolfgang Merkt, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,45 +39,47 @@ void PointToPlane::Instantiate(const PointToPlaneInitializer& init)
 {
     if (debug_ && Server::IsRos())
     {
-        debug_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(
-            object_name_ + "/planes", 1, true);
+        debug_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(object_name_ + "/planes", 1, true);
     }
 }
 
-void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
+void PointToPlane::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of phi!");
 
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Eigen::Map<const Eigen::Vector3d> point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
-        phi(i) = Eigen::Vector3d::UnitZ().dot(point);
+        phi(i) = kinematics[0].Phi(i).p.data[2];
     }
 
     if (debug_ && Server::IsRos()) PublishDebug();
 }
 
-void PointToPlane::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void PointToPlane::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of phi!");
     if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
 
-    jacobian.setZero();
-
     for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
     {
-        Eigen::Map<const Eigen::Vector3d> point = Eigen::Map<const Eigen::Vector3d>(kinematics[0].Phi(i).p.data);
-
-        phi(i) = Eigen::Vector3d::UnitZ().dot(point);
-
-        for (int j = 0; j < jacobian.cols(); ++j)
-        {
-            Eigen::Map<const Eigen::Vector3d> dpoint = Eigen::Map<const Eigen::Vector3d>(kinematics[0].jacobian[i].getColumn(j).vel.data);
-            jacobian(i, j) = Eigen::Vector3d::UnitZ().dot(dpoint);
-        }
+        phi(i) = kinematics[0].Phi(i).p.data[2];
+        jacobian.row(i) = kinematics[0].jacobian[i].data.middleRows<1>(2);
     }
 
     if (debug_ && Server::IsRos()) PublishDebug();
+}
+
+void PointToPlane::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+{
+    if (phi.rows() != kinematics[0].Phi.rows()) ThrowNamed("Wrong size of Phi!");
+    if (jacobian.rows() != kinematics[0].jacobian.rows() || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
+
+    for (int i = 0; i < kinematics[0].Phi.rows(); ++i)
+    {
+        phi(i) = kinematics[0].Phi(i).p.data[2];
+        jacobian.row(i) = kinematics[0].jacobian[i].data.middleRows<1>(2);
+        hessian(i).block(0, 0, jacobian.cols(), jacobian.cols()) = kinematics[0].hessian[i](2);
+    }
 }
 
 int PointToPlane::TaskSpaceDim()

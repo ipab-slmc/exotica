@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 
 #include <exotica_ddp_solver/analytic_ddp_solver.h>
 #include <exotica_ddp_solver/control_limited_ddp_solver.h>
+#include <exotica_ddp_solver/control_limited_feasibility_driven_ddp_solver.h>
 #include <exotica_ddp_solver/feasibility_driven_ddp_solver.h>
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -43,12 +44,35 @@ PYBIND11_MODULE(exotica_ddp_solver_py, module)
 
     py::module::import("pyexotica");
 
-    py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, FeedbackMotionSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
+    py::class_<AbstractDDPSolver, std::shared_ptr<AbstractDDPSolver>, FeedbackMotionSolver>(module, "AbstractDDPSolver")
+        .def_property_readonly("Vxx", &AbstractDDPSolver::get_Vxx)
+        .def_property_readonly("Vx", &AbstractDDPSolver::get_Vx)
+        .def_property_readonly("Qxx", &AbstractDDPSolver::get_Qxx)
+        .def_property_readonly("Qux", &AbstractDDPSolver::get_Qux)
+        .def_property_readonly("Quu", &AbstractDDPSolver::get_Quu)
+        .def_property_readonly("Qx", &AbstractDDPSolver::get_Qx)
+        .def_property_readonly("Qu", &AbstractDDPSolver::get_Qu)
+        .def_property_readonly("K", &AbstractDDPSolver::get_K)
+        .def_property_readonly("k", &AbstractDDPSolver::get_k)
+        .def_property_readonly("X_try", &AbstractDDPSolver::get_X_try)
+        .def_property_readonly("U_try", &AbstractDDPSolver::get_U_try)
+        .def_property_readonly("X_ref", &AbstractDDPSolver::get_X_ref)
+        .def_property_readonly("U_ref", &AbstractDDPSolver::get_U_ref)
+        .def_property_readonly("Quu_inv", &AbstractDDPSolver::get_Quu_inv)
+        .def_property_readonly("fx", &AbstractDDPSolver::get_fx)
+        .def_property_readonly("fu", &AbstractDDPSolver::get_fu)
+        .def_property_readonly("control_cost_evolution", &AbstractDDPSolver::get_control_cost_evolution)
+        .def_property_readonly("steplength_evolution", &AbstractDDPSolver::get_steplength_evolution)
+        .def_property_readonly("regularization_evolution", &AbstractDDPSolver::get_regularization_evolution);
 
-    py::class_<ControlLimitedDDPSolver, std::shared_ptr<ControlLimitedDDPSolver>, FeedbackMotionSolver> control_limited_ddp_solver(module, "ControlLimitedDDPSolver");
+    py::class_<AnalyticDDPSolver, std::shared_ptr<AnalyticDDPSolver>, AbstractDDPSolver> analytic_ddp_solver(module, "AnalyticDDPSolver");
 
-    py::class_<FeasibilityDrivenDDPSolver, std::shared_ptr<FeasibilityDrivenDDPSolver>, FeedbackMotionSolver> feasibility_driven_ddp_solver(module, "FeasibilityDrivenDDPSolver");
+    py::class_<ControlLimitedDDPSolver, std::shared_ptr<ControlLimitedDDPSolver>, AbstractDDPSolver> control_limited_ddp_solver(module, "ControlLimitedDDPSolver");
+
+    py::class_<FeasibilityDrivenDDPSolver, std::shared_ptr<FeasibilityDrivenDDPSolver>, AbstractDDPSolver> feasibility_driven_ddp_solver(module, "FeasibilityDrivenDDPSolver");
     feasibility_driven_ddp_solver.def_property_readonly("fs", &FeasibilityDrivenDDPSolver::get_fs);
     feasibility_driven_ddp_solver.def_property_readonly("xs", &FeasibilityDrivenDDPSolver::get_xs);
     feasibility_driven_ddp_solver.def_property_readonly("us", &FeasibilityDrivenDDPSolver::get_us);
+
+    py::class_<ControlLimitedFeasibilityDrivenDDPSolver, std::shared_ptr<ControlLimitedFeasibilityDrivenDDPSolver>, AbstractDDPSolver> control_limited_feasibility_driven_ddp_solver(module, "ControlLimitedFeasibilityDrivenDDPSolver");
 }

@@ -62,6 +62,13 @@ void AbstractDynamicsSolver<T, NX, NU>::AssignScene(std::shared_ptr<Scene> scene
 }
 
 template <typename T, int NX, int NU>
+Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::F(const StateVector& x, const ControlVector& u)
+{
+    // TODO: Switch to Integrate here...
+    return SimulateOneStep(x, u);  // ToDo: Fold SimulateOneStep into here
+}
+
+template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::SetDt(double dt_in)
 {
     if (dt_in < 0.0001) ThrowPretty("dt needs to be strictly greater than 0. Provided: " << dt_in);
@@ -73,16 +80,21 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
 {
     switch (integrator_)
     {
-        // Forward Euler (RK1)
+        // Forward Euler (RK1), symplectic Euler
         case Integrator::RK1:
+        case Integrator::SymplecticEuler:
         {
             StateVector xdot = f(x, u);
-            // TODO: This is the explicit RK1. We can switch to semi-implicit.
-            return x + dt_ * xdot;
+            StateVector xout(get_num_state());
+            Integrate(x, xdot, dt_, xout);
+            return xout;
         }
-        // Explicit trapezoid rule (RK2)
+        // NB: RK2 and RK4 are currently deactivated as we do not yet have correct derivatives for state transitions.
+        /*// Explicit trapezoid rule (RK2)
         case Integrator::RK2:
         {
+            assert(num_positions_ == num_velocities_);  // If this is not true, we should have specialised methods.
+
             StateVector xdot0 = f(x, u);
             StateVector x1est = x + dt_ * xdot0;  // explicit Euler step
             StateVector xdot1 = f(x1est, u);
@@ -93,6 +105,8 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
         // Runge-Kutta 4
         case Integrator::RK4:
         {
+            assert(num_positions_ == num_velocities_);  // If this is not true, we should have specialised methods.
+
             StateVector k1 = dt_ * f(x, u);
             StateVector k2 = dt_ * f(x + 0.5 * k1, u);
             StateVector k3 = dt_ * f(x + 0.5 * k2, u);
@@ -100,20 +114,40 @@ Eigen::Matrix<T, NX, 1> AbstractDynamicsSolver<T, NX, NU>::SimulateOneStep(const
             StateVector dx = (k1 + k4) / 6. + (k2 + k3) / 3.;
 
             return x + dx;
-        }
+        }*/
+        default:
+            ThrowPretty("Not implemented!");
     };
-    ThrowPretty("Not implemented!");
 }
 
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::Integrate(const StateVector& x, const StateVector& dx, const double dt, StateVector& xout)
 {
+    assert(num_positions_ == num_velocities_);  // Integration on manifolds needs to be handled using function overloads in specific dynamics solvers.
+    assert(x.size() == get_num_state());
+    assert(dx.size() == get_num_state_derivative());
+    assert(xout.size() == get_num_state());
+    if (dt < 1e-6) ThrowPretty("dt needs to be positive!");
+
     switch (integrator_)
     {
-        // Forward Euler (RK1) - explicit
+        // Forward Euler (RK1)
         case Integrator::RK1:
         {
-            xout = x + dt * dx;
+            xout.noalias() = x + dt * dx;
+        }
+        break;
+
+        // Semi-implicit Euler
+        case Integrator::SymplecticEuler:
+        {
+            StateVector dx_new(get_num_state_derivative());
+            dx_new.head(num_positions_) = dt * x.tail(num_velocities_) + (dt * dt) * dx.tail(num_velocities_);
+            dx_new.tail(num_velocities_) = dt * dx.tail(num_velocities_);
+            xout.noalias() = x + dx_new;
+
+            // xout.tail(num_velocities_).noalias() = x.tail(num_velocities_) + dt * dx.tail(num_velocities_);  // Integrate acceleration to velocity
+            // xout.head(num_positions_).noalias() = x.head(num_positions_) + dt * xout.tail(num_velocities_);  // Integrate position with new velocity
         }
         break;
 
@@ -197,10 +231,12 @@ void AbstractDynamicsSolver<T, NX, NU>::set_integrator(Integrator integrator_in)
 }
 
 template <typename T, int NX, int NU>
-void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(std::string integrator_in)
+void AbstractDynamicsSolver<T, NX, NU>::SetIntegrator(const std::string& integrator_in)
 {
     if (integrator_in == "RK1")
         integrator_ = Integrator::RK1;
+    else if (integrator_in == "SymplecticEuler")
+        integrator_ = Integrator::SymplecticEuler;
     else if (integrator_in == "RK2")
         integrator_ = Integrator::RK2;
     else if (integrator_in == "RK4")
@@ -242,12 +278,22 @@ void AbstractDynamicsSolver<T, NX, NU>::set_control_limits(Eigen::VectorXdRefCon
 }
 
 template <typename T, int NX, int NU>
+void AbstractDynamicsSolver<T, NX, NU>::ClampToStateLimits(Eigen::Ref<Eigen::VectorXd> state_in)
+{
+    if (!has_state_limits_) ThrowPretty("No StateLimits!");
+    if (state_in.size() != get_num_state()) ThrowPretty("Wrong size state passed in!");
+    assert(state_in.size() == state_limits_lower_.size());
+    assert(state_limits_lower_.size() == state_limits_upper_.size());
+
+    state_in = state_in.cwiseMax(state_limits_lower_).cwiseMin(state_limits_upper_);
+}
+
+template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
 {
     if (second_order_derivatives_initialized_)
         return;
 
-    const int nx = get_num_state();
     const int ndx = get_num_state_derivative();
 
     fxx_default_ = Eigen::Tensor<T, 3>(ndx, ndx, ndx);
@@ -295,6 +341,12 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVec
     const int nx = get_num_state();
     const int ndx = get_num_state_derivative();
 
+    // This finite differencing only works with RK1 due to Integrate(x, u, dt)
+    // We thus store the previous Integrator, set it to RK1, then set it back
+    // afterwards.
+    Integrator previous_integrator = integrator_;
+    integrator_ = Integrator::RK1;  // Note, this by-passes potentially overriden virtual set_integrator callbacks
+
     // Finite differences
     Eigen::MatrixXd fx_fd(ndx, ndx);
     constexpr double eps = 1e-6;
@@ -304,11 +356,14 @@ Eigen::Matrix<T, NX, NX> AbstractDynamicsSolver<T, NX, NU>::fx_fd(const StateVec
         xdiff.setZero();
         xdiff(i) = eps / 2.0;
 
-        Integrate(x, xdiff, -1., x_low);
+        Integrate(x, -xdiff, 1., x_low);
         Integrate(x, xdiff, 1., x_high);
 
         fx_fd.col(i) = (f(x_high, u) - f(x_low, u)) / eps;
     }
+
+    // Reset integrator
+    integrator_ = previous_integrator;
 
     return fx_fd;
 }
@@ -350,8 +405,46 @@ Eigen::Matrix<T, NX, NU> AbstractDynamicsSolver<T, NX, NU>::fu(const StateVector
 template <typename T, int NX, int NU>
 void AbstractDynamicsSolver<T, NX, NU>::ComputeDerivatives(const StateVector& x, const ControlVector& u)
 {
+    // Compute derivatives of differential dynamics
     fx_ = fx(x, u);
     fu_ = fu(x, u);
+
+    // Compute derivatives of state transition function
+    // NB: In our "f" order, we have both velocity and acceleration. We only need the acceleration derivative part:
+    Eigen::Block<Eigen::MatrixXd> da_dx = fx_.block(num_velocities_, 0, num_velocities_, get_num_state_derivative());
+    Eigen::Block<Eigen::MatrixXd> da_du = fu_.block(num_velocities_, 0, num_velocities_, num_controls_);
+
+    // TODO: Do this only once...
+    Fx_.setZero(get_num_state_derivative(), get_num_state_derivative());
+    Fu_.setZero(get_num_state_derivative(), get_num_controls());
+
+    switch (integrator_)
+    {
+        // Forward Euler (RK1)
+        case Integrator::RK1:
+        {
+            Fx_.topRightCorner(num_velocities_, num_velocities_).diagonal().array() = dt_;
+            Fx_.bottomRows(num_velocities_).noalias() = dt_ * da_dx;
+            Fx_.diagonal().array() += 1.0;
+
+            Fu_.bottomRows(num_velocities_).noalias() = da_du * dt_;
+        }
+        break;
+        // Semi-implicit Euler
+        case Integrator::SymplecticEuler:
+        {
+            Fx_.topRows(num_velocities_).noalias() = da_dx * dt_ * dt_;
+            Fx_.bottomRows(num_velocities_).noalias() = da_dx * dt_;
+            Fx_.topRightCorner(num_velocities_, num_velocities_).diagonal().array() += dt_;
+            Fx_.diagonal().array() += 1.0;
+
+            Fu_.topRows(num_velocities_).noalias() = da_du * dt_ * dt_;  // Semi-implicit: configuration changes with acceleration in same step
+            Fu_.bottomRows(num_velocities_).noalias() = da_du * dt_;
+        }
+        break;
+        default:
+            ThrowPretty("Not implemented!");
+    };
 }
 
 template <typename T, int NX, int NU>
@@ -364,6 +457,18 @@ template <typename T, int NX, int NU>
 const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_fu() const
 {
     return fu_;
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NX>& AbstractDynamicsSolver<T, NX, NU>::get_Fx() const
+{
+    return Fx_;
+}
+
+template <typename T, int NX, int NU>
+const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_Fu() const
+{
+    return Fu_;
 }
 
 }  // namespace exotica

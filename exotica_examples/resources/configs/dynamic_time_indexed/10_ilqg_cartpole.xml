@@ -15,7 +15,7 @@
                 <SRDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
-                    <CartpoleDynamicsSolver Name="solver" Integrator="RK1">
+                    <CartpoleDynamicsSolver Name="solver">
                         <ControlLimitsLow>-25</ControlLimitsLow>
                         <ControlLimitsHigh>25</ControlLimitsHigh>
                         <dt>0.01</dt>
@@ -29,7 +29,6 @@
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
         <R_rate>0.1</R_rate>
-        <DiagonalNoiseMatrix>true</DiagonalNoiseMatrix>
 
         <!-- <C_rate>0.1</C_rate> -->
         <C>

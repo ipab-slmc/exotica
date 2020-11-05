@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, University of Edinburgh
+// Copyright (c) 2019-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <exotica_core/tools/box_qp.h>
+#include <exotica_core/tools/box_qp_old.h>
 #include <exotica_ddp_solver/control_limited_ddp_solver.h>
 
 REGISTER_MOTIONSOLVER_TYPE("ControlLimitedDDPSolver", exotica::ControlLimitedDDPSolver)
@@ -41,84 +43,76 @@ void ControlLimitedDDPSolver::Instantiate(const ControlLimitedDDPSolverInitializ
 
 void ControlLimitedDDPSolver::BackwardPass()
 {
-    const int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
-    const double dt = dynamics_solver_->get_dt();
-    // const double dt_squared = dynamics_solver_->get_dt() * dynamics_solver_->get_dt();
+    const Eigen::MatrixXd& control_limits = dynamics_solver_->get_control_limits();
 
-    Eigen::MatrixXd Qx, Qu, Qxx, Quu, Qux, Vxx;
-    Eigen::VectorXd Vx;
-    Eigen::MatrixXd Quu_inv(NU, NU);
-
-    Vx = prob_->GetStateCostJacobian(T - 1);
-    Vxx = prob_->GetStateCostHessian(T - 1);
-    const Eigen::MatrixXd control_limits = dynamics_solver_->get_control_limits();
+    Vx_.back().noalias() = prob_->GetStateCostJacobian(T_ - 1);
+    Vxx_.back().noalias() = prob_->GetStateCostHessian(T_ - 1);
 
     // concatenation axis for tensor products
     //  See https://eigen.tuxfamily.org/dox-devel/unsupported/eigen_tensors.html#title14
     Eigen::array<Eigen::IndexPair<int>, 1> dims = {Eigen::IndexPair<int>(1, 0)};
 
-    for (int t = T - 2; t >= 0; t--)
+    Eigen::VectorXd x(NX_), u(NU_);  // TODO: Replace
+    for (int t = T_ - 2; t >= 0; t--)
     {
-        Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
-        Eigen::MatrixXd fx = dynamics_solver_->fx(x, u),
-                        fu = dynamics_solver_->fu(x, u);
+        x = prob_->get_X(t);
+        u = prob_->get_U(t);
 
-        fx = fx * dynamics_solver_->get_dt() + Eigen::MatrixXd::Identity(fx.rows(), fx.cols());
-        fu = fu * dynamics_solver_->get_dt();
+        dynamics_solver_->ComputeDerivatives(x, u);
+        fx_[t].noalias() = dynamics_solver_->get_Fx();
+        fu_[t].noalias() = dynamics_solver_->get_Fu();
 
-        Qx = dt * prob_->GetStateCostJacobian(t) + fx.transpose() * Vx;  // lx + fx @ Vx
-        Qu = dt * prob_->GetControlCostJacobian(t) + fu.transpose() * Vx;
+        Qx_[t].noalias() = dt_ * prob_->GetStateCostJacobian(t) + fx_[t].transpose() * Vx_[t + 1];
+        Qu_[t].noalias() = dt_ * prob_->GetControlCostJacobian(t) + fu_[t].transpose() * Vx_[t + 1];
 
-        if (parameters_.UseSecondOrderDynamics)
+        // State regularization
+        Vxx_[t + 1].diagonal().array() += lambda_;
+
+        Qxx_[t].noalias() = dt_ * prob_->GetStateCostHessian(t) + fx_[t].transpose() * Vxx_[t + 1] * fx_[t];
+        Quu_[t].noalias() = dt_ * prob_->GetControlCostHessian(t) + fu_[t].transpose() * Vxx_[t + 1] * fu_[t];
+        // Qux_[t].noalias() = dt_ * prob_->GetStateControlCostHessian()  // TODO: Reactivate once we have costs that depend on both x and u!
+        Qux_[t].noalias() = fu_[t].transpose() * Vxx_[t + 1] * fx_[t];
+
+        if (parameters_.UseSecondOrderDynamics && dynamics_solver_->get_has_second_order_derivatives())
         {
-            // clang-format off
-            Eigen::Tensor<double, 1> Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx.data(), NX_);
-            Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx +
-                Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NX, NX
-                ) * dt;
-
-            Quu = dt * prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu +
-                Eigen::TensorToMatrix(
-                    (Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU, NU
-                ) * dt;
-
-            Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx +
-                Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU, NX
-                ) * dt;
-            // clang-format on
-        }
-        else
-        {
-            Qxx = dt * prob_->GetStateCostHessian(t) + fx.transpose() * Vxx * fx;
-            Quu = dt * prob_->GetControlCostHessian() + fu.transpose() * Vxx * fu;
-
-            // NOTE: Qux = Qxu for all robotics systems I have seen
-            //  this might need to be changed later on
-            Qux = dt * prob_->GetStateControlCostHessian() + fu.transpose() * Vxx * fx;
+            Eigen::Tensor<double, 1> Vx_tensor = Eigen::TensorMap<Eigen::Tensor<double, 1>>(Vx_[t + 1].data(), NDX_);
+            Qxx_[t].noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxx(x, u).contract(Vx_tensor, dims), NDX_, NDX_) * dt_;
+            Quu_[t].noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fuu(x, u).contract(Vx_tensor, dims), NU_, NU_) * dt_;
+            Qux_[t].noalias() += Eigen::TensorToMatrix((Eigen::Tensor<double, 2>)dynamics_solver_->fxu(x, u).contract(Vx_tensor, dims), NU_, NDX_) * dt_;
         }
 
         Eigen::VectorXd low_limit = control_limits.col(0) - u,
                         high_limit = control_limits.col(1) - u;
 
-        BoxQPSolution boxqp_sol = BoxQP(Quu, Qu, low_limit, high_limit, u, 0.1, 100, 1e-5, parameters_.RegularizationRate);
+        // Quu_.diagonal().array() += lambda_;
+        BoxQPSolution boxqp_sol;
+        if (parameters_.UseNewBoxQP)
+        {
+            boxqp_sol = BoxQP(Quu_[t], Qu_[t], low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
+        }
+        else
+        {
+            boxqp_sol = ExoticaBoxQP(Quu_[t], Qu_[t], low_limit, high_limit, u, 0.1, 100, 1e-5, lambda_, parameters_.BoxQPUsePolynomialLinesearch, parameters_.BoxQPUseCholeskyFactorization);
+        }
 
-        Quu_inv.setZero();
-        for (unsigned int i = 0; i < boxqp_sol.free_idx.size(); ++i)
-            for (unsigned int j = 0; j < boxqp_sol.free_idx.size(); ++j)
-                Quu_inv(boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
+        Quu_inv_[t].setZero();
+        if (boxqp_sol.free_idx.size() > 0)
+            for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i)
+                for (std::size_t j = 0; j < boxqp_sol.free_idx.size(); ++j)
+                    Quu_inv_[t](boxqp_sol.free_idx[i], boxqp_sol.free_idx[j]) = boxqp_sol.Hff_inv(i, j);
 
         // Compute controls
-        K_gains_[t] = -Quu_inv * Qux;
-        k_gains_[t] = boxqp_sol.x;
+        K_[t].noalias() = -Quu_inv_[t] * Qux_[t];
+        k_[t].noalias() = boxqp_sol.x;
 
-        for (unsigned int j = 0; j < boxqp_sol.clamped_idx.size(); ++j)
-            K_gains_[t](boxqp_sol.clamped_idx[j]) = 0;
+        // Update the value function w.r.t. u as k (feed-forward term) is clamped inside the BoxQP
+        if (boxqp_sol.free_idx.size() > 0)
+            for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i)
+                Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
 
-        Vx = Qx - K_gains_[t].transpose() * Quu * k_gains_[t];
-        Vxx = Qxx - K_gains_[t].transpose() * Quu * K_gains_[t];
+        Vx_[t].noalias() = Qx_[t] + K_[t].transpose() * Quu_[t] * k_[t] + K_[t].transpose() * Qu_[t] + Qux_[t].transpose() * k_[t];     // Eq. 25(b)
+        Vxx_[t].noalias() = Qxx_[t] + K_[t].transpose() * Quu_[t] * K_[t] + K_[t].transpose() * Qux_[t] + Qux_[t].transpose() * K_[t];  // Eq. 25(c)
+        Vxx_[t] = 0.5 * (Vxx_[t] + Vxx_[t].transpose()).eval();                                                                         // Ensure the Hessian of the value function is symmetric.
     }
 }
 

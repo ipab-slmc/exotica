@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -59,9 +59,9 @@ std::vector<KinematicFrameRequest> TaskMap::GetFrames() const
     return frames_;
 }
 
-void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian)
+void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
-    if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != x.rows())
+    if (jacobian.rows() != TaskSpaceDim() && jacobian.cols() != q.rows())
         ThrowNamed("Jacobian dimension mismatch!");
 
     if (scene_ == nullptr)
@@ -73,38 +73,60 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::M
     constexpr double h = 1e-6;
     constexpr double h_inverse = 1.0 / h;
 
-    // Compute x/Phi using forward mapping (no jacobian)
-    Update(x, Phi);
+    // Compute x/phi using forward mapping (no jacobian)
+    Update(q, phi);
 
     // Setup for gradient estimate
-    Eigen::VectorXd x_backward(x.size()), Phi_backward(TaskSpaceDim());
+    Eigen::VectorXd q_backward(q.size()), phi_backward(TaskSpaceDim());
 
     // Backward finite differencing
     for (int i = 0; i < jacobian.cols(); ++i)
     {
         // Compute and set x_backward as model state
-        x_backward = x;
-        x_backward(i) -= h;
-        scene_->GetKinematicTree().Update(x_backward);
+        q_backward = q;
+        q_backward(i) -= h;
+        scene_->GetKinematicTree().Update(q_backward);
 
         // Compute phi_backward using forward mapping (no jacobian)
-        Update(x_backward, Phi_backward);
+        Update(q_backward, phi_backward);
 
         // Compute gradient estimate
-        jacobian.col(i) = h_inverse * (Phi - Phi_backward);
+        jacobian.col(i).noalias() = h_inverse * (phi - phi_backward);
     }
 
     // Reset model state
-    scene_->GetKinematicTree().Update(x);
+    scene_->GetKinematicTree().Update(q);
 }
 
-void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef Phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
+void TaskMap::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
-    Update(x, Phi, jacobian);
-    hessian.resize(TaskSpaceDim());
-    for (int i = 0; i < TaskSpaceDim(); ++i)
+    Update(q, phi, jacobian);
+    const int ndq = scene_->get_has_quaternion_floating_base() ? scene_->get_num_positions() - 1 : scene_->get_num_positions();
+    for (int i = 0; i < TaskSpaceJacobianDim(); ++i)
     {
-        hessian(i) = jacobian.row(i).transpose() * jacobian.row(i);
+        Eigen::Block<Eigen::Ref<Eigen::MatrixXd>> jacobian_row = jacobian.block(i, 0, 1, ndq);
+        hessian(i).topLeftCorner(ndq, ndq).noalias() = jacobian_row.transpose() * jacobian_row;
     }
 }
+
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi)
+{
+    // WARNING("x,u update not implemented - defaulting to q update.");
+    Update(x.head(scene_->get_num_positions()), phi);
+}
+
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du)
+{
+    // WARNING("x,u update not implemented - defaulting to q update.");
+    const int ndq = scene_->get_has_quaternion_floating_base() ? scene_->get_num_positions() - 1 : scene_->get_num_positions();
+    Update(x.head(ndq), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), ndq));
+}
+
+void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
+{
+    // WARNING("x,u update not implemented - defaulting to q update.");
+    const int ndq = scene_->get_has_quaternion_floating_base() ? scene_->get_num_positions() - 1 : scene_->get_num_positions();
+    Update(x.head(ndq), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), ndq), ddphi_ddx);
+}
+
 }  // namespace

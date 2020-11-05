@@ -30,6 +30,10 @@ add_executable(example_cpp_init_xml src/xml.cpp)
 target_link_libraries(example_cpp_init_xml ${catkin_LIBRARIES})
 add_dependencies(example_cpp_init_xml ${catkin_EXPORTED_TARGETS})
 
+add_executable(example_cpp_xml_load_and_solve src/xml_load_and_solve.cpp)
+target_link_libraries(example_cpp_xml_load_and_solve ${catkin_LIBRARIES})
+add_dependencies(example_cpp_xml_load_and_solve ${catkin_EXPORTED_TARGETS})
+
 add_executable(example_cpp_planner src/planner.cpp)
 target_link_libraries(example_cpp_planner ${catkin_LIBRARIES})
 add_dependencies(example_cpp_planner ${catkin_EXPORTED_TARGETS})
@@ -41,6 +45,7 @@ add_dependencies(example_cpp_ik_minimal ${catkin_EXPORTED_TARGETS})
 install(TARGETS
   example_cpp_init_generic
   example_cpp_init_xml
+  example_cpp_xml_load_and_solve
   example_cpp_planner
   example_cpp_core
   example_cpp_ik_minimal
@@ -66,6 +71,7 @@ if(CATKIN_ENABLE_TESTING)
 
   add_rostest(test/python_tests.launch)
 
-  catkin_add_nosetests(test/run_tests.py)
+  catkin_add_nosetests(test/test_ompl_solver_bounds.py)
   catkin_add_nosetests(test/test_dynamics_solvers.py)
+  catkin_add_nosetests(test/test_dynamic_time_indexed_shooting_problem.py)
 endif()

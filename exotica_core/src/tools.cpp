@@ -115,6 +115,20 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
     }
 }
 
+std::shared_ptr<octomap::OcTree> LoadOctree(const std::string& file_path)
+{
+    std::shared_ptr<octomap::OcTree> octree(new octomap::OcTree(file_path));
+    if (!octree) ThrowPretty("Could not load OcTree!");
+    return octree;
+}
+
+std::shared_ptr<shapes::Shape> LoadOctreeAsShape(const std::string& file_path)
+{
+    std::shared_ptr<octomap::OcTree> octree = LoadOctree(file_path);
+    std::shared_ptr<shapes::Shape> shape(new shapes::OcTree(octree));
+    return shape;
+}
+
 std::string GetTypeName(const std::type_info& type)
 {
     int status;
@@ -186,4 +200,4 @@ bool PathExists(const std::string& path)
     std::ifstream file(ParsePath(path));
     return (bool)file;
 }
-}
+}  // namespace exotica

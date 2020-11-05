@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, University of Edinburgh
+// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -43,15 +43,18 @@ public:
 
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian) override;
+
     int TaskSpaceDim() override;
     int TaskSpaceJacobianDim() override;
 
     std::vector<TaskVectorEntry> GetLieGroupIndices() override;
-    RotationType rotation_type_ = RotationType::RPY;  // TODO: Make private with getter
+    const RotationType& get_rotation_type() const;
 
 private:
     int big_stride_;
     int small_stride_;
+    RotationType rotation_type_ = RotationType::RPY;
 };
 }  // namespace exotica
 

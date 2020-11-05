@@ -71,7 +71,8 @@ inline Eigen::Tensor<Scalar, sizeof...(Dims)> MatrixToTensor(const MatrixType<Sc
     constexpr int rank = sizeof...(Dims);
     return Eigen::TensorMap<Eigen::Tensor<const Scalar, rank>>(matrix.data(), {dims...});
 }
-}
+
+}  // namespace Eigen
 
 namespace exotica
 {
@@ -95,6 +96,38 @@ inline int GetRotationTypeLength(const RotationType& type)
     return types[static_cast<int>(type)];
 }
 
+inline RotationType GetRotationTypeFromString(const std::string& rotation_type)
+{
+    if (rotation_type == "Quaternion")
+    {
+        return RotationType::QUATERNION;
+    }
+    else if (rotation_type == "RPY")
+    {
+        return RotationType::RPY;
+    }
+    else if (rotation_type == "ZYX")
+    {
+        return RotationType::ZYX;
+    }
+    else if (rotation_type == "ZYZ")
+    {
+        return RotationType::ZYZ;
+    }
+    else if (rotation_type == "AngleAxis")
+    {
+        return RotationType::ANGLE_AXIS;
+    }
+    else if (rotation_type == "Matrix")
+    {
+        return RotationType::MATRIX;
+    }
+    else
+    {
+        ThrowPretty("Unsupported rotation type '" << rotation_type << "'");
+    }
+}
+
 KDL::Frame GetFrame(Eigen::VectorXdRefConst val);
 
 KDL::Frame GetFrameFromMatrix(Eigen::MatrixXdRefConst val);
@@ -104,6 +137,16 @@ Eigen::MatrixXd GetFrame(const KDL::Frame& val);
 Eigen::VectorXd GetFrameAsVector(const KDL::Frame& val, RotationType type = RotationType::RPY);
 
 Eigen::VectorXd GetRotationAsVector(const KDL::Frame& val, RotationType type);
+
+inline void NormalizeQuaternionInConfigurationVector(Eigen::Ref<Eigen::VectorXd> q)
+{
+    q.segment<4>(3) = Eigen::Quaterniond(q.segment<4>(3)).normalized().coeffs();
+}
+
+inline void SetDefaultQuaternionInConfigurationVector(Eigen::Ref<Eigen::VectorXd> q)
+{
+    q.segment<4>(3) = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0).normalized().coeffs();
+}
 
 typedef Eigen::Array<KDL::Frame, Eigen::Dynamic, 1> ArrayFrame;
 typedef Eigen::Array<KDL::Twist, Eigen::Dynamic, 1> ArrayTwist;

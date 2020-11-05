@@ -33,11 +33,10 @@ REGISTER_DYNAMICS_SOLVER_TYPE("DoubleIntegratorDynamicsSolver", exotica::DoubleI
 
 namespace exotica
 {
-DoubleIntegratorDynamicsSolver::DoubleIntegratorDynamicsSolver() = default;
-
 void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 {
     const int num_positions_in = scene_in->GetKinematicTree().GetNumControlledJoints();
+    if (debug_) HIGHLIGHT_NAMED("DoubleIntegratorDynamicsSolver::AssignScene", "Dimension: " << num_positions_in);
 
     num_positions_ = num_positions_in;
     num_velocities_ = num_positions_in;
@@ -52,6 +51,9 @@ void DoubleIntegratorDynamicsSolver::AssignScene(ScenePtr scene_in)
 
     fx_ = A_;
     fu_ = B_;
+
+    // Set up state transition derivative
+    DynamicsSolver::ComputeDerivatives(Eigen::VectorXd(num_positions_ + num_velocities_), Eigen::VectorXd(num_controls_));
 }
 
 Eigen::VectorXd DoubleIntegratorDynamicsSolver::f(const StateVector& x, const ControlVector& u)
@@ -61,7 +63,12 @@ Eigen::VectorXd DoubleIntegratorDynamicsSolver::f(const StateVector& x, const Co
 
 void DoubleIntegratorDynamicsSolver::ComputeDerivatives(const StateVector& x, const ControlVector& u)
 {
-    // Nothing to do here.
+    // If the integrator changed, set up state transition derivatives again:
+    if (integrator_ != last_integrator_)
+    {
+        DynamicsSolver::ComputeDerivatives(x, u);
+        last_integrator_ = integrator_;
+    }
 }
 
 Eigen::MatrixXd DoubleIntegratorDynamicsSolver::fx(const StateVector& x, const ControlVector& u)

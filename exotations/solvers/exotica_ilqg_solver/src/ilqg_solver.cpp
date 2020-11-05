@@ -52,7 +52,7 @@ void ILQGSolver::BackwardPass()
     constexpr double max_clamp_ = 1e10;
     const int T = prob_->get_T();
     const double dt = dynamics_solver_->get_dt();
-    const int NU = prob_->get_num_controls();
+    const int NU = prob_->GetScene()->get_num_controls();
 
     // Noise terms
     Eigen::VectorXd big_C_times_little_c = Eigen::VectorXd::Zero(NU, 1);
@@ -69,17 +69,15 @@ void ILQGSolver::BackwardPass()
         // eq. 3
         Eigen::VectorXd x = prob_->get_X(t), u = prob_->get_U(t);
         dynamics_solver_->ComputeDerivatives(x, u);
-        Eigen::MatrixXd A = dynamics_solver_->get_fx(), B = dynamics_solver_->get_fu();
-
-        A.noalias() = A * dt + Eigen::MatrixXd::Identity(A.rows(), A.cols());
-        B.noalias() = B * dt;
+        Eigen::MatrixXd A = dynamics_solver_->get_Fx();
+        Eigen::MatrixXd B = dynamics_solver_->get_Fu();
 
         double q0 = dt * (prob_->GetStateCost(t) + prob_->GetControlCost(t));
         // Aliases from the paper used. These are used with different names in e.g. DDPSolver.
         Eigen::MatrixXd q = dt * prob_->GetStateCostJacobian(t);
         Eigen::MatrixXd Q = dt * prob_->GetStateCostHessian(t);
         Eigen::MatrixXd r = dt * prob_->GetControlCostJacobian(t);
-        Eigen::MatrixXd R = dt * prob_->GetControlCostHessian();
+        Eigen::MatrixXd R = dt * prob_->GetControlCostHessian(t);
         Eigen::MatrixXd P = dt * prob_->GetStateControlCostHessian();
 
         Eigen::MatrixXd g = r + B.transpose() * s;
@@ -182,8 +180,8 @@ void ILQGSolver::Solve(Eigen::MatrixXd& solution)
     prob_->DisableStochasticUpdates();
 
     const int T = prob_->get_T();
-    const int NU = prob_->get_num_controls();
-    const int NX = prob_->get_num_positions() + prob_->get_num_velocities();
+    const int NU = prob_->GetScene()->get_num_controls();
+    const int NX = prob_->GetScene()->get_num_state();
     const double dt = dynamics_solver_->get_dt();
     prob_->ResetCostEvolution(GetNumberOfMaxIterations() + 1);
     prob_->PreUpdate();

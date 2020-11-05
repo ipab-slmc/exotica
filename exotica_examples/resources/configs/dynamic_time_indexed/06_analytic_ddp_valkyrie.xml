@@ -3,7 +3,7 @@
     <AnalyticDDPSolver Name="AnalyticDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>10</MaxIterations>
-        <UseSecondOrderDynamics>1</UseSecondOrderDynamics>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
     </AnalyticDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
@@ -16,7 +16,7 @@
             <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
 
             <DynamicsSolver>
-                <DoubleIntegratorDynamicsSolver Name="solver" Integrator="RK1">
+                <DoubleIntegratorDynamicsSolver Name="solver">
                     <dt>0.02</dt>
                     <ControlLimitsLow>-5</ControlLimitsLow>
                     <ControlLimitsHigh>5</ControlLimitsHigh>
@@ -27,7 +27,6 @@
         
         <T>150</T>
         <tau>0.02</tau>
-        <dt>0.02</dt>
         <Q_rate>0</Q_rate>
         <Qf_rate>10</Qf_rate>
         <R_rate>1e-3</R_rate>

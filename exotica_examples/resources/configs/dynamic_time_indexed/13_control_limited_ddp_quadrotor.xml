@@ -3,10 +3,8 @@
     <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
         <Debug>1</Debug>
         <MaxIterations>300</MaxIterations>
-        <FunctionTolerance>1e-5</FunctionTolerance>
-        <FunctionTolerancePatience>300</FunctionTolerancePatience>
         <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
-        <RegularizationRate>0.5</RegularizationRate>
+        <BoxQPUseCholeskyFactorization>1</BoxQPUseCholeskyFactorization>
     </ControlLimitedDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="MyProblem">
@@ -17,7 +15,7 @@
                 <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
                 <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
                 <DynamicsSolver>
-                    <QuadrotorDynamicsSolver Name="dsolver" Integrator="RK1">
+                    <QuadrotorDynamicsSolver Name="dsolver">
                         <ControlLimitsLow>0</ControlLimitsLow>
                         <ControlLimitsHigh>5</ControlLimitsHigh>
                         <dt>0.005</dt>
@@ -31,9 +29,9 @@
         
         <!-- Q rate penalizes large pitch/yaw maneuvers -->
         <Q>0 0 0 1 1 0 0 0 0 0 0 0</Q>
-        <Q_rate>10</Q_rate>
+        <Q_rate>1</Q_rate>
 
-        <Qf_rate>10</Qf_rate>
+        <Qf_rate>5</Qf_rate>
 
         <!-- Rate penalizes large control forces. -->
         <R_rate>0.1</R_rate>

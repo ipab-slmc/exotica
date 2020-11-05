@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, Wolfgang Merkt
+// Copyright (c) 2018-2020, Wolfgang Merkt, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,9 @@ class PointToPlane : public TaskMap, public Instantiable<PointToPlaneInitializer
 public:
     void Instantiate(const PointToPlaneInitializer &init) override;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi) override;
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
+    void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian, HessianRef hessian) override;
     int TaskSpaceDim() override;
 
 private:

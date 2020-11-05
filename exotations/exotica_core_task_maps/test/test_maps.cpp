@@ -191,6 +191,53 @@ bool test_jacobian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e
     return true;
 }
 
+bool test_hessian(UnconstrainedEndPoseProblemPtr problem, const double eps = 1e-5)
+{
+    constexpr double h = 1e-5;
+
+    TEST_COUT << "Testing Hessian with h=" << h << ", eps=" << eps;
+    for (int l = 0; l < num_trials_; ++l)
+    {
+        Eigen::VectorXd x0 = problem->GetScene()->GetKinematicTree().GetRandomControlledState();
+        problem->Update(x0);
+        const Hessian H0(problem->hessian);
+        Hessian hessian = Hessian::Constant(problem->length_jacobian, Eigen::MatrixXd::Zero(problem->N, problem->N));
+        Eigen::VectorXd x;
+        for (int j = 0; j < problem->N; ++j)
+        {
+            x = x0;
+            x(j) += h;
+            problem->Update(x);
+            const Eigen::MatrixXd J1 = problem->jacobian;
+            x = x0;
+            x(j) -= h;
+            problem->Update(x);
+            const Eigen::MatrixXd J2 = problem->jacobian;
+            for (int i = 0; i < problem->N; ++i)
+            {
+                for (int k = 0; k < problem->length_jacobian; ++k)
+                {
+                    hessian(k)(i, j) = (J1(k, i) - J2(k, i)) / (2.0 * h);
+                }
+            }
+        }
+        double errH = 0;
+        for (int i = 0; i < hessian.rows(); ++i) errH += (hessian(i) - H0(i)).norm();
+        if (errH > eps)
+        {
+            TEST_COUT << "x: " << x0.transpose();
+            TEST_COUT << "H*:\n";
+            for (int i = 0; i < problem->length_jacobian; ++i) TEST_COUT << hessian(i) << "\n\n";
+            TEST_COUT << "\n\n...";
+            TEST_COUT << "H:\n";
+            for (int i = 0; i < problem->length_jacobian; ++i) TEST_COUT << H0(i) << "\n\n";
+            TEST_COUT << "\n\n...";
+            ADD_FAILURE() << "Hessian error out of bounds: " << errH;
+        }
+    }
+    return true;
+}
+
 template <class T>
 bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& task, int t, const double eps = 1e-5)
 {
@@ -230,14 +277,19 @@ bool test_jacobian_time_indexed(std::shared_ptr<T> problem, TimeIndexedTask& tas
 UnconstrainedEndPoseProblemPtr setup_problem(Initializer& map, const std::string& collision_scene = "", const std::vector<Initializer>& links = std::vector<Initializer>())
 {
     Initializer scene;
-    if (collision_scene != "")
-        scene = Initializer("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}, {"Links", links}, {"CollisionScene", std::string(collision_scene)}});
+    if (!collision_scene.empty())
+        scene = Initializer("Scene", {{"Name", std::string("MyScene")},
+                                      {"JointGroup", std::string("arm")},
+                                      {"Links", links},
+                                      {"AlwaysUpdateCollisionScene", std::string("1")},
+                                      {"CollisionScene", std::vector<Initializer>({Initializer(collision_scene, {{"Name", std::string("MyCollisionScene")}})})}});
     else
         scene = Initializer("Scene", {{"Name", std::string("MyScene")}, {"JointGroup", std::string("arm")}, {"Links", links}});
     Initializer cost("exotica/Task", {{"Task", std::string("MyTask")}});
     Eigen::VectorXd W = Eigen::Vector3d(3, 2, 1);
     Initializer problem("exotica/UnconstrainedEndPoseProblem", {
                                                                    {"Name", std::string("MyProblem")},
+                                                                   {"DerivativeOrder", std::string("2")},
                                                                    {"PlanningScene", scene},
                                                                    {"Maps", std::vector<Initializer>({map})},
                                                                    {"Cost", std::vector<Initializer>({cost})},
@@ -302,6 +354,7 @@ TEST(ExoticaTaskMaps, testEffPositionXY)
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
     }
     catch (const std::exception& e)
     {
@@ -332,6 +385,7 @@ TEST(ExoticaTaskMaps, testEffPosition)
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
 
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
     }
     catch (const std::exception& e)
     {
@@ -345,8 +399,6 @@ TEST(ExoticaTaskMaps, testEffOrientation)
     {
         TEST_COUT << "End-effector orientation test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
-        std::vector<double> eps = {2e-5, 2e-5, 2e-5, 2e-5, 2e-5, 2e-5};
-        // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
         for (std::size_t i = 0; i < types.size(); ++i)
         {
@@ -359,7 +411,8 @@ TEST(ExoticaTaskMaps, testEffOrientation)
 
             EXPECT_TRUE(test_random(problem));
 
-            EXPECT_TRUE(test_jacobian(problem, eps[i]));
+            EXPECT_TRUE(test_jacobian(problem));
+            EXPECT_TRUE(test_hessian(problem));
         }
     }
     catch (const std::exception& e)
@@ -393,12 +446,10 @@ TEST(ExoticaTaskMaps, testEffFrame)
     {
         TEST_COUT << "End-effector frame test";
         std::vector<std::string> types = {"Quaternion", "ZYX", "ZYZ", "AngleAxis", "Matrix", "RPY"};
-        std::vector<double> eps = {2e-5, 2e-5, 2e-5, 2e-5, 2e-5, 2e-5};
-        // TODO: Quaternion does not pass the test with precision 1e-5. Investigate why.
 
         for (std::size_t i = 0; i < types.size(); ++i)
         {
-            std::string type = types[i];
+            const std::string& type = types[i];
             TEST_COUT << "Rotation type " << type;
             Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
                                                  {"Type", type},
@@ -406,7 +457,24 @@ TEST(ExoticaTaskMaps, testEffFrame)
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
 
-            EXPECT_TRUE(test_jacobian(problem, eps[i]));
+            EXPECT_TRUE(test_jacobian(problem));
+            EXPECT_TRUE(test_hessian(problem));
+        }
+
+        // Multi-end-effector test case
+        for (std::size_t i = 0; i < types.size(); ++i)
+        {
+            const std::string& type = types[i];
+            TEST_COUT << "[Multi end-effector] Rotation type " << type;
+            Initializer map("exotica/EffFrame", {{"Name", std::string("MyTask")},
+                                                 {"Type", type},
+                                                 {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("endeff")}}),
+                                                                                           Initializer("Frame", {{"Link", std::string("link3")}})})}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+            EXPECT_TRUE(test_random(problem));
+
+            EXPECT_TRUE(test_jacobian(problem));
+            EXPECT_TRUE(test_hessian(problem));
         }
     }
     catch (const std::exception& e)
@@ -470,6 +538,7 @@ TEST(ExoticaTaskMaps, testDistance)
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
 
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem, 1e-2));
     }
     catch (const std::exception& e)
     {
@@ -486,32 +555,8 @@ TEST(ExoticaTaskMaps, testJointLimit)
                                                {"SafePercentage", 0.0}});
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
-
-        int N = problem->N;
-        int M = problem->length_Phi;
-        int L = 5;
-        Eigen::MatrixXd X(L, N);
-        Eigen::MatrixXd Y(L, M);
-        Eigen::MatrixXd jacobian(L * M, N);
-
-        X << 0.0258648, 0.678224, 0.22528, -0.407937, 0.275105, 0.0485744, -0.012834, 0.94555, -0.414966, 0.542715, 0.05349, 0.539828, -0.199543, 0.783059, -0.433371;
-        Y << 0, 0.278224, 0, -0.00793676, 0, 0, 0, 0.54555, -0.0149664, 0.142715, 0, 0.139828, 0, 0.383059, -0.0333705;
-        jacobian << 1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1;
-        EXPECT_TRUE(test_values(X, Y, jacobian, problem));
+        EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
     }
     catch (const std::exception& e)
     {
@@ -628,6 +673,8 @@ TEST(ExoticaTaskMaps, testSphereCollision)
             0, -0.349195, -0.447214,
             0, -0.270171, -0.430172;
         EXPECT_TRUE(test_values(X, Y, jacobian, problem));
+
+        // EXPECT_TRUE(test_jacobian(problem));  // Throws!
     }
     catch (const std::exception& e)
     {
@@ -672,6 +719,7 @@ TEST(ExoticaTaskMaps, testJointPose)
             EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
 
         TEST_COUT << "JointPose test with reference";
         map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
@@ -707,6 +755,7 @@ TEST(ExoticaTaskMaps, testJointPose)
             EXPECT_TRUE(test_values(X, Y, jacobian, problem));
         }
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
 
         TEST_COUT << "JointPose test with subset of joints";
         map = Initializer("exotica/JointPose", {{"Name", std::string("MyTask")},
@@ -897,6 +946,7 @@ TEST(ExoticaTaskMaps, testContinuousJointPose)
         UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
+        EXPECT_TRUE(test_hessian(problem));
     }
     catch (const std::exception& e)
     {
@@ -1024,6 +1074,7 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
+            EXPECT_TRUE(test_hessian(problem));
         }
 
         {
@@ -1034,6 +1085,7 @@ TEST(ExoticaTaskMaps, testPoint2Plane)
             UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
+            EXPECT_TRUE(test_hessian(problem));
         }
     }
     catch (const std::exception& e)
@@ -1052,7 +1104,7 @@ TEST(ExoticaTaskMaps, testCollisionDistance)
                                                       {"WorldMargin", 0.0},
                                                       {"RobotMargin", 0.0},
                                                       {}});
-        UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
+        UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "exotica/CollisionSceneFCLLatest");
         EXPECT_TRUE(test_random(problem));
         // EXPECT_TRUE(test_jacobian(problem, 1e-2));  // Currently failing
     }
@@ -1077,7 +1129,7 @@ TEST(ExoticaTaskMaps, testSmoothCollisionDistance)
                                                                 {"RobotMargin", 0.01},
                                                                 {"Linear", is_linear},
                                                                 {}});
-            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "CollisionSceneFCLLatest");
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map, "exotica/CollisionSceneFCLLatest");
             EXPECT_TRUE(test_random(problem));
             EXPECT_TRUE(test_jacobian(problem));
         }

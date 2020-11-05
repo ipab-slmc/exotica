@@ -4,7 +4,7 @@
   <version>5.1.3</version>
   <description>SciPy-based Python solvers for Exotica</description>
 
-  <maintainer email="wolfgang.merkt@ed.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
   <author>Wolfgang Merkt</author>
 
   <license>BSD</license>

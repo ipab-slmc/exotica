@@ -62,7 +62,7 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
                 // No child tags = this is an empty vector of properties
                 return;
             }
-            std::string value = tag.ToElement()->GetText();
+            const std::string value = tag.ToElement()->GetText();
             parent.AddProperty(Property(name, true, value));
         }
         else
@@ -179,11 +179,11 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
         if (xml_file.Error())
         {
 #ifdef TINYXML_HAS_ERROR_STR
-            ThrowPretty("Can't load file!\n"
-                        << xml_file.ErrorStr() << "\nFile: '" + ParsePath(file_name) + "'");
+            ThrowPretty("Can't load file! Return code: " << return_code << "\n"
+                                                         << xml_file.ErrorStr() << "\nFile: '" + ParsePath(file_name) + "'");
 #else
-            ThrowPretty("Can't load file!"
-                        << "\nFile: '" + ParsePath(file_name) + "'");
+            ThrowPretty("Can't load file! Return code: " << return_code << "\n"
+                                                         << "File: '" + ParsePath(file_name) + "'");
 #endif
         }
     }
@@ -257,4 +257,4 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
     if (!found_solver) ThrowPretty("Can't find solver '" + solver_name + "' in '" + file_name + "'!");
     if (!found_problem) ThrowPretty("Can't find problem '" + problem_name + "' in '" + file_name + "'!");
 }
-}
+}  // namespace exotica

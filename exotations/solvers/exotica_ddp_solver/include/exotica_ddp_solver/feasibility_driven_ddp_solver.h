@@ -42,12 +42,14 @@ class AbstractFeasibilityDrivenDDPSolver : public AbstractDDPSolver
 {
 public:
     void Solve(Eigen::MatrixXd& solution) override;
+    void SpecifyProblem(PlanningProblemPtr pointer) override;
 
     const std::vector<Eigen::VectorXd>& get_fs() const { return fs_; };
     const std::vector<Eigen::VectorXd>& get_xs() const { return xs_; };
     const std::vector<Eigen::VectorXd>& get_us() const { return us_; };
 protected:
     int NDX_;
+    int last_T_ = -1;
 
     void IncreaseRegularization();
     void DecreaseRegularization();
@@ -81,13 +83,14 @@ protected:
     double initial_regularization_rate_ = 1e-9;             // Set from parameters on Instantiate
     bool clamp_to_control_limits_in_forward_pass_ = false;  // Set from parameters on Instantiate
 
-    double steplength_;           //!< Current applied step-length
-    Eigen::Vector2d d_;           //!< LQ approximation of the expected improvement
-    double dV_;                   //!< Cost reduction obtained by TryStep
-    double dVexp_;                //!< Expected cost reduction
-    double th_acceptstep_ = 0.1;  //!< Threshold used for accepting step
-    double th_stop_ = 1e-9;       //!< Tolerance for stopping the algorithm
-    double stop_;                 //!< Value computed by CheckStoppingCriteria
+    double steplength_;                  //!< Current applied step-length
+    Eigen::Vector2d d_;                  //!< LQ approximation of the expected improvement
+    double dV_;                          //!< Cost reduction obtained by TryStep
+    double dVexp_;                       //!< Expected cost reduction
+    double th_acceptstep_ = 0.1;         //!< Threshold used for accepting step
+    double th_stop_ = 1e-9;              //!< Tolerance for stopping the algorithm
+    double th_gradient_tolerance_ = 0.;  //!< Gradient tolerance
+    double stop_;                        //!< Value computed by CheckStoppingCriteria
 
     double dg_ = 0.;
     double dq_ = 0.;
@@ -102,28 +105,19 @@ protected:
     double regmax_ = 1e9;     //!< Maximum regularization (to exit by divergence)
     double regfactor_ = 10.;  //!< Factor by which the regularization gets increased/decreased
 
-    double cost_try_;                      //!< Total cost computed by line-search procedure
     std::vector<Eigen::VectorXd> xs_try_;  //!< State trajectory computed by line-search procedure
     std::vector<Eigen::VectorXd> us_try_;  //!< Control trajectory computed by line-search procedure
     std::vector<Eigen::VectorXd> dx_;
 
     // allocate data
-    std::vector<Eigen::MatrixXd> Vxx_;  //!< Hessian of the Value function
-    std::vector<Eigen::VectorXd> Vx_;   //!< Gradient of the Value function
-    std::vector<Eigen::MatrixXd> Qxx_;  //!< Hessian of the Hamiltonian
-    std::vector<Eigen::MatrixXd> Qxu_;  //!< Hessian of the Hamiltonian
-    std::vector<Eigen::MatrixXd> Quu_;  //!< Hessian of the Hamiltonian
-    std::vector<Eigen::VectorXd> Qx_;   //!< Gradient of the Hamiltonian
-    std::vector<Eigen::VectorXd> Qu_;   //!< Gradient of the Hamiltonian
-    std::vector<Eigen::MatrixXd> K_;    //!< Feedback gains
-    std::vector<Eigen::VectorXd> k_;    //!< Feed-forward terms
-    std::vector<Eigen::VectorXd> fs_;   //!< Gaps/defects between shooting nodes
+    std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
 
     Eigen::VectorXd xnext_;
     Eigen::MatrixXd FxTVxx_p_;
     std::vector<Eigen::MatrixXd> FuTVxx_p_;
+    std::vector<Eigen::MatrixXd> Qxu_;
     Eigen::VectorXd fTVxx_p_;
-    std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;
+    std::vector<Eigen::LDLT<Eigen::MatrixXd> > Quu_ldlt_;
     std::vector<Eigen::VectorXd> Quuk_;
     double th_grad_ = 1e-12;     //!< Tolerance of the expected gradient used for testing the step
     double th_stepdec_ = 0.5;    //!< Step-length threshold used to decrease regularization

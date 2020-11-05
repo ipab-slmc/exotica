@@ -36,6 +36,8 @@
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_model/robot_model.h>
+#include <octomap_msgs/Octomap.h>
+#include <octomap_msgs/conversions.h>
 #include <tf_conversions/tf_kdl.h>
 #include <kdl/frames_io.hpp>
 #include <kdl_parser/kdl_parser.hpp>
@@ -56,8 +58,9 @@ KinematicResponse::KinematicResponse(KinematicRequestFlags _flags, int _size, in
     if (flags & KIN_FK_VEL) Phi_dot.resize(_size);
     KDL::Jacobian Jzero(_n);
     Jzero.data.setZero();
+    Hessian Hzero = Hessian::Constant(6, Eigen::MatrixXd::Zero(_n, _n));
     if (_flags & KIN_J) jacobian = ArrayJacobian::Constant(_size, Jzero);
-    if (_flags & KIN_J_DOT) jacobian_dot = ArrayJacobian::Constant(_size, Jzero);
+    if (_flags & KIN_H) hessian = ArrayHessian::Constant(_size, Hzero);
     x.setZero(_n);
 }
 
@@ -82,7 +85,7 @@ void KinematicSolution::Create(std::shared_ptr<KinematicResponse> solution)
     new (&X) Eigen::Map<Eigen::VectorXd>(solution->x.data(), solution->x.rows());
     if (solution->flags & KIN_FK_VEL) new (&Phi_dot) Eigen::Map<ArrayTwist>(solution->Phi_dot.data() + start, length);
     if (solution->flags & KIN_J) new (&jacobian) Eigen::Map<ArrayJacobian>(solution->jacobian.data() + start, length);
-    if (solution->flags & KIN_J_DOT) new (&jacobian_dot) Eigen::Map<ArrayJacobian>(solution->jacobian_dot.data() + start, length);
+    if (solution->flags & KIN_H) new (&hessian) Eigen::Map<ArrayHessian>(solution->hessian.data() + start, length);
 }
 
 int KinematicTree::GetNumControlledJoints() const
@@ -148,6 +151,7 @@ void KinematicTree::Instantiate(const std::string& joint_group, robot_model::Rob
     if (Server::IsRos())
     {
         shapes_pub_ = Server::Advertise<visualization_msgs::MarkerArray>(name_ + (name_ == "" ? "" : "/") + "CollisionShapes", 1, true);
+        octomap_pub_ = Server::Advertise<octomap_msgs::Octomap>(name_ + (name_ == "" ? "" : "/") + "OctoMap", 1, true);
         debug_scene_changed_ = true;
         // Clear scene
         visualization_msgs::MarkerArray msg;
@@ -323,6 +327,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     acceleration_limits_ = Eigen::VectorXd::Zero(num_controlled_joints_);
     ResetJointLimits();
 
+    if (debug) HIGHLIGHT_NAMED("KinematicTree::BuildTree", "Number of controlled joints: " << num_controlled_joints_ << " - Number of model joints: " << num_joints_);
+
     // Create random distributions for state sampling
     generator_ = std::mt19937(rd_());
 
@@ -384,6 +390,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
                         visual.shape = std::shared_ptr<shapes::Mesh>(shapes::createMeshFromResource(mesh->filename));
                     }
                     break;
+                    default:
+                        ThrowPretty("Unknown geometry type: " << urdf_visual->geometry->type);
                 }
                 element->visual.push_back(visual);
                 ++i;
@@ -600,11 +608,10 @@ int KinematicTree::IsControlledLink(const std::string& link_name)
 std::shared_ptr<KinematicResponse> KinematicTree::RequestFrames(const KinematicsRequest& request)
 {
     flags_ = request.flags;
-    if (flags_ & KIN_J_DOT) flags_ = flags_ | KIN_J;
+    if (flags_ & KIN_H) flags_ = flags_ | KIN_J;
     solution_.reset(new KinematicResponse(flags_, request.frames.size(), num_controlled_joints_));
 
     state_size_ = num_controlled_joints_;
-    if (((flags_ & KIN_FK_VEL) || (flags_ & KIN_J_DOT))) state_size_ = num_controlled_joints_;
 
     for (int i = 0; i < request.frames.size(); ++i)
     {
@@ -661,7 +668,7 @@ void KinematicTree::Update(Eigen::VectorXdRefConst x)
     UpdateTree();
     UpdateFK();
     if (flags_ & KIN_J) UpdateJ();
-    if (flags_ & KIN_J && flags_ & KIN_J_DOT) UpdateJdot();
+    if (flags_ & KIN_J && flags_ & KIN_H) UpdateH();
     if (debug) PublishFrames();
 }
 
@@ -702,7 +709,7 @@ void KinematicTree::UpdateTree()
     }
 }
 
-void KinematicTree::PublishFrames()
+void KinematicTree::PublishFrames(const std::string& tf_prefix)
 {
     if (Server::IsRos())
     {
@@ -713,7 +720,7 @@ void KinematicTree::PublishFrames()
             {
                 tf::Transform T;
                 tf::transformKDLToTF(element.lock()->frame, T);
-                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", GetRootFrameName()), tf::resolve("exotica", element.lock()->segment.getName()));
+                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, element.lock()->segment.getName()));
                 ++i;
             }
             Server::SendTransform(debug_tree_);
@@ -722,9 +729,9 @@ void KinematicTree::PublishFrames()
             {
                 tf::Transform T;
                 tf::transformKDLToTF(frame.temp_B, T);
-                debug_frames_[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", GetRootFrameName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
+                debug_frames_[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
                 tf::transformKDLToTF(frame.temp_AB, T);
-                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve("exotica", "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve("exotica", "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
+                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
                 ++i;
             }
             Server::SendTransform(debug_frames_);
@@ -745,7 +752,7 @@ void KinematicTree::PublishFrames()
                     mrk.id = i;
                     mrk.ns = "CollisionObjects";
                     mrk.color = GetColor(tree_[i].lock()->color);
-                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
+                    mrk.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
                     mrk.pose.orientation.w = 1.0;
                     mrk.type = visualization_msgs::Marker::MESH_RESOURCE;
                     mrk.mesh_resource = tree_[i].lock()->shape_resource_path;
@@ -757,16 +764,29 @@ void KinematicTree::PublishFrames()
                 }
                 else if (tree_[i].lock()->shape && (!tree_[i].lock()->closest_robot_link.lock() || !tree_[i].lock()->closest_robot_link.lock()->is_robot_link))
                 {
-                    visualization_msgs::Marker mrk;
-                    shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
-                    mrk.action = visualization_msgs::Marker::ADD;
-                    mrk.frame_locked = true;
-                    mrk.id = i;
-                    mrk.ns = "CollisionObjects";
-                    mrk.color = GetColor(tree_[i].lock()->color);
-                    mrk.header.frame_id = "exotica/" + tree_[i].lock()->segment.getName();
-                    mrk.pose.orientation.w = 1.0;
-                    marker_array_msg_.markers.push_back(mrk);
+                    if (tree_[i].lock()->shape->type != shapes::ShapeType::OCTREE)
+                    {
+                        visualization_msgs::Marker mrk;
+                        shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
+                        mrk.action = visualization_msgs::Marker::ADD;
+                        mrk.frame_locked = true;
+                        mrk.id = i;
+                        mrk.ns = "CollisionObjects";
+                        mrk.color = GetColor(tree_[i].lock()->color);
+                        mrk.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
+                        mrk.pose.orientation.w = 1.0;
+                        marker_array_msg_.markers.push_back(mrk);
+                    }
+                    else
+                    {
+                        // OcTree needs separate handling as it's not supported in constructMarkerFromShape
+                        // NB: This only supports a single OctoMap in the KinematicTree as we only have one publisher!
+                        octomap::OcTree my_octomap = *std::static_pointer_cast<const shapes::OcTree>(tree_[i].lock()->shape)->octree.get();
+                        octomap_msgs::Octomap octomap_msg;
+                        octomap_msgs::binaryMapToMsg(my_octomap, octomap_msg);
+                        octomap_msg.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
+                        octomap_pub_.publish(octomap_msg);
+                    }
                 }
             }
             shapes_pub_.publish(marker_array_msg_);
@@ -838,52 +858,36 @@ Eigen::MatrixXd KinematicTree::Jacobian(const std::string& element_A, const KDL:
     return Jacobian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
-Eigen::MatrixXd KinematicTree::Jdot(const KDL::Jacobian& jacobian)
+exotica::Hessian KinematicTree::Hessian(std::shared_ptr<KinematicElement> element_A, const KDL::Frame& offset_a, std::shared_ptr<KinematicElement> element_B, const KDL::Frame& offset_b) const
 {
-    KDL::Jacobian Jdot;
-    ComputeJdot(jacobian, Jdot);
-    return Jdot.data;
+    if (!element_A) ThrowPretty("The pointer to KinematicElement A is dead.");
+    KinematicFrame frame;
+    frame.frame_A = element_A;
+    frame.frame_B = (element_B == nullptr) ? root_ : element_B;
+    frame.frame_A_offset = offset_a;
+    frame.frame_B_offset = offset_b;
+    KDL::Jacobian J(num_controlled_joints_);
+    ComputeJ(frame, J);
+    exotica::Hessian hessian = exotica::Hessian::Constant(6, Eigen::MatrixXd::Zero(num_controlled_joints_, num_controlled_joints_));
+    ComputeH(frame, J, hessian);
+    return hessian;
 }
 
-void KinematicTree::ComputeJdot(const KDL::Jacobian& jacobian, KDL::Jacobian& jacobian_dot) const
+exotica::Hessian KinematicTree::Hessian(const std::string& element_A, const KDL::Frame& offset_a, const std::string& element_B, const KDL::Frame& offset_b) const
 {
-    jacobian_dot.data.setZero(jacobian.rows(), jacobian.columns());
-    for (int i = 0; i < jacobian.columns(); ++i)
-    {
-        KDL::Twist tmp;
-        for (int j = 0; j < jacobian.columns(); ++j)
-        {
-            KDL::Twist jac_i_ = jacobian.getColumn(i);
-            KDL::Twist jac_j_ = jacobian.getColumn(j);
-            KDL::Twist t_djdq_;
-
-            if (j < i)
-            {
-                t_djdq_.vel = jac_j_.rot * jac_i_.vel;
-                t_djdq_.rot = jac_j_.rot * jac_i_.rot;
-            }
-            else if (j > i)
-            {
-                KDL::SetToZero(t_djdq_.rot);
-                t_djdq_.vel = -jac_j_.vel * jac_i_.rot;
-            }
-            else if (j == i)
-            {
-                // ref (40)
-                KDL::SetToZero(t_djdq_.rot);
-                t_djdq_.vel = jac_i_.rot * jac_i_.vel;
-            }
-
-            tmp += t_djdq_;
-        }
-        jacobian_dot.setColumn(i, tmp);
-    }
+    std::string name_a = element_A == "" ? root_->segment.getName() : element_A;
+    std::string name_b = element_B == "" ? root_->segment.getName() : element_B;
+    auto A = tree_map_.find(name_a);
+    if (A == tree_map_.end()) ThrowPretty("Can't find link '" << name_a << "'!");
+    auto B = tree_map_.find(name_b);
+    if (B == tree_map_.end()) ThrowPretty("Can't find link '" << name_b << "'!");
+    return this->Hessian(A->second.lock(), offset_a, B->second.lock(), offset_b);
 }
 
 void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) const
 {
     jacobian.data.setZero();
-    KDL::Frame tmp = FK(frame);  // Create temporary offset frames
+    (void)FK(frame);  // Create temporary offset frames
     std::shared_ptr<KinematicElement> it = frame.frame_A.lock();
     while (it != nullptr)
     {
@@ -908,6 +912,39 @@ void KinematicTree::ComputeJ(KinematicFrame& frame, KDL::Jacobian& jacobian) con
     }
 }
 
+void KinematicTree::ComputeH(KinematicFrame& frame, const KDL::Jacobian& jacobian, exotica::Hessian& hessian) const
+{
+    hessian.conservativeResize(6);
+    for (int i = 0; i < 6; ++i)
+    {
+        hessian(i).resize(jacobian.columns(), jacobian.columns());
+        hessian(i).setZero();
+    }
+
+    KDL::Twist axis;
+
+    for (int i = 0; i < jacobian.columns(); ++i)
+    {
+        axis.rot = jacobian.getColumn(i).rot;
+        for (int j = i; j < jacobian.columns(); ++j)
+        {
+            KDL::Twist Hij = axis * jacobian.getColumn(j);
+            hessian(0)(i, j) = Hij[0];
+            hessian(1)(i, j) = Hij[1];
+            hessian(2)(i, j) = Hij[2];
+            hessian(0)(j, i) = Hij[0];
+            hessian(1)(j, i) = Hij[1];
+            hessian(2)(j, i) = Hij[2];
+            if (i != j)
+            {
+                hessian(3)(j, i) = Hij[3];
+                hessian(4)(j, i) = Hij[4];
+                hessian(5)(j, i) = Hij[5];
+            }
+        }
+    }
+}
+
 void KinematicTree::UpdateJ()
 {
     int i = 0;
@@ -918,12 +955,12 @@ void KinematicTree::UpdateJ()
     }
 }
 
-void KinematicTree::UpdateJdot()
+void KinematicTree::UpdateH()
 {
     int i = 0;
     for (KinematicFrame& frame : solution_->frame)
     {
-        ComputeJdot(solution_->jacobian(i), solution_->jacobian_dot(i));
+        ComputeH(frame, solution_->jacobian(i), solution_->hessian(i));
         ++i;
     }
 }
@@ -1299,6 +1336,13 @@ std::vector<std::string> KinematicTree::GetKinematicChainLinks(const std::string
 
 void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
 {
+    // Work-around in case someone passed a vector of size num_controlled_joints_
+    if (x.rows() == num_controlled_joints_)
+    {
+        Update(x);
+        return;
+    }
+
     if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
     for (int i = 0; i < model_joints_names_.size(); ++i)
     {
@@ -1310,7 +1354,7 @@ void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
     if (debug) PublishFrames();
 }
 
-void KinematicTree::SetModelState(std::map<std::string, double> x)
+void KinematicTree::SetModelState(const std::map<std::string, double>& x)
 {
     for (auto& joint : x)
     {
@@ -1368,5 +1412,13 @@ bool KinematicTree::DoesLinkWithNameExist(std::string name) const
 {
     // Check whether it exists in TreeMap, which should encompass both EnvironmentTree and model_tree_
     return tree_map_.find(name) != tree_map_.end();
+}
+
+std::shared_ptr<KinematicElement> KinematicTree::FindKinematicElementByName(const std::string& frame_name)
+{
+    auto it = tree_map_.find(frame_name);
+    if (it == tree_map_.end()) ThrowPretty("KinematicElement does not exist:" << frame_name);
+
+    return it->second.lock();
 }
 }  // namespace exotica

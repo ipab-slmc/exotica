@@ -28,13 +28,16 @@ def check_state_cost_jacobian_at_t(problem, t):
     J_numdiff = np.zeros_like(J_solver)
     np.testing.assert_equal(J_numdiff.shape[0], ds.ndx)
 
+    original_integrator = ds.integrator
     eps = 1e-6
     for i in range(ds.ndx):
         dx = np.zeros((ds.ndx,))
         dx[i] = eps / 2.0
 
+        ds.integrator = exo.Integrator.RK1
         x_plus = ds.integrate(x, dx, 1.0)
         x_minus = ds.integrate(x, -dx, 1.0)
+        ds.integrator = original_integrator
 
         if t == problem.T - 1:
             problem.update_terminal_state(x_plus)
@@ -69,13 +72,16 @@ def check_state_cost_hessian_at_t(problem, t):
     np.testing.assert_equal(H_numdiff.shape[0], ds.ndx)
     np.testing.assert_equal(H_numdiff.shape[1], ds.ndx)
 
+    original_integrator = ds.integrator
     eps = 1e-6
     for i in range(ds.ndx):
         dx = np.zeros((ds.ndx,))
         dx[i] = eps / 2.0
 
+        ds.integrator = exo.Integrator.RK1
         x_plus = ds.integrate(x, dx, 1.0)
         x_minus = ds.integrate(x, -dx, 1.0)
+        ds.integrator = original_integrator
 
         if t == problem.T - 1:
             problem.update_terminal_state(x_plus)
@@ -91,6 +97,7 @@ def check_state_cost_hessian_at_t(problem, t):
 
         H_numdiff[:,i] = (jacobian_plus - jacobian_minus) / eps
     if np.linalg.norm(H_solver - H_numdiff) > 1e-2:
+        print("Hessian does not match at t=", t)
         print(H_solver)
         print(H_numdiff)
         print((H_solver-H_numdiff)<1e-3)

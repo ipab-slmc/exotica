@@ -1,5 +1,0 @@
-<library path="lib/libexotica_collision_scene_fcl">
-  <class name="exotica/CollisionSceneFCL" type="exotica::CollisionSceneFCL" base_class_type="exotica::CollisionScene">
-    <description>FCL collision scene</description>
-  </class>
-</library>

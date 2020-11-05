@@ -14,7 +14,7 @@ The other is the *Task Definition* which describes the task itself by providing 
 Additionally, users can select different underlying dynamics models by specifying a *DynamicsSolver*. Similarly, different collision checking methods and libraries can be selected using the *CollisionScene* plug-ins.
 
 ## Prerequisites
-* Ubuntu 16.04 with ROS Kinetic or Ubuntu 18.04 with ROS Melodic. Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
+* Ubuntu 16.04 (ROS Kinetic), Ubuntu 18.04 (ROS Melodic), or Ubuntu 20.04 (ROS Noetic). Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation)

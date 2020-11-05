@@ -3,7 +3,6 @@ from __future__ import print_function, division
 
 import matplotlib.pyplot as plt
 import pyexotica as exo
-import numpy as np
 from collections import OrderedDict
 
 
@@ -32,7 +31,7 @@ def test_solver(use_new_boxqp, use_polynomial_linesearch, use_cholesky):
     #solver.max_iterations = 1000
     solver.specify_problem(problem)
 
-    solution = solver.solve()
+    _ = solver.solve()
 
     print('Solver terminated with:', problem.termination_criterion)
     print('Solver took:', solver.get_planning_time())

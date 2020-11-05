@@ -1,0 +1,38 @@
+# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
+# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
+
+name: CI
+
+# This determines when this workflow is run
+on: [push, pull_request] # on all pushes and PRs
+
+jobs:
+  CI:
+    strategy:
+      matrix:
+        env:
+          # - {ROS_DISTRO: melodic, ROS_REPO: testing}
+          - {ROS_DISTRO: kinetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'} # PARALLEL_BUILDS=1
+          - {ROS_DISTRO: kinetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
+          - {ROS_DISTRO: kinetic, PRERELEASE: true}
+          - {ROS_DISTRO: kinetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: 3.9}
+          - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'} # PARALLEL_BUILDS=1
+          - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
+          - {ROS_DISTRO: melodic, PRERELEASE: true}
+          # Deactivated noetic as they will fail due to the exotica_collision_scene_fcl
+          #- {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'} # PARALLEL_BUILDS=1
+          #- {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
+          #- {ROS_DISTRO: noetic, PRERELEASE: true}
+    env:
+      CCACHE_DIR: /github/home/.ccache # Enable ccache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # This step will fetch/store the directory used by ccache before/after the ci run
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+      # Run industrial_ci
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{ matrix.env }}

@@ -39,7 +39,6 @@ def explicit_euler(x, dx, dt, ds=None):
 def semiimplicit_euler(x, dx, dt, ds=None):
     if ds is None:
         raise RuntimeError("ds is None!")
-    q = x[:ds.nq].copy()
     v = x[ds.nq:].copy()
     a = dx[ds.nq:].copy()
 

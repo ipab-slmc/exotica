@@ -152,6 +152,10 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
 # These work too: -Wstrict-overflow=5 -Wswitch-default -Wundef)
 
+## Quick fixes to get Noetic to compile:
+# - ZMQ is using deprecated send() declarations - remove once fixed for Noetic
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations)
+
 # TODO: if you have time, remove these ignored warnings and fix them
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-reorder)
 

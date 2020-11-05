@@ -36,10 +36,10 @@ pkg_check_modules(MSGPACK QUIET msgpack)
 pkg_check_modules(TinyXML2 REQUIRED tinyxml2)
 
 if(MSGPACK_FOUND)
-    add_definitions(-DMSGPACK_FOUND)
-    list(APPEND SYSTEM_DEPENDS MSGPACK)
+  add_definitions(-DMSGPACK_FOUND)
+  list(APPEND SYSTEM_DEPENDS MSGPACK)
 else()
-    message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
+  message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
 endif()
 
 # NB: VERSION_GREATER_EQUAL requires CMake 3.7

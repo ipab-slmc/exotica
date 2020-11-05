@@ -1,4 +1,4 @@
-# EXOTica 🏝️ [![Build Status](https://travis-ci.org/ipab-slmc/exotica.svg?branch=master)](https://travis-ci.org/ipab-slmc/exotica) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/ipab-slmc/exotica/?pixel)](https://github.com/igrigorik/ga-beacon) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7d2b85be51645288ff6511f2d3e88a4)](https://app.codacy.com/gh/ipab-slmc/exotica?utm_source=github.com&utm_medium=referral&utm_content=ipab-slmc/exotica&utm_campaign=Badge_Grade_Dashboard)
+# EXOTica 🏝️ [![CI](https://github.com/ipab-slmc/exotica/workflows/CI/badge.svg)](https://github.com/ipab-slmc/exotica/actions?query=workflow%3ACI) [![Analytics](https://ga-beacon.appspot.com/UA-72496975-1/ipab-slmc/exotica/?pixel)](https://github.com/igrigorik/ga-beacon) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7d2b85be51645288ff6511f2d3e88a4)](https://app.codacy.com/gh/ipab-slmc/exotica?utm_source=github.com&utm_medium=referral&utm_content=ipab-slmc/exotica&utm_campaign=Badge_Grade_Dashboard)
 
 [Documentation](https://ipab-slmc.github.io/exotica/) - [C++ Doxygen](https://ipab-slmc.github.io/exotica/doxygen_cpp/) - [Python Documentation](https://ipab-slmc.github.io/exotica/Python-API.html) - [Docker](https://github.com/VladimirIvan/exotica-docker-notebook)
 
@@ -14,7 +14,7 @@ The other is the *Task Definition* which describes the task itself by providing 
 Additionally, users can select different underlying dynamics models by specifying a *DynamicsSolver*. Similarly, different collision checking methods and libraries can be selected using the *CollisionScene* plug-ins.
 
 ## Prerequisites
-* Ubuntu 16.04 with ROS Kinetic or Ubuntu 18.04 with ROS Melodic. Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
+* Ubuntu 16.04 (ROS Kinetic), Ubuntu 18.04 (ROS Melodic), or Ubuntu 20.04 (ROS Noetic). Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation)

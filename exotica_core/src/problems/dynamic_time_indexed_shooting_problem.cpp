@@ -598,7 +598,6 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // backwards compatibility.
     if (num_tasks > 0 && t == T_ - 2)
     {
-        const Eigen::VectorXd q_next_position = scene_->GetDynamicsSolver()->GetPosition(X_.col(t + 1));
         UpdateTaskMaps(X_.col(t + 1), Eigen::VectorXd::Zero(scene_->get_num_controls()), t + 1);
     }
 

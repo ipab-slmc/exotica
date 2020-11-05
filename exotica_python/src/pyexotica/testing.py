@@ -37,7 +37,8 @@ def explicit_euler(x, dx, dt, ds=None):
 
 
 def semiimplicit_euler(x, dx, dt, ds=None):
-    assert ds is not None
+    if ds is None:
+        raise RuntimeError("ds is None!")
     q = x[:ds.nq].copy()
     v = x[ds.nq:].copy()
     a = dx[ds.nq:].copy()
@@ -69,11 +70,13 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
     u = np.random.random((ds.nu,))
 
     # f should return tangent vector type
-    assert ds.f(x,u).shape[0] == ds.ndx
+    np.testing.assert_equal(ds.f(x,u).shape[0], ds.ndx)
     # fx should be (ds.ndx,ds.ndx)
-    assert ds.fx(x,u).shape[0] == ds.ndx and ds.fx(x,u).shape[1] == ds.ndx
+    np.testing.assert_equal(ds.fx(x,u).shape[0], ds.ndx)
+    np.testing.assert_equal(ds.fx(x,u).shape[1], ds.ndx)
     # fu should be (ds.ndx,ds.nu)
-    assert ds.fu(x,u).shape[0] == ds.ndx and ds.fu(x,u).shape[1] == ds.nu
+    np.testing.assert_equal(ds.fu(x,u).shape[0], ds.ndx)
+    np.testing.assert_equal(ds.fu(x,u).shape[1], ds.nu)
 
     # Check integration / simulate
     dx = ds.f(x,u)

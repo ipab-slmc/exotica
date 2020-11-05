@@ -28,7 +28,6 @@
 //
 
 #include <cxxabi.h>  // The demangler for gcc... this makes this system dependent!
-#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <random>

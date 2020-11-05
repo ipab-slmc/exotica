@@ -31,7 +31,6 @@
 #include <exotica_core/factory.h>
 #include <exotica_core/scene.h>
 
-#include <eigen_conversions/eigen_kdl.h>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
@@ -40,20 +39,19 @@ REGISTER_COLLISION_SCENE_TYPE("CollisionSceneFCLLatest", exotica::CollisionScene
 #define CONTINUOUS_COLLISION_USE_ADVANCED_SETTINGS
 // #define CONTINUOUS_COLLISION_DEBUG
 
-namespace fcl_convert
-{
-// ** Do not remove the inline ** It causes an epic memory bug in the transforms.
-//      Fixed in July 2018 and July 2019.
-inline fcl::Transform3d KDL2fcl(const KDL::Frame& frame)
-{
-    Eigen::Isometry3d ret;
-    tf::transformKDLToEigen(frame, ret);
-    return ret;
-}
-}  // namespace fcl_convert
-
 namespace exotica
 {
+// This function was the source of a massive bug that reappeared in July 2018, July 2019, and November 2020.
+// It was mostly due to a symbol crash between the two fcl_conversion implementations. I.e., the naming and
+// namespace is now kept different from the implementation in the CollisionSceneFCLDefault
+inline fcl::Transform3d transformKDLToFCL(const KDL::Frame& frame)
+{
+    fcl::Transform3d ret;
+    ret.translation() = Eigen::Map<const Eigen::Vector3d>(frame.p.data);
+    ret.linear() = Eigen::Map<const Eigen::Matrix3d>(frame.M.data);
+    return ret;
+}
+
 inline bool IsRobotLink(std::shared_ptr<KinematicElement> e)
 {
     return e->is_robot_link || e->closest_robot_link.lock();
@@ -145,7 +143,7 @@ void CollisionSceneFCLLatest::UpdateCollisionObjectTransforms()
             ThrowPretty("Transform for " << element->segment.getName() << " contains NaNs.");
         }
 
-        collision_object->setTransform(fcl_convert::KDL2fcl(element->frame));
+        collision_object->setTransform(transformKDLToFCL(element->frame));
         collision_object->computeAABB();
     }
 }
@@ -419,10 +417,8 @@ void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::Co
             p.normal1 = -contact.normal;
             p.normal2 = contact.normal;
 
-            KDL::Vector c1 = KDL::Vector(p_WAc(0), p_WAc(1), p_WAc(2));
-            KDL::Vector c2 = KDL::Vector(p_WBc(0), p_WBc(1), p_WBc(2));
-            tf::vectorKDLToEigen(c1, p.contact1);
-            tf::vectorKDLToEigen(c2, p.contact2);
+            p.contact1 = p_WAc;
+            p.contact2 = p_WBc;
 
             data->Distance = std::min(data->Distance, p.distance);
             data->proxies.push_back(p);
@@ -503,8 +499,8 @@ void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::Co
         }
     }
 
-    tf::vectorKDLToEigen(c1, p.contact1);
-    tf::vectorKDLToEigen(c2, p.contact2);
+    p.contact1 = Eigen::Map<Eigen::Vector3d>(c1.data);
+    p.contact2 = Eigen::Map<Eigen::Vector3d>(c2.data);
 
     // On touching contact, the normal would be ill-defined. Thus, use the shape centre of the opposite shape as a proxy contact.
     if (touching_contact)
@@ -517,8 +513,8 @@ void CollisionSceneFCLLatest::ComputeDistance(fcl::CollisionObjectd* o1, fcl::Co
     KDL::Vector n2 = c1 - c2;
     n1.Normalize();
     n2.Normalize();
-    tf::vectorKDLToEigen(n1, p.normal1);
-    tf::vectorKDLToEigen(n2, p.normal2);
+    p.normal1 = Eigen::Map<Eigen::Vector3d>(n1.data);
+    p.normal2 = Eigen::Map<Eigen::Vector3d>(n2.data);
 
     data->Distance = std::min(data->Distance, p.distance);
     data->proxies.push_back(p);
@@ -799,10 +795,10 @@ ContinuousCollisionProxy CollisionSceneFCLLatest::ContinuousCollisionCheck(
         return ret;
     }
 
-    fcl::Transform3d tf1_beg_fcl = fcl_convert::KDL2fcl(tf1_beg);
-    fcl::Transform3d tf1_end_fcl = fcl_convert::KDL2fcl(tf1_end);
-    fcl::Transform3d tf2_beg_fcl = fcl_convert::KDL2fcl(tf2_beg);
-    fcl::Transform3d tf2_end_fcl = fcl_convert::KDL2fcl(tf2_end);
+    fcl::Transform3d tf1_beg_fcl = transformKDLToFCL(tf1_beg);
+    fcl::Transform3d tf1_end_fcl = transformKDLToFCL(tf1_end);
+    fcl::Transform3d tf2_beg_fcl = transformKDLToFCL(tf2_beg);
+    fcl::Transform3d tf2_end_fcl = transformKDLToFCL(tf2_end);
 
     if (!tf1_beg_fcl.matrix().allFinite())
     {

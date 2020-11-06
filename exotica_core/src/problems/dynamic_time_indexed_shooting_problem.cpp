@@ -574,6 +574,12 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     // Simulate for tau
     X_.col(t + 1) = scene_->GetDynamicsSolver()->Simulate(X_.col(t), U_.col(t), tau_);
 
+    // Clamp!
+    if (scene_->GetDynamicsSolver()->get_has_state_limits())
+    {
+        scene_->GetDynamicsSolver()->ClampToStateLimits(X_.col(t + 1));
+    }
+
     // Update xdiff
     X_diff_.col(t + 1) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t + 1), X_star_.col(t + 1));
 

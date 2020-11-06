@@ -41,7 +41,7 @@ def solve_problem(loss_type):
     solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
     problem = solver.get_problem()
     problem.loss_type = loss_type
-    solver.debug_mode = False
+    # solver.debug_mode = False
     solution = solver.solve()
     # task_cost_over_time(problem)
 
@@ -60,16 +60,20 @@ def solve_problem(loss_type):
 
 if __name__ == "__main__":
     exo.Setup.init_ros()
-    solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
+    # solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
+    solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_valkyrie_force_control.xml')
     problem = solver.get_problem()
     scene = problem.get_scene()
+    kt = scene.get_kinematic_tree()
     vis = exo.VisualizationMoveIt(scene)
 
+    '''
     results = {}
     for loss_type in [exo.ControlCostLossTermType.L2,
-                      exo.ControlCostLossTermType.SmoothL1,
-                      exo.ControlCostLossTermType.Huber,
-                      exo.ControlCostLossTermType.NormalizedHuber]:
+                    #   exo.ControlCostLossTermType.SmoothL1,
+                    #   exo.ControlCostLossTermType.Huber,
+                    #   exo.ControlCostLossTermType.NormalizedHuber]:
+                    ]:
         results[loss_type] = solve_problem(loss_type)
     
     fig = plt.figure(figsize=(8,4))
@@ -117,7 +121,9 @@ if __name__ == "__main__":
 
     plt.show()
     exit()
+    '''
 
+    '''
     # This is now set in the XML
     palm_target = problem.cost.get_goal('PalmPosition', -1)
 
@@ -141,6 +147,16 @@ if __name__ == "__main__":
     ma = MarkerArray()
     ma.markers = [m]
     pub.publish(ma)
+    '''
+
+    # Initial guess
+    total_mass = np.array([ke.get_mass() for ke in kt.get_tree()]).sum()
+    print("total mass", total_mass)
+
+    U_warmstart = problem.U.copy()
+    for i in range(8): # 4 generators, 2 feet
+        U_warmstart[3 * i,:] = total_mass * 9.81 / 8.
+    problem.U = U_warmstart
 
     solution = solver.solve()
     print("Solved in", solver.get_planning_time())
@@ -157,7 +173,16 @@ if __name__ == "__main__":
     plt.plot(problem.X[38:,:].T)
     plt.show()
 
-    #np.save('l2_cost_1e-3', problem.X)
-    vis.display_trajectory(problem.X[:problem.N].T)
+    print(problem.U[:,0])
 
-    publish_trajectory(problem.X[:problem.N,:].T, problem.T*problem.tau, problem)
+    ds = scene.get_dynamics_solver()
+    traj_to_display = np.zeros((problem.T, scene.get_kinematic_tree().get_num_controlled_joints()))
+    for t in range(problem.T):
+        traj_to_display[t,:] = ds.get_position(problem.X[:,t])
+    vis.display_trajectory(traj_to_display)
+
+    publish_trajectory(traj_to_display, 1. * problem.T * problem.tau, problem)
+    #np.save('l2_cost_1e-3', problem.X)
+    # vis.display_trajectory(problem.X[:problem.N].T)
+
+    # publish_trajectory(problem.X[:problem.N,:].T, problem.T*problem.tau, problem)

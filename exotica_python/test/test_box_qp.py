@@ -35,7 +35,7 @@ def check_boxqp_vs_scipy_impl(H, q, b_low, b_high, x_init,
         (b_low[1], b_high[1]),
     ])
 
-    nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-4, err_msg="BoxQP and SciPy (" + scipy_method + ") differ!")
+    nptest.assert_allclose(sp_sol.x, sol.x, rtol=1, atol=1e-3, err_msg="BoxQP and SciPy (" + scipy_method + ") differ!")
 
 
 class TestBoxQP(unittest.TestCase):

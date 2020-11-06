@@ -26,6 +26,7 @@ set(SYSTEM_DEPENDS
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS cmake_modules ${CATKIN_DEPENDS})
+find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -35,10 +36,10 @@ pkg_check_modules(MSGPACK QUIET msgpack)
 pkg_check_modules(TinyXML2 REQUIRED tinyxml2)
 
 if(MSGPACK_FOUND)
-    add_definitions(-DMSGPACK_FOUND)
-    list(APPEND SYSTEM_DEPENDS MSGPACK)
+  add_definitions(-DMSGPACK_FOUND)
+  list(APPEND SYSTEM_DEPENDS MSGPACK)
 else()
-    message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
+  message(STATUS "MessagePack not found. VisualizationMeshcat will be disabled.")
 endif()
 
 # NB: VERSION_GREATER_EQUAL requires CMake 3.7
@@ -150,6 +151,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
 # enable additional warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
 # These work too: -Wstrict-overflow=5 -Wswitch-default -Wundef)
+
+## Quick fixes to get Noetic to compile:
+# - ZMQ is using deprecated send() declarations - remove once fixed for Noetic
+# - -Wno-deprecated-copy needs to be appended here to avoid issues with pragmas for Melodic
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations -Wno-deprecated-copy)
 
 # TODO: if you have time, remove these ignored warnings and fix them
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-reorder)

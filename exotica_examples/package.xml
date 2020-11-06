@@ -18,7 +18,6 @@
   <depend>sensor_msgs</depend>
   <exec_depend>exotica_cartpole_dynamics_solver</exec_depend>
   <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>
-  <exec_depend>exotica_collision_scene_fcl</exec_depend>
   <exec_depend>exotica_ddp_solver</exec_depend>
   <exec_depend>exotica_ddp_solver</exec_depend>
   <exec_depend>exotica_double_integrator_dynamics_solver</exec_depend>

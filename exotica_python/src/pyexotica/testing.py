@@ -8,7 +8,7 @@ import sys
 __all__ = ["check_dynamics_solver_derivatives"]
 
 # np.random.seed(42)
-np.set_printoptions(2, suppress=True, threshold=sys.maxsize, linewidth=500)
+np.set_printoptions(4, suppress=True, threshold=sys.maxsize, linewidth=500)
 
 def random_quaternion():
     # Using http://planning.cs.uiuc.edu/node198.html
@@ -20,7 +20,6 @@ def random_quaternion():
 
 
 def random_state(ds):
-    # ds = scene.get_dynamics_solver()
     x = np.random.random((ds.nx,))
 
     # Use random quaternion when floating base is represented using SE(3)
@@ -159,11 +158,11 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
 
         # print("Fx_fd\n", Fx_fd)
         # print("ds.get_Fx()\n", ds.get_Fx())
-        # print((Fx_fd-ds.get_Fx()))
+        # print("Fx-diff\n", (Fx_fd-ds.get_Fx()))
         # print(np.abs(Fx_fd-ds.get_Fx()) < 1e-5)
         # print("Fu_fd\n", Fu_fd)
         # print("ds.get_Fu()\n", ds.get_Fu())
-        # print("Fu-diff\n",(Fu_fd-ds.get_Fu()))
+        # print("Fu-diff\n", (Fu_fd-ds.get_Fu()))
         # print(np.abs(Fu_fd-ds.get_Fu()) < 1e-5)
 
         np.testing.assert_allclose(ds.get_Fx(), Fx_fd, rtol=1e-5, atol=1e-5)
@@ -179,11 +178,14 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
         Jds = ds.state_delta_derivative(x1, x2, exo.ArgumentPosition.ARG0)
         Jdiff = np.zeros((ds.ndx, ds.ndx))
         eps = 1e-5
+        integrator = ds.integrator
         for i in range(ds.ndx):
             dx = np.zeros((ds.ndx))
             dx[i] = eps / 2.0
+            ds.integrator = exo.Integrator.RK1
             x1_plus = ds.integrate(x1, dx, 1.0)
             x1_minus = ds.integrate(x1, -dx, 1.0)
+            ds.integrator = integrator
             delta_plus = ds.state_delta(x1_plus, x2)
             delta_minus = ds.state_delta(x1_minus, x2)
             Jdiff[:,i] = (delta_plus - delta_minus) / eps
@@ -196,11 +198,14 @@ def check_dynamics_solver_derivatives(name, urdf=None, srdf=None, joint_group=No
         Hds = ds.state_delta_second_derivative(x1, x2, exo.ArgumentPosition.ARG0)
         Hdiff = np.zeros((ds.ndx, ds.ndx, ds.ndx))
         eps = 1e-5
+        integrator = ds.integrator
         for i in range(ds.ndx):
             dx = np.zeros((ds.ndx))
             dx[i] = eps / 2.0
+            ds.integrator = exo.Integrator.RK1
             x1_plus = ds.integrate(x1, dx, 1.0)
             x1_minus = ds.integrate(x1, -dx, 1.0)
+            ds.integrator = integrator
             Jdiff_plus = ds.state_delta_derivative(x1_plus, x2, exo.ArgumentPosition.ARG0)
             Jdiff_minus = ds.state_delta_derivative(x1_minus, x2, exo.ArgumentPosition.ARG0)
             Hdiff[:,:,i] = (Jdiff_plus - Jdiff_minus) / eps

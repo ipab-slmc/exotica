@@ -15,7 +15,7 @@ Packages, files and directories
         exotica_core_taskmaps
         exotica_aico_solver
         exotica_ik_solver
-        exotica_collision_scene_fcl
+        exotica_collision_scene_fcl_latest
         ...
 
 - All solver packages with ``_solver`` suffix.

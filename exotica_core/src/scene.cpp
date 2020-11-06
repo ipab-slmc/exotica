@@ -189,8 +189,8 @@ void Scene::Instantiate(const SceneInitializer& init)
     {
         if (init.CollisionScene.size() == 0)
         {
-            // Not set ==> Default to CollisionSceneFCL for backwards compatibility.
-            collision_scene_ = Setup::CreateCollisionScene("CollisionSceneFCL");  // NB: This is an implicit run-time dependency and thus dangerous! But we don't want to break existing configs...
+            // Not set ==> Default to CollisionSceneFCLLatest for backwards compatibility.
+            collision_scene_ = Setup::CreateCollisionScene("CollisionSceneFCLLatest");  // NB: This is an implicit run-time dependency and thus dangerous! But we don't want to break existing configs...
         }
         else if (init.CollisionScene.size() == 1)
         {

@@ -38,6 +38,7 @@ configs = [
     '{exotica_examples}/resources/configs/dynamic_time_indexed/20_sparse_fddp_pendulum.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/21_sparse_fddp_cartpole.xml',
     '{exotica_examples}/resources/configs/dynamic_time_indexed/22_boxfddp_cartpole.xml',
+    '{exotica_examples}/resources/configs/dynamic_time_indexed/23_quadrotor_rotating_inplace.xml',
 ]
 
 problem_idx = int(sys.argv[1]) - 1
@@ -90,7 +91,7 @@ visualization.display_trajectory(
     problem.X[:problem.num_positions, :].T
 )
 
-# publish_trajectory(problem.X[:problem.num_positions, :].T, problem.T * problem.tau, problem)
+publish_trajectory(problem.X[:problem.num_positions, :].T, problem.T * problem.tau, problem)
 # exit(0)
 
 signal.signal(signal.SIGINT, sig_int_handler)

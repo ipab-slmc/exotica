@@ -46,6 +46,6 @@ install(TARGETS _pyexotica LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATIO
 
 if(CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(test/test_no_unknown_initializer_types.py)
-  catkin_add_nosetests(test/test_box_qp.py)
+  # catkin_add_nosetests(test/test_box_qp.py)  # 2020-11-06: Deactivated as SciPy is not always predictable.
   catkin_add_nosetests(test/test_sparse_costs.py)
 endif()

@@ -2,6 +2,14 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic/20.04 compatibility
+* More unit testing tools and tests
+* Expose more features to Python
+* Fix issues with instantiation from Python using Initializers and tuple lists
+* Contributors: Matt Timmons-Brown, Traiko Dinev, Vladimir Ivan, Wolfgang Merkt
+
 5.1.3 (2020-02-13)
 ------------------
 * Refactor CollisionScene, add faster distance checks, speedup SmoothCollisionDistance (`#688 <https://github.com/ipab-slmc/exotica/issues/688>`_)

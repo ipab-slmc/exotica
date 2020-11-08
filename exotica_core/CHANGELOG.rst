@@ -2,6 +2,19 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Upgrade standard to C++14 for new pybind11 version
+* Updates and fixes, including speed optimisation, to many areas including: DynamicsSolver, DynamicTimeIndexedShootingProblem, CollisionScene (now instantiable), support for instantiating geometry shapes, meshes, and octrees from initialisers, etc.
+* Added support for kinematic Hessians
+* New integration schemes for dynamic problems: symplectic integrators; added state transition function
+* Add support for dynamic task maps, i.e., those that depend on both x (configuration+velocity) and u (control)
+* Add sparse costs
+* Add a second BoxQP
+* Meshcat visualisation
+* Joint velocity and acceleration limits
+* Contributors: Matt Timmons-Brown, Traiko Dinev, Vladimir Ivan, Wolfgang Merkt
+
 5.1.3 (2020-02-13)
 ------------------
 * Refactor CollisionScene, add faster distance checks, speedup SmoothCollisionDistance (`#688 <https://github.com/ipab-slmc/exotica/issues/688>`_)

@@ -2,6 +2,12 @@
 Changelog for package exotica_ompl_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048 (`#720 <https://github.com/ipab-slmc/exotica/issues/720>`_)
+  Add Dubin's state-space support for OMPL solvers (`#707 <https://github.com/ipab-slmc/exotica/issues/707>`_)
+* Contributors: Wolfgang Merkt, mspahn
+
 5.1.3 (2020-02-13)
 ------------------
 

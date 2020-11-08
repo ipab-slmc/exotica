@@ -2,6 +2,19 @@
 Changelog for package exotica_collision_scene_fcl_latest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove usage of exotica_collision_scene_fcl; add backwards compatibility using exotica_collision_scene_fcl_latest (`#726 <https://github.com/ipab-slmc/exotica/issues/726>`_)
+* Fix transform bug fix, remove usage of tf_conversions (`#723 <https://github.com/ipab-slmc/exotica/issues/723>`_)
+* Merge remote-tracking branch 'origin/master'
+* Return after first ACM entry is found
+* CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
+* Move to Initializer initialisation of collision scenes
+* Check whether transform contains NaNs (translation)
+* CollisionScene: Store whether update of objects is required
+* CollisionScene: Add setter/getter for replace_cylinder_with_capsule, do not store duplicate company of world links to be excluded from collision scene
+* Contributors: Vladimir Ivan, Wolfgang Merkt
+
 5.1.3 (2020-02-13)
 ------------------
 * Refactor CollisionScene, add faster distance checks, speedup SmoothCollisionDistance (`#688 <https://github.com/ipab-slmc/exotica/issues/688>`_)

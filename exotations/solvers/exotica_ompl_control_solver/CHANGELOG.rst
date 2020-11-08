@@ -2,6 +2,12 @@
 Changelog for package exotica_ompl_control_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048 (`#720 <https://github.com/ipab-slmc/exotica/issues/720>`_)
+* Upgrade get_num_positions etc. (`#723 <https://github.com/ipab-slmc/exotica/issues/723>`_)
+* Contributors: Wolfgang Merkt
+
 5.1.3 (2020-02-13)
 ------------------
 * [exotica_ompl_control_solver] Fix ROS buildfarm failure

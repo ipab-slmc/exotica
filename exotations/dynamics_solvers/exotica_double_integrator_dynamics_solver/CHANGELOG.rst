@@ -2,6 +2,14 @@
 Changelog for package exotica_double_integrator_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Implement ComputeDerivatives, correctly set up state transition derivatives. This includes updating Fx, Fu when changing integrators
+* CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
+* Moved unit test to exotica_examples due to circular dependency
+* Bug fixes, added unit test
+* Contributors: Wolfgang Merkt
+
 5.1.3 (2020-02-13)
 ------------------
 

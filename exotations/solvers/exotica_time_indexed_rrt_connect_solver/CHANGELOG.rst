@@ -2,6 +2,12 @@
 Changelog for package exotica_time_indexed_rrt_connect_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
+* Fix and reset time-space bounds, add planning time
+* Contributors: Wolfgang Merkt
+
 5.1.3 (2020-02-13)
 ------------------
 * [exotica_time_indexed_rrt_connect_solver] Fix runtime std::bad_cast exception

@@ -2,8 +2,8 @@
 Changelog for package exotica
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * Remove usage of exotica_collision_scene_fcl
 * CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
 * ROS Noetic/Python3 compatibility

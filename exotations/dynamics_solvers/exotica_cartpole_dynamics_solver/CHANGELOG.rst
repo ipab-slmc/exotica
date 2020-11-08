@@ -2,8 +2,8 @@
 Changelog for package exotica_cartpole_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * Remove test dependency on exotica_collision_scene_fcl (`#726 <https://github.com/ipab-slmc/exotica/issues/726>`_)
 * Move URDF/SRDF from exotica_examples to dynamics solver package to resolve circular dependency
 * DynamicsSolver: add has_second_order_derivatives

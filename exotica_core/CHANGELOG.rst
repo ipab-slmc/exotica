@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * Upgrade standard to C++14 for new pybind11 version
 * Updates and fixes, including speed optimisation, to many areas including: DynamicsSolver, DynamicTimeIndexedShootingProblem, CollisionScene (now instantiable), support for instantiating geometry shapes, meshes, and octrees from initialisers, etc.
 * Added support for kinematic Hessians

@@ -2,8 +2,8 @@
 Changelog for package exotica_core_task_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * Remove usage of exotica_collision_scene_fcl; add backwards compatibility
 * Fix segmentation fault for joint smoothing task maps
 * test_maps: Upgrade collision scene to initializer

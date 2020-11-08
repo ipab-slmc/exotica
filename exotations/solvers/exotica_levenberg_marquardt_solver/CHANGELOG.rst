@@ -2,8 +2,8 @@
 Changelog for package exotica_levenberg_marquardt_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
 * Use pre-allocation & Cholesky decomposition: 16% speed-up
 * Contributors: Wolfgang Merkt

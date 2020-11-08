@@ -2,8 +2,8 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * Noetic/20.04 compatibility
 * More unit testing tools and tests
 * Expose more features to Python

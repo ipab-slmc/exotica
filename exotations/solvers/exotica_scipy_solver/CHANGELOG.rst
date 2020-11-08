@@ -2,8 +2,8 @@
 Changelog for package exotica_scipy_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048 (`#720 <https://github.com/ipab-slmc/exotica/issues/720>`_)
 * ROS Noetic/Python3 compatibility (`#720 <https://github.com/ipab-slmc/exotica/issues/720>`_)
 * Code clean-up (`#702 <https://github.com/ipab-slmc/exotica/issues/702>`_)

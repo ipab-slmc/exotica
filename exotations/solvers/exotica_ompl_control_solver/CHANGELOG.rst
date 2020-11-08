@@ -2,8 +2,8 @@
 Changelog for package exotica_ompl_control_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048 (`#720 <https://github.com/ipab-slmc/exotica/issues/720>`_)
 * Upgrade get_num_positions etc. (`#723 <https://github.com/ipab-slmc/exotica/issues/723>`_)
 * Contributors: Wolfgang Merkt

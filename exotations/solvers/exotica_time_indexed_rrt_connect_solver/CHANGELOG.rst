@@ -2,8 +2,8 @@
 Changelog for package exotica_time_indexed_rrt_connect_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
 * Fix and reset time-space bounds, add planning time
 * Contributors: Wolfgang Merkt

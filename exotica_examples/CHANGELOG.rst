@@ -2,8 +2,8 @@
 Changelog for package exotica_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * Add new examples for sparsity-inducing optimal control and fix optimal control examples
 * Add unit tests
 * Add example for Dubin's state space

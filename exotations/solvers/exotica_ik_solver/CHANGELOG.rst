@@ -2,8 +2,8 @@
 Changelog for package exotica_ik_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * CMakeLists: Upgrade minimum version to 3.0.2 to avoid CMP0048
 * Re-wrote the IK solver as regularised, weighted pseudo-inverse
   Re-wrote the IK solver from scratch:

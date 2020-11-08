@@ -2,8 +2,8 @@
 Changelog for package exotica_ddp_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.0 (2020-11-08)
+------------------
 * FDDP: More verbosity on NaN
 * Use state transition function + derivative in place of hard-coded scheme
 * BoxFDDP: Set default BoxQP options

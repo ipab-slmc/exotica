@@ -19,9 +19,9 @@ copyright = u'2020, Vladimir Ivan, Wolfgang Merkt, Sethu Vijayakumar - and contr
 author = u'Vladimir Ivan, Wolfgang Merkt, Sethu Vijayakumar - and contributors'
 
 # The short X.Y version.
-version = u'5.1.3'
+version = u'6.0.0'
 # The full version, including alpha/beta/rc tags.
-release = u'5.1.3'
+release = u'6.0.0'
 
 language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Doxyfile']

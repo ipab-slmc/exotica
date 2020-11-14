@@ -9,121 +9,37 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 import numpy as np
 import pyexotica as exo
-import exotica_ddp_solver_py
 from pyexotica.publish_trajectory import *
 
+import sys
 
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 
-def task_cost_over_time(problem):
-    costs = OrderedDict()
-    for task_name in problem.cost.task_maps:
-        costs[task_name] = np.zeros((problem.T,))
-        for t in range(problem.T):
-            ydiff = problem.cost.get_task_error(task_name, t)
-            S = problem.cost.get_S(task_name, t)
-            cost = np.dot(np.dot(ydiff, S), ydiff.T)
-            #print(task_name, cost)
-            #print(task_name, "ydiff\n", ydiff, "\n")
-            #print(task_name, "S\n", S, "\n")
-            costs[task_name][t] = cost
-    fig = plt.figure()
-    for task_name in costs:
-        plt.plot(costs[task_name], label=task_name)
-    plt.title('Task cost over time')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-def solve_problem(loss_type):
-    # Note: The R_rate or other parameters won't be affected by this!
-    solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
-    problem = solver.get_problem()
-    problem.loss_type = loss_type
-    # solver.debug_mode = False
-    solution = solver.solve()
-    # task_cost_over_time(problem)
-
-    result = {}
-    result['cost_evolution'] = problem.get_cost_evolution()
-    result['termination_criterion'] = problem.termination_criterion
-    result['control_cost_evolution'] = solver.control_cost_evolution
-    result['task_cost'] = np.array(problem.get_cost_evolution()[1]) - np.array(solver.control_cost_evolution)
-    result['solution'] = solution
-    result['X'] = problem.X
-    result['U'] = problem.U
-
-    print("{0}: Solved in {1:.2f}s, termination criterion: {2}. Final cost: {3:.2f}, final task cost: {4:.2f}".format(loss_type, solver.get_planning_time(), str(problem.termination_criterion).replace("TerminationCriterion.", ""), problem.get_cost_evolution()[1][-1], result['task_cost'][-1]))
-
-    return result
-
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print('Invalid number of input arguments.')
+        print('Usage: ./example_sparseddp_valkyrie l2|pseudo_huber')
+        exit(0)
+    
+    loss = sys.argv[1]
+    if loss not in ['l2', 'pseudo_huber']:
+        print('Unknown loss {0}.'.format(loss))
+        print('Usage: ./example_sparseddp_valkyrie l2|pseudo_huber')
+        exit(0)
+
     exo.Setup.init_ros()
-    # solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie.xml')
-    solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_valkyrie_force_control.xml')
+
+    if loss == 'l2':
+        solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie_l2.xml')
+    else:
+        solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie_pseudo_huber.xml')
+    
     problem = solver.get_problem()
     scene = problem.get_scene()
-    kt = scene.get_kinematic_tree()
     vis = exo.VisualizationMoveIt(scene)
+    solution = solver.solve()
 
-    '''
-    results = {}
-    for loss_type in [exo.ControlCostLossTermType.L2,
-                    #   exo.ControlCostLossTermType.SmoothL1,
-                    #   exo.ControlCostLossTermType.Huber,
-                    #   exo.ControlCostLossTermType.NormalizedHuber]:
-                    ]:
-        results[loss_type] = solve_problem(loss_type)
-    
-    fig = plt.figure(figsize=(8,4))
-    fig.set_dpi(150)
-    
-    plt.subplot(1,2,1)
-    plt.title('Task Cost vs Time')
-    for loss_type in results:
-        # plt.plot(results[loss_type]['cost_evolution'][0], results[loss_type]['task_cost'], label=str(loss_type).replace("ControlCostLossTermType.", ""))
-        plt.plot(results[loss_type]['task_cost'], label=str(loss_type).replace("ControlCostLossTermType.", ""))
-    plt.yscale('log')
-    plt.grid()
-    plt.legend()
-
-    plt.subplot(1,2,2)
-    plt.title('Overall Cost vs Time')
-    for loss_type in results:
-        # plt.plot(results[loss_type]['cost_evolution'][0], results[loss_type]['cost_evolution'][1], label=str(loss_type).replace("ControlCostLossTermType.", ""))
-        plt.plot(results[loss_type]['cost_evolution'][1], label=str(loss_type).replace("ControlCostLossTermType.", ""))
-    plt.yscale('log')
-    plt.grid()
-    plt.legend()
-
-    plt.tight_layout()
-
-    # Compare solutions
-    fig = plt.figure(figsize=(8,8))
-    fig.set_dpi(150)
-    
-    plt.subplot(2,2,1)
-    plt.title('L2')
-    plt.plot(results[exo.ControlCostLossTermType.L2]['solution'])
-
-    plt.subplot(2,2,2)
-    plt.title('SmoothL1')
-    plt.plot(results[exo.ControlCostLossTermType.SmoothL1]['solution'])
-
-    plt.subplot(2,2,3)
-    plt.title('Huber')
-    plt.plot(results[exo.ControlCostLossTermType.Huber]['solution'])
-
-    plt.subplot(2,2,4)
-    plt.title('NormalizedHuber')
-    plt.plot(results[exo.ControlCostLossTermType.NormalizedHuber]['solution'])
-
-    plt.show()
-    exit()
-    '''
-
-    '''
     # This is now set in the XML
     palm_target = problem.cost.get_goal('PalmPosition', -1)
 
@@ -146,43 +62,23 @@ if __name__ == "__main__":
     m.id = 1
     ma = MarkerArray()
     ma.markers = [m]
-    pub.publish(ma)
-    '''
+        
+    joint_used = [not np.allclose(problem.X[i + 38,:], 0, atol=1e-3) for i in range(problem.num_controls)]
+    print('{0} joints used'.format(np.sum(joint_used)))
 
-    # Initial guess
-    total_mass = np.array([ke.get_mass() for ke in kt.get_tree()]).sum()
-    print("total mass", total_mass)
 
-    U_warmstart = problem.U.copy()
-    for i in range(8): # 4 generators, 2 feet
-        U_warmstart[3 * i,:] = total_mass * 9.81 / 8.
-    problem.U = U_warmstart
-
-    solution = solver.solve()
-    print("Solved in", solver.get_planning_time())
-    # task_cost_over_time(problem)
-    plot(problem.get_cost_evolution()[1])
-    plot(solution)
-
-    fig = plt.figure()
-    plt.subplot(1,2,1)
-    plt.title('Positions')
-    plt.plot(problem.X[:38,:].T)
-    plt.subplot(1,2,2)
-    plt.title('Velocities')
-    plt.plot(problem.X[38:,:].T)
+    plt.figure()
+    plt.plot(solution, '.-')
     plt.show()
 
-    print(problem.U[:,0])
+    while True:
+        for t in range(problem.T - 1):
+            u = solution[t,:]
 
-    ds = scene.get_dynamics_solver()
-    traj_to_display = np.zeros((problem.T, scene.get_kinematic_tree().get_num_controlled_joints()))
-    for t in range(problem.T):
-        traj_to_display[t,:] = ds.get_position(problem.X[:,t])
-    vis.display_trajectory(traj_to_display)
+            problem.update(u, t)
+            problem.get_scene().get_kinematic_tree().publish_frames('exotica')
 
-    publish_trajectory(traj_to_display, 1. * problem.T * problem.tau, problem)
-    #np.save('l2_cost_1e-3', problem.X)
-    # vis.display_trajectory(problem.X[:problem.N].T)
+            pub.publish(ma)
+            sleep(0.05)
 
-    # publish_trajectory(problem.X[:problem.N,:].T, problem.T*problem.tau, problem)
+        sleep(0.5)

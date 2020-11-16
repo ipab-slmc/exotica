@@ -2,10 +2,10 @@
 
 [Documentation](https://ipab-slmc.github.io/exotica/) - [C++ Doxygen](https://ipab-slmc.github.io/exotica/doxygen_cpp/) - [Python Documentation](https://ipab-slmc.github.io/exotica/Python-API.html) - [Docker](https://github.com/VladimirIvan/exotica-docker-notebook)
 
-The EXOTica library is a generic Optimisation Toolset for Robotics platforms, written in C++ with bindings for Python. Its motivation is to provide a more streamlined process for developing algorithms for tasks such as Inverse Kinematics, Trajectory Optimisation, and Optimal Control. Its design advocates:
+The EXOTica library is a general Optimisation Toolset for Robotics platforms, written in C++ with bindings for Python. Its motivation is to provide a more streamlined process for developing algorithms for tasks such as Inverse Kinematics, Trajectory Optimisation, and Optimal Control. Its design advocates:
 
 * **Modularity:** The library is developed in a modular manner making use of C++’s object-oriented features (such as polymorphism). This allows users to define their own components and ’plug them into’ the existing framework. Thus, an engineer does not need to implement a whole system whenever he needs to change a component, but rather can re-implement the specific functionality and as long as he follows certain guidelines, retain the use of the other modules.
-* **Extensibility:** The library is also heavily extensible, mainly thanks to the modular design. In addition, the library makes very minimal prior assumptions about the form of the problem so that it can be as generic as possible.
+* **Extensibility:** The library is also heavily extensible, mainly thanks to the modular design. In addition, the library makes very minimal prior assumptions about the form of the problem so that it can be as general as possible.
 * **Integration with ROS:** The library is designed to be fully integrated with ROS allowing to set up, configuration, consuming data from ros topics, and publishing debug display using ROS tools.
 
 The library itself consists of two major specifications, both of which are abstract classes.
@@ -14,7 +14,7 @@ The other is the *Task Definition* which describes the task itself by providing 
 Additionally, users can select different underlying dynamics models by specifying a *DynamicsSolver*. Similarly, different collision checking methods and libraries can be selected using the *CollisionScene* plug-ins.
 
 ## Prerequisites
-* Ubuntu 16.04 (ROS Kinetic), Ubuntu 18.04 (ROS Melodic), or Ubuntu 20.04 (ROS Noetic). Ubuntu 14.04 with ROS Indigo is not officially supported or covered by continuous integration any longer -- further instructions are [here](exotica/doc/deprecated/Instructions_for_ROS_Indigo.md)
+* Ubuntu 16.04 (ROS Kinetic), Ubuntu 18.04 (ROS Melodic), or Ubuntu 20.04 (ROS Noetic).
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation)

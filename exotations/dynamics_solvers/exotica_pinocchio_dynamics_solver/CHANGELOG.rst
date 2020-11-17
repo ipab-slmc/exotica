@@ -2,6 +2,9 @@
 Changelog for package exotica_pinocchio_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.0 (2020-11-08)
 ------------------
 * Add state transition function, derivative.

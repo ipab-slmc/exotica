@@ -2,6 +2,11 @@
 Changelog for package exotica
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Minor updates to documentation
+* Contributors: Wolfgang Merkt
+
 6.0.0 (2020-11-08)
 ------------------
 * Remove usage of exotica_collision_scene_fcl

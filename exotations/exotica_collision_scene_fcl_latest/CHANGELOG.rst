@@ -2,6 +2,9 @@
 Changelog for package exotica_collision_scene_fcl_latest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.0 (2020-11-08)
 ------------------
 * Remove usage of exotica_collision_scene_fcl; add backwards compatibility using exotica_collision_scene_fcl_latest (`#726 <https://github.com/ipab-slmc/exotica/issues/726>`_)

@@ -2,6 +2,11 @@
 Changelog for package exotica_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix some SparseDDP examples and remove old ones (`#728 <https://github.com/ipab-slmc/exotica/issues/728>`_)
+* Contributors: Traiko Dinev, Wolfgang Merkt
+
 6.0.0 (2020-11-08)
 ------------------
 * Add new examples for sparsity-inducing optimal control and fix optimal control examples

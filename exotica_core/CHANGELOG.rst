@@ -2,6 +2,12 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Disable treating compiler warnings as errors due to buildfarm failure on Debian Stretch
+  This change will result in "unstable" build notifications from the buildfarm but prevent failures.
+* Contributors: Wolfgang Merkt
+
 6.0.0 (2020-11-08)
 ------------------
 * Upgrade standard to C++14 for new pybind11 version

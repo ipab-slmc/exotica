@@ -2,6 +2,9 @@
 Changelog for package exotica_double_integrator_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.0 (2020-11-08)
 ------------------
 * Implement ComputeDerivatives, correctly set up state transition derivatives. This includes updating Fx, Fu when changing integrators

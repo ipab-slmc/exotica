@@ -29,7 +29,6 @@
 
                 <DynamicsSolver>
                     <DoubleIntegratorDynamicsSolver Name="solver">
-                        <Integrator>RK1</Integrator>
                         <dt>0.1</dt>
                         <ControlLimitsLow>-10</ControlLimitsLow>
                         <ControlLimitsHigh>10</ControlLimitsHigh>

@@ -1,6 +1,8 @@
 from __future__ import print_function, division
 import numpy as np
 from time import time
+import matplotlib.pyplot as plt
+from collections import OrderedDict
 
 __all__ = ["check_trajectory_continuous_time",
            "check_whether_trajectory_is_collision_free_by_subsampling", "get_colliding_links"]
@@ -78,3 +80,23 @@ def get_colliding_links(scene, margin=0.0, safe_distance=0.0, check_self_collisi
                                     print(r_l,"-",w_l,d[0].distance)
     return collisions
 
+
+def plot_task_cost_over_time(problem):	
+    '''
+    Plots the task cost (task maps) over time given a problem.
+    '''
+    costs = OrderedDict()	
+    for task_name in problem.cost.task_maps:	
+        costs[task_name] = np.zeros((problem.T,))	
+        for t in range(problem.T):	
+            ydiff = problem.cost.get_task_error(task_name, t)	
+            S = problem.cost.get_S(task_name, t)	
+            cost = np.dot(np.dot(ydiff, S), ydiff.T)
+            costs[task_name][t] = cost	
+    fig = plt.figure()	
+    for task_name in costs:	
+        plt.plot(costs[task_name], label=task_name)	
+    plt.title('Task cost over time')	
+    plt.legend()	
+    plt.tight_layout()	
+    plt.show()

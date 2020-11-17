@@ -1,40 +1,25 @@
 <?xml version="1.0" ?>
 <ExoticaConfig>
-    <ControlLimitedFeasibilityDrivenDDPSolver Name="BoxFDDP">
+    <FeasibilityDrivenDDPSolver Name="DDP">
+    <!-- <ControlLimitedFeasibilityDrivenDDPSolver Name="DDP"> -->
+    <!-- <AnalyticDDPSolver Name="DDP"> -->
         <Debug>1</Debug>
-        <MaxIterations>100</MaxIterations>
+        <MaxIterations>500</MaxIterations>
         <GradientTolerance>1e-4</GradientTolerance>
-        <!-- <RegularizationRate>1e-3</RegularizationRate> -->
-        <RegularizationRate>0.1</RegularizationRate>
+        <RegularizationRate>1e-3</RegularizationRate>
         <UseNewBoxQP>1</UseNewBoxQP>
         <BoxQPUseCholeskyFactorization>1</BoxQPUseCholeskyFactorization>
         <BoxQPUsePolynomialLinesearch>1</BoxQPUsePolynomialLinesearch>
-    </ControlLimitedFeasibilityDrivenDDPSolver>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+    <!-- </AnalyticDDPSolver> -->
+    <!-- </ControlLimitedFeasibilityDrivenDDPSolver> -->
+    </FeasibilityDrivenDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="valkyrie">
-        <!-- <DerivativeOrder>2</DerivativeOrder> -->
-
-        <LossType>L2</LossType>
-        <R_rate>1e-5</R_rate>
-
-        <!-- HuberRate defaults 1.0 -->
-
-        <!-- <LossType>Huber</LossType> -->
-        <!-- <HuberRate>0.9</HuberRate>
-        <ControlCostWeight>1e2</ControlCostWeight> -->
-        <HuberRate>0.01</HuberRate>
-        <ControlCostWeight>500</ControlCostWeight>
-        <!-- <R_rate>0</R_rate> -->
-
-        <!-- <LossType>NormalizedHuber</LossType> -->
-        <!-- <HuberRate>.01</HuberRate> -->
-        <!-- <R_rate>0</R_rate> -->
-        
-        <!-- <LossType>SmoothL1</LossType> -->
-        <L1Rate>0.5</L1Rate>
-        <L1IncreaseRate>1.2</L1IncreaseRate>
-        <MaxL1Rate>1e3</MaxL1Rate>
-        <!-- <R_rate>0</R_rate> -->
+        <LossType>PseudoHuber</LossType>
+        <ControlCostWeight>1000</ControlCostWeight>
+        <HuberRate>1e-3</HuberRate>       
+        <R_rate>0</R_rate>         
         
         <PlanningScene>
             <Scene>
@@ -46,9 +31,8 @@
                 <DynamicsSolver>
                     <DoubleIntegratorDynamicsSolver Name="solver">
                         <dt>0.1</dt>
-                        <ControlLimitsLow>-5</ControlLimitsLow>
-                        <ControlLimitsHigh>5</ControlLimitsHigh>
-                        <!-- <Integrator>RK1</Integrator> -->
+                        <ControlLimitsLow>-10</ControlLimitsLow>
+                        <ControlLimitsHigh>10</ControlLimitsHigh>
                     </DoubleIntegratorDynamicsSolver>
                 </DynamicsSolver>
             </Scene>
@@ -61,7 +45,7 @@
                 </EndEffector>
             </EffPosition>
             <JointLimit Name="JointLimit">
-                <SafePercentage>.05</SafePercentage>
+                <SafePercentage>0.01</SafePercentage>
             </JointLimit>
             <EffOrientation Name="StraightBack">
                 <EndEffector>
@@ -89,16 +73,13 @@
             </QuasiStatic>
         </Maps>
         <Cost>
-            <!-- <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100" Goal="0.4 0 0.9"/> -->
-            <!-- <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100" Goal="0.4 -0.35 0.9"/> -->
-            <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100" Goal="0.5 0.0 0.9"/>
-            <Task Task="JointLimit" Rho="100"/>
-            <Task Task="Stability" Rho="10"/>
-            <Task Task="FootPosition" Rho="1e5"/>
-            <!-- <Task Task="StraightBack" Rho="1"/> -->
+            <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1e3" Goal="0.5 0.2 0.9"/>
+
+            <Task Task="JointLimit" Rho="1e3"/>
+            <Task Task="FootPosition" Rho="1e3"/>
         </Cost>
 
-        <T>100</T>
+        <T>21</T>
         <tau>0.1</tau>
         <Q_rate>0</Q_rate>
 
@@ -108,8 +89,9 @@
           1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
           1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         </Qf>
-        <Qf_rate>100</Qf_rate>
+        <Qf_rate>1e3</Qf_rate>
 
         <StartState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </StartState>
+        <GoalState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </GoalState>
     </DynamicTimeIndexedShootingProblem>
 </ExoticaConfig>

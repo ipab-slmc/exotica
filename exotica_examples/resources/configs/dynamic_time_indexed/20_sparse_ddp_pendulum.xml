@@ -7,22 +7,12 @@
     </ControlLimitedFeasibilityDrivenDDPSolver>
 
     <DynamicTimeIndexedShootingProblem Name="pendulum">
-        <!-- <LossType>L2</LossType> -->
-        <!-- <R_rate>1e-5</R_rate> -->
         <R_rate>0</R_rate>
-
-        <!-- <LossType>Huber</LossType> -->
-        <HuberRate>0.1</HuberRate>
-
-        <!-- <LossType>BiModalHuber</LossType> -->
-        <Mode1>  -10</Mode1>
-        <Mode2>   10</Mode2>
 
         <LossType>SmoothL1</LossType>
         <L1Rate>0.001</L1Rate>
-        <L1IncreaseRate>1.05</L1IncreaseRate>
 
-        <ControlCostWeight>10</ControlCostWeight>
+        <ControlCostWeight>3</ControlCostWeight>
 
         <PlanningScene>
             <Scene>

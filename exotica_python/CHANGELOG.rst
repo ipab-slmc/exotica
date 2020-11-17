@@ -2,8 +2,8 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.1 (2020-11-17)
+------------------
 * Fix some SparseDDP examples and remove old ones (`#728 <https://github.com/ipab-slmc/exotica/issues/728>`_)
 * Contributors: Traiko Dinev, Wolfgang Merkt
 

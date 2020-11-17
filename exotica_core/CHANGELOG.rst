@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.1 (2020-11-17)
+------------------
 * Disable treating compiler warnings as errors due to buildfarm failure on Debian Stretch
   This change will result in "unstable" build notifications from the buildfarm but prevent failures.
 * Contributors: Wolfgang Merkt

@@ -2,8 +2,8 @@
 Changelog for package exotica
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.1 (2020-11-17)
+------------------
 * Minor updates to documentation
 * Contributors: Wolfgang Merkt
 

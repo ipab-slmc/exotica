@@ -2,8 +2,8 @@
 Changelog for package exotica_scipy_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.0.1 (2020-11-17)
+------------------
 * Fix buildfarm configuration failure due to search for exec-only dependency
 * Contributors: Wolfgang Merkt
 

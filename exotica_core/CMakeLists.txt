@@ -147,7 +147,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TinyXML2_LIBRARIES} ${ZeroMQ_LIBRARIES} ${MSGPACK_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 # mark all warnings as errors
-target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra) # -Werror
 # enable additional warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverloaded-virtual -Wfloat-conversion)
 # These work too: -Wstrict-overflow=5 -Wswitch-default -Wundef)
@@ -155,7 +155,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated-declarations -Woverl
 ## Quick fixes to get Noetic to compile:
 # - ZMQ is using deprecated send() declarations - remove once fixed for Noetic
 # - -Wno-deprecated-copy needs to be appended here to avoid issues with pragmas for Melodic
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations -Wno-deprecated-copy)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations) # -Wno-deprecated-copy)
 
 # TODO: if you have time, remove these ignored warnings and fix them
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-sign-compare -Wno-reorder)

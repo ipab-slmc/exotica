@@ -29,7 +29,6 @@
 
 #include <exotica_pinocchio_dynamics_solver/pinocchio_dynamics_solver.h>
 
-#include <pinocchio/algorithm/aba-derivatives.hpp>
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
@@ -82,69 +81,6 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
     xdot_analytic_.head(num_velocities_) = x.tail(num_velocities_);
     xdot_analytic_.tail(num_velocities_) = pinocchio_data_->ddq;
     return xdot_analytic_;
-}
-
-void PinocchioDynamicsSolver::ComputeDerivatives(const StateVector& x, const ControlVector& u)
-{
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
-
-    Eigen::Block<Eigen::MatrixXd> da_dx = fx_.block(num_velocities_, 0, num_velocities_, get_num_state_derivative());
-    Eigen::Block<Eigen::MatrixXd> da_du = fu_.block(num_velocities_, 0, num_velocities_, num_controls_);
-
-    switch (integrator_)
-    {
-        // Forward Euler (RK1)
-        case Integrator::RK1:
-        {
-            Fx_.topRows(num_velocities_).setZero();
-            Fx_.bottomRows(num_velocities_).noalias() = dt_ * da_dx;
-            Fx_.topRightCorner(num_velocities_, num_velocities_).diagonal().array() += dt_;
-            pinocchio::dIntegrateTransport(model_, x.head(num_positions_), x.tail(num_velocities_), Fx_.topRows(num_velocities_), pinocchio::ARG1);
-            pinocchio::dIntegrate(model_, x.head(num_positions_), x.tail(num_velocities_), Fx_.topLeftCorner(num_velocities_, num_velocities_), pinocchio::ARG0, pinocchio::ADDTO);
-            Fx_.bottomRightCorner(num_velocities_, num_velocities_).diagonal().array() += 1.0;
-
-            Fu_.topRows(num_velocities_).setZero();
-            Fu_.bottomRows(num_velocities_).noalias() = dt_ * da_du;
-            pinocchio::dIntegrateTransport(model_, x.head(num_positions_), x.tail(num_velocities_), Fu_.topRows(num_velocities_), pinocchio::ARG1);
-        }
-        break;
-        // Semi-implicit Euler
-        case Integrator::SymplecticEuler:
-        {
-            Eigen::VectorXd dx_v = dt_ * x.tail(num_velocities_) + dt_ * dt_ * pinocchio_data_->ddq;
-
-            Fx_.topRows(num_velocities_).noalias() = dt_ * dt_ * da_dx;
-            Fx_.bottomRows(num_velocities_).noalias() = dt_ * da_dx;
-            Fx_.topRightCorner(num_velocities_, num_velocities_).diagonal().array() += dt_;
-            pinocchio::dIntegrateTransport(model_, x.head(num_positions_), dx_v, Fx_.topRows(num_velocities_), pinocchio::ARG1);
-            pinocchio::dIntegrate(model_, x.head(num_positions_), dx_v, Fx_.topLeftCorner(num_velocities_, num_velocities_), pinocchio::ARG0, pinocchio::ADDTO);
-            Fx_.bottomRightCorner(num_velocities_, num_velocities_).diagonal().array() += 1.0;
-
-            Fu_.topRows(num_velocities_).noalias() = dt_ * dt_ * da_du;
-            Fu_.bottomRows(num_velocities_).noalias() = dt_ * da_du;
-            pinocchio::dIntegrateTransport(model_, x.head(num_positions_), dx_v, Fu_.topRows(num_velocities_), pinocchio::ARG1);
-        }
-        break;
-        default:
-            ThrowPretty("Not implemented!");
-    };
-}
-
-Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlVector& u)
-{
-    // Four quadrants should be: 0, Identity, ddq_dq, ddq_dv
-    // 0 and Identity are set during initialisation. Here, we pass references to ddq_dq, ddq_dv to the algorithm.
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
-
-    return fx_;
-}
-
-Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
-{
-    // NB: ddq_dtau is computed with the same call - i.e., we are duplicating computation.
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
-
-    return fu_;
 }
 
 Eigen::VectorXd PinocchioDynamicsSolver::InverseDynamics(const StateVector& x)

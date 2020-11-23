@@ -2,6 +2,11 @@
 Changelog for package exotica_pinocchio_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Split derivatives into separate compile units to reduce memory consumption (7.6 GB peak to 6.1 GB peak) (`#729 <https://github.com/ipab-slmc/exotica/issues/729>`_)
+* Contributors: Wolfgang Merkt
+
 6.0.1 (2020-11-17)
 ------------------
 

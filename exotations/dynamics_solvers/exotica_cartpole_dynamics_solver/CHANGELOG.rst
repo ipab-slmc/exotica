@@ -2,6 +2,9 @@
 Changelog for package exotica_cartpole_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.1 (2020-11-17)
 ------------------
 

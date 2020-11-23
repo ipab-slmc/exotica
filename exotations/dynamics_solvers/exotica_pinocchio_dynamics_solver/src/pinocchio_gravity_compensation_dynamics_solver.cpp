@@ -34,8 +34,6 @@
 #include <pinocchio/algorithm/rnea.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
-REGISTER_DYNAMICS_SOLVER_TYPE("PinocchioDynamicsSolverWithGravityCompensation", exotica::PinocchioDynamicsSolverWithGravityCompensation)
-
 namespace exotica
 {
 void PinocchioDynamicsSolverWithGravityCompensation::AssignScene(ScenePtr scene_in)

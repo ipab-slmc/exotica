@@ -32,8 +32,6 @@
 #include <pinocchio/algorithm/aba-derivatives.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 
-REGISTER_DYNAMICS_SOLVER_TYPE("PinocchioDynamicsSolver", exotica::PinocchioDynamicsSolver)
-
 namespace exotica
 {
 void PinocchioDynamicsSolver::ComputeDerivatives(const StateVector& x, const ControlVector& u)

@@ -26,12 +26,17 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/pinocchio_dynamics_solver.cpp src/pinocchio_gravity_compensation_dynamics_solver.cpp)
+add_library(${PROJECT_NAME}
+  src/pinocchio_dynamics_solver.cpp
+  src/pinocchio_dynamics_solver_derivatives.cpp
+  src/pinocchio_gravity_compensation_dynamics_solver.cpp
+  src/pinocchio_gravity_compensation_dynamics_solver_derivatives.cpp
+)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-variadic-macros -Wno-deprecated-declarations -Wno-comment -Wno-ignored-attributes)
 target_link_libraries(${PROJECT_NAME} PUBLIC pinocchio::pinocchio)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

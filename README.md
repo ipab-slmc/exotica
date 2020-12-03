@@ -21,7 +21,7 @@ Additionally, users can select different underlying dynamics models by specifyin
 
 ## Installation
 ### From binary
-Exotica is available as binaries for ROS Kinetic and Melodic and can be installed via
+Exotica is available as binaries for ROS Kinetic, Melodic, and Noetic and can be installed via
 
 ```bash
 sudo apt install ros-$ROS_DISTRO-exotica
@@ -29,11 +29,11 @@ sudo apt install ros-$ROS_DISTRO-exotica
 
 ### From source
 1. [Create a catkin workspace](https://catkin-tools.readthedocs.io/en/latest/quick_start.html#initializing-a-new-workspace) or use an existing workspace. [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) is the preferred build system.
-2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone git@github.com:ipab-slmc/exotica.git``.
+2. Clone this repository into the ```src/``` subdirectory of the workspace (any subdirectory below ```src/``` will do): ``git clone https://github.com/ipab-slmc/exotica.git``.
 3. ```cd``` into the the cloned directory.
 4. Install dependencies: ```rosdep update ; rosdep install --from-paths ./ -iry ```
 5. Compile the code ```catkin build -s```.
-6. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your installspace if your workspace is configured for installation.
+6. Source the config file (ideally inside ```~/.bashrc```): ```source path_to_workspace/devel/setup.bash```. You may have to source the config file from your install-space if your workspace is configured for installation.
 
 ## Demos
 Have a look at ```exotica_examples```.

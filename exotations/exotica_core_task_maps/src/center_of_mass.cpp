@@ -169,10 +169,10 @@ void CenterOfMass::Initialize()
             frames_[i].frame_A_offset.p = scene_->GetKinematicTree().GetTreeMap().at(frames_[i].frame_A_link_name).lock()->segment.getInertia().getCOG();
             mass_(i) = scene_->GetKinematicTree().GetTreeMap().at(frames_[i].frame_A_link_name).lock()->segment.getInertia().getMass();
         }
+        if (debug_) HIGHLIGHT_NAMED("CenterOfMass", "Total model mass: " << mass_.sum() << " kg");
     }
 
     if (Server::IsRos()) InitializeDebug();
-    if (debug_) HIGHLIGHT_NAMED("CenterOfMass", "Total model mass: " << mass_.sum() << " kg");
 }
 
 void CenterOfMass::AssignScene(ScenePtr scene)

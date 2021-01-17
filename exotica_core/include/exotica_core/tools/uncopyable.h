@@ -42,6 +42,6 @@ private:
     Uncopyable(const Uncopyable&);
     Uncopyable& operator=(const Uncopyable&);
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_UNCOPYABLE_H_

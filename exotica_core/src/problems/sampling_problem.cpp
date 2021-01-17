@@ -281,4 +281,4 @@ bool SamplingProblem::IsCompoundStateSpace()
 {
     return compound_;
 }
-}
+}  // namespace exotica

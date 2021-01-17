@@ -180,8 +180,7 @@ inline bool IsVectorContainerType(std::string type)
 }
 
 template <class Key, class Val>
-[[deprecated("Replaced by GetKeysFromMap and GetValuesFromMap")]] std::vector<Val> MapToVec(const std::map<Key, Val>& map)
-{
+[[deprecated("Replaced by GetKeysFromMap and GetValuesFromMap")]] std::vector<Val> MapToVec(const std::map<Key, Val>& map) {
     std::vector<Val> ret;
     for (auto& it : map)
     {
@@ -369,6 +368,6 @@ inline std::vector<bool> ParseBoolList(const std::string value)
     if (ret.empty()) WARNING_NAMED("Parser", "Empty vector!")
     return ret;
 }
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_CONVERSIONS_H_

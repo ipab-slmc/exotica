@@ -158,4 +158,4 @@ void VisualizationMoveIt::DisplayTrajectory(Eigen::MatrixXdRefConst trajectory)
 
     trajectory_pub_.publish(traj_msg);
 }
-}
+}  // namespace exotica

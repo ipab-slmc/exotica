@@ -305,6 +305,6 @@ private:
     visualization_msgs::MarkerArray marker_array_msg_;
     std::string name_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_KINEMATIC_TREE_H_

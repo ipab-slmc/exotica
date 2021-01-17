@@ -133,8 +133,8 @@ public:
     int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac, HessianType &hess) const
 #endif
     {
-        using std::sqrt;
         using std::abs;
+        using std::sqrt;
         // Local variables
         FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor *>(this), update_, epsfcn_);
         Scalar h;
@@ -225,6 +225,6 @@ public:
         return nfev;
     }
 };
-}
+}  // namespace Eigen
 
 #endif  // EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_

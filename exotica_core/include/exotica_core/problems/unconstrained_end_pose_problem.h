@@ -79,6 +79,6 @@ public:
     int num_tasks;
 };
 typedef std::shared_ptr<exotica::UnconstrainedEndPoseProblem> UnconstrainedEndPoseProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_UNCONSTRAINED_END_POSE_PROBLEM_H_

@@ -158,4 +158,4 @@ std::string Server::GetName()
 {
     return name_;
 }
-}
+}  // namespace exotica

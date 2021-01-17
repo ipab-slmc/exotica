@@ -103,4 +103,4 @@ int JointJerkBackwardDifference::TaskSpaceDim()
 {
     return N_;
 }
-}
+}  // namespace exotica

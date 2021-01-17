@@ -71,6 +71,6 @@ protected:
     ros::Publisher imesh_mark_pub_;
     visualization_msgs::Marker imesh_mark_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_INTERACTION_MESH_H_

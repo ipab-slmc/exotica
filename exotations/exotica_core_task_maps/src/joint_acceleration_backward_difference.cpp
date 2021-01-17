@@ -102,4 +102,4 @@ int JointAccelerationBackwardDifference::TaskSpaceDim()
 {
     return N_;
 }
-}
+}  // namespace exotica

@@ -144,6 +144,6 @@ private:
         }
     }
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_KINEMATIC_ELEMENT_H_

@@ -48,4 +48,4 @@ const char *Exception::what() const noexcept
 {
     return msg_.c_str();
 }
-}
+}  // namespace exotica

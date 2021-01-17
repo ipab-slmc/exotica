@@ -49,6 +49,6 @@ public:
     bool IsValid() override;
 };
 typedef std::shared_ptr<exotica::TimeIndexedProblem> TimeIndexedProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TIME_INDEXED_PROBLEM_H_

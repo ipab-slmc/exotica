@@ -105,6 +105,6 @@ std::list<int> ConvexHull2D(Eigen::MatrixXdRefConst points)
 
     return hull;
 }
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_CONVEXHULL_H_

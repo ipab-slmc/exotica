@@ -46,8 +46,8 @@ enum GTestColor
 };
 #endif
 extern void ColoredPrintf(testing::internal::GTestColor color, const char* fmt, ...);
-}
-}
+}  // namespace internal
+}  // namespace testing
 #define PRINTF(...)                                                                        \
     do                                                                                     \
     {                                                                                      \

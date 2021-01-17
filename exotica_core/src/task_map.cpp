@@ -129,4 +129,4 @@ void TaskMap::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen
     Update(x.head(ndq), phi, dphi_dx.topLeftCorner(TaskSpaceJacobianDim(), ndq), ddphi_ddx);
 }
 
-}  // namespace
+}  // namespace exotica

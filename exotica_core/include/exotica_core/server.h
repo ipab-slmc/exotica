@@ -50,6 +50,7 @@ public:
     ~RosNode();
     inline ros::NodeHandle &GetNodeHandle() { return *nh_; }
     inline tf::TransformBroadcaster &GetTF() { return tf_; }
+
 protected:
     std::shared_ptr<ros::NodeHandle> nh_;
     ros::AsyncSpinner sp_;
@@ -185,6 +186,6 @@ private:
 };
 
 typedef std::shared_ptr<Server> ServerPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_SERVER_H_

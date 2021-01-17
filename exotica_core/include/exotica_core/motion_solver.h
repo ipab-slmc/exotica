@@ -56,6 +56,7 @@ public:
     }
     int GetNumberOfMaxIterations() { return max_iterations_; }
     double GetPlanningTime() { return planning_time_; }
+
 protected:
     PlanningProblemPtr problem_;
     double planning_time_ = -1;
@@ -63,6 +64,6 @@ protected:
 };
 
 typedef std::shared_ptr<exotica::MotionSolver> MotionSolverPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_MOTION_SOLVER_H_

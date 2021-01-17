@@ -87,6 +87,6 @@ private:
 };
 
 typedef std::shared_ptr<exotica::TimeIndexedSamplingProblem> TimeIndexedSamplingProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TIME_INDEXED_SAMPLING_PROBLEM_H_

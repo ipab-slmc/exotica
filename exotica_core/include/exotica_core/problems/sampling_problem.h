@@ -81,6 +81,6 @@ private:
 };
 
 typedef std::shared_ptr<exotica::SamplingProblem> SamplingProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_SAMPLING_PROBLEM_H_

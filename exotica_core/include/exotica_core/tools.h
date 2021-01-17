@@ -120,7 +120,7 @@ enum ArgumentPosition
     ARG3 = 3,
     ARG4 = 4
 };
-}
+}  // namespace exotica
 
 namespace
 {
@@ -134,7 +134,7 @@ struct Holder
     Holder(Holder&& other) : p(std::move(other.p)) {}
     void operator()(...) { p.reset(); }
 };
-}
+}  // namespace
 
 template <class T>
 std::shared_ptr<T> ToStdPtr(const boost::shared_ptr<T>& p)

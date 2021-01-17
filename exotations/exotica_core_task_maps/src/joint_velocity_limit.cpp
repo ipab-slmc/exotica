@@ -111,4 +111,4 @@ void JointVelocityLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef ph
         if (phi(i) == 0.0)
             jacobian(i, i) = 0.0;
 }
-}
+}  // namespace exotica

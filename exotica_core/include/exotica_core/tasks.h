@@ -161,6 +161,6 @@ struct SamplingTask : public Task
     TaskSpaceVector Phi;
     Eigen::MatrixXd S;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASKS_H_

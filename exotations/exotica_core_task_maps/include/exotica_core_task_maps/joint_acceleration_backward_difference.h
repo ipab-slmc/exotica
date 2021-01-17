@@ -70,6 +70,6 @@ private:
     Eigen::VectorXd qbd_;                         ///< x+qbd_ is a simplifed estimate of the second time derivative.
     Eigen::MatrixXd I_;                           ///< Identity matrix.
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_JOINT_ACCELERATION_BACKWARD_DIFFERENCE_H_

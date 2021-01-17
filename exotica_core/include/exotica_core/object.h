@@ -85,6 +85,6 @@ public:
     std::string object_name_;
     bool debug_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_OBJECT_H_

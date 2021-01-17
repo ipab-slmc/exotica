@@ -261,4 +261,4 @@ void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
 }
 
 template class OMPLSolver<SamplingProblem>;
-}
+}  // namespace exotica

@@ -339,6 +339,6 @@ protected:
 };
 
 typedef std::shared_ptr<CollisionScene> CollisionScenePtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_COLLISION_SCENE_H_

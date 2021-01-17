@@ -47,6 +47,6 @@ struct FunctorBase
 };
 
 typedef FunctorBase<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::Dynamic> Functor;
-}
+}  // namespace exotica
 
 #endif  // EIGEN_AUTODIFF_FUNCTOR_H_

@@ -40,6 +40,6 @@ public:
     // \brief Returns a control input given the state x and timestep t.
     virtual Eigen::VectorXd GetFeedbackControl(Eigen::VectorXdRefConst x, int t) const = 0;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_MOTION_SOLVER_H_

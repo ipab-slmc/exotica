@@ -114,6 +114,6 @@ public:
     LBTRRTSolver();
     void Instantiate(const LBTRRTSolverInitializer& init) override;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_OMPL_SOLVER_OMPL_NATIVE_SOLVER_H_

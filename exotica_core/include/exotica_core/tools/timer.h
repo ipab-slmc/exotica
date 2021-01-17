@@ -60,6 +60,6 @@ public:
 private:
     std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TIMER_H_

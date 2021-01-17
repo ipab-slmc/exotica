@@ -90,6 +90,6 @@ private:
     XMLLoader();
     static std::shared_ptr<XMLLoader> instance_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_XML_LOADER_H_

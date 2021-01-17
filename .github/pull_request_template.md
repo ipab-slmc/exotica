@@ -1,7 +1,7 @@
 <!--
 # Checklist
 
-- code formatting: run `find -name '*.cpp' -o -name '*.h' -o -name '*.hpp' | xargs clang-format-3.9 -style=file -i` in the root directory
+- code formatting: run `find -name '*.cpp' -o -name '*.h' -o -name '*.hpp' | xargs clang-format-6.0 -style=file -i` in the root directory
 
 - add unit test(s)
 

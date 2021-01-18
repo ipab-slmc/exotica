@@ -99,4 +99,4 @@ std::vector<TaskVectorEntry> TaskVectorEntry::reindex(const std::vector<TaskVect
     }
     return ret;
 }
-}
+}  // namespace exotica

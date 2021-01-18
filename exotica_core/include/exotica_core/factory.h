@@ -136,6 +136,6 @@ public:
         Factory<BaseClass>::Instance().RegisterType(name, creator);
     }
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_FACTORY_H_

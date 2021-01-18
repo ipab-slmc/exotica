@@ -377,4 +377,4 @@ void QuasiStatic::AssignScene(ScenePtr scene)
     scene_ = scene;
     Initialize();
 }
-}
+}  // namespace exotica

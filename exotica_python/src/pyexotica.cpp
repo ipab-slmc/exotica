@@ -663,8 +663,8 @@ public:
         return hessian_array<Hessian::Scalar::Scalar>(src);
     }
 };
-}
-}  // namespace pybind11::detail
+}  // namespace detail
+}  // namespace pybind11
 
 PYBIND11_MODULE(_pyexotica, module)
 {

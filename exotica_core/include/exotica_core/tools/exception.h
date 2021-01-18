@@ -78,6 +78,6 @@ class SolveException : public Exception
 {
     using Exception::Exception;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_EXCEPTION_H_

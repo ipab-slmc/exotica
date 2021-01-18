@@ -96,6 +96,6 @@ private:
     void ReinitializeVariables() override;
 };
 typedef std::shared_ptr<exotica::UnconstrainedTimeIndexedProblem> UnconstrainedTimeIndexedProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_

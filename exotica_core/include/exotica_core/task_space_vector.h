@@ -58,6 +58,6 @@ struct TaskSpaceVector
     Eigen::VectorXd data;
     std::vector<TaskVectorEntry> map;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_SPACE_VECTOR_H_

@@ -84,4 +84,4 @@ int EffVelocity::TaskSpaceDim()
 {
     return kinematics[0].Phi.rows();
 }
-}
+}  // namespace exotica

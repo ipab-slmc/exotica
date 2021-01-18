@@ -58,6 +58,6 @@ protected:
     Eigen::MatrixXd data_;
     std::shared_ptr<KDL::Trajectory_Composite> trajectory_;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TRAJECTORY_H_

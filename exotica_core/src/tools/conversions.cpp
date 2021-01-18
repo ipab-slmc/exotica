@@ -45,7 +45,7 @@ Eigen::VectorXd IdentityTransform()
 {
     return VectorTransform();
 }
-}
+}  // namespace Eigen
 
 namespace exotica
 {
@@ -177,4 +177,4 @@ Eigen::VectorXd SetRotation(const KDL::Rotation& data, RotationType type)
             ThrowPretty("Unknown rotation representation type!");
     }
 }
-}
+}  // namespace exotica

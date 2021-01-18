@@ -72,6 +72,6 @@ public:
     int num_tasks;
 };
 typedef std::shared_ptr<exotica::BoundedEndPoseProblem> BoundedEndPoseProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_BOUNDED_END_POSE_PROBLEM_H_

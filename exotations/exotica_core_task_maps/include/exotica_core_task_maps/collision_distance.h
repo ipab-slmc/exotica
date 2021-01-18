@@ -49,6 +49,7 @@ public:
     int TaskSpaceDim() override;
 
     std::vector<CollisionProxy> get_collision_proxies() { return closest_proxies_; }
+
 private:
     void Initialize();
 

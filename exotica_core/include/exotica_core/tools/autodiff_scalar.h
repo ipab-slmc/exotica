@@ -815,7 +815,7 @@ struct NumTraits<AutoDiffScalar<SparseVector<DerType_>>>
         RequireInitialization = 1
     };
 };
-}
+}  // namespace Eigen
 
 namespace std
 {
@@ -830,6 +830,6 @@ class numeric_limits<Eigen::AutoDiffScalar<T&>>
     : public numeric_limits<typename T::Scalar>
 {
 };
-}
+}  // namespace std
 
 #endif  // EIGEN_AUTODIFF_SCALAR_H_

@@ -56,6 +56,6 @@ private:
     Eigen::VectorXd joint_ref_;   ///! Joint reference value
     void Initialize();
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_IDENTITY_H_

@@ -14,7 +14,7 @@ jobs:
           - {ROS_DISTRO: kinetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           - {ROS_DISTRO: kinetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
           - {ROS_DISTRO: kinetic, PRERELEASE: true}
-          - {ROS_DISTRO: kinetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: 3.9}
+          - {ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0"}
           - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
           - {ROS_DISTRO: melodic, PRERELEASE: true}

@@ -138,6 +138,6 @@ private:
 };
 
 typedef std::shared_ptr<Setup> SetupPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_SETUP_H_

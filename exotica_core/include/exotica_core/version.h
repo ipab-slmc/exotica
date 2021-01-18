@@ -34,6 +34,6 @@ namespace exotica
 {
 extern const char version[];
 extern const char branch[];
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_VERSION_H_

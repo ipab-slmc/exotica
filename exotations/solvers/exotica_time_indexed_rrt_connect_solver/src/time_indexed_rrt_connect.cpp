@@ -574,4 +574,4 @@ void OMPLTimeIndexedRRTConnect::getPlannerData(base::PlannerData &data) const
     // Add the edge connecting the two trees
     data.addEdge(data.vertexIndex(connectionPoint_.first), data.vertexIndex(connectionPoint_.second));
 }
-}
+}  // namespace exotica

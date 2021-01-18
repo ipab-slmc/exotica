@@ -46,6 +46,6 @@ public:
     void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;
     int TaskSpaceDim() override;
 };
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H_

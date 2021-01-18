@@ -118,8 +118,8 @@ public:
     int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac) const
 #endif
     {
-        using std::sqrt;
         using std::abs;
+        using std::sqrt;
         // Local variables
         Scalar h;
         int nfev = 0;
@@ -212,6 +212,6 @@ public:
         return nfev;
     }
 };
-}
+}  // namespace Eigen
 
 #endif  // EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H_

@@ -47,6 +47,7 @@ public:
     const std::vector<Eigen::VectorXd>& get_fs() const { return fs_; };
     const std::vector<Eigen::VectorXd>& get_xs() const { return xs_; };
     const std::vector<Eigen::VectorXd>& get_us() const { return us_; };
+
 protected:
     int NDX_;
     int last_T_ = -1;

@@ -124,8 +124,7 @@ void ILQGSolver::BackwardPass()
         S = Q + A.transpose() * S * A + L_gains_[t].transpose() * H * L_gains_[t] + L_gains_[t].transpose() * G + G.transpose() * L_gains_[t];
         s = q + A.transpose() * s + L_gains_[t].transpose() * H * l_gains_[t] +
             L_gains_[t].transpose() * g + G.transpose() * l_gains_[t];
-        s0 = q0 + s0 + (l_gains_[t].transpose() * H * l_gains_[t] / 2.0 +
-                        l_gains_[t].transpose() * g)(0);
+        s0 = q0 + s0 + (l_gains_[t].transpose() * H * l_gains_[t] / 2.0 + l_gains_[t].transpose() * g)(0);
 
         if (parameters_.IncludeNoiseTerms)
         {

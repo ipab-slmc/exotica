@@ -339,4 +339,4 @@ void InteractionMesh::SetWeights(const Eigen::MatrixXd& weights)
     }
     weights_ = weights;
 }
-}
+}  // namespace exotica

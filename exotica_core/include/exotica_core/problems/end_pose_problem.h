@@ -86,6 +86,6 @@ public:
     bool use_bounds;
 };
 typedef std::shared_ptr<exotica::EndPoseProblem> EndPoseProblemPtr;
-}
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_END_POSE_PROBLEM_H_

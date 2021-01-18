@@ -60,6 +60,6 @@ private:
     double safe_percentage_;
     int N;
 };
-}  // namespace
+}  // namespace exotica
 
 #endif  // EXOTICA_CORE_TASK_MAPS_JOINTLIMIT_H_

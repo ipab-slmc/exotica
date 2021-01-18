@@ -240,4 +240,4 @@ void LazyPRMSolver::SetMultiQuery(bool val)
 {
     multi_query_ = val;
 }
-}
+}  // namespace exotica

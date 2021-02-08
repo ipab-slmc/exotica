@@ -126,7 +126,7 @@ void BayesianIKSolver::Solve(Eigen::MatrixXd& solution)
             // Check convergence if
             //    a) damping is on and the iteration has concluded (the sweep improved the cost)
             //    b) damping is off [each sweep equals one iteration]
-            if ((damping && sweep_improved_cost_) || !damping)
+            if ((static_cast<bool>(damping) && sweep_improved_cost_) || !static_cast<bool>(damping))
             {
                 // 1. Check step tolerance
                 // || x_t-x_t-1 || <= stepTolerance * max(1, || x_t ||)
@@ -303,7 +303,7 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
     if (update_fwd) UpdateFwdMessage();
     if (update_bwd) UpdateBwdMessage();
 
-    if (damping)
+    if (static_cast<bool>(damping))
     {
         Binv = Sinv + Vinv + R + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
         AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_);
@@ -324,7 +324,7 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
         if (update_fwd) UpdateFwdMessage();
         if (update_bwd) UpdateBwdMessage();
 
-        if (damping)
+        if (static_cast<bool>(damping))
         {
             Binv = Sinv + Vinv + R + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
             AinvBSymPosDef(b, Binv, Sinv * s + Vinv * v + r + damping * damping_reference_);
@@ -396,7 +396,7 @@ double BayesianIKSolver::Step()
     best_sweep_ = sweep_;
 
     // If damping (similar to line-search) is being used, consider reverting this step
-    if (damping) PerhapsUndoStep();
+    if (static_cast<bool>(damping)) PerhapsUndoStep();
 
     ++sweep_;
     if (sweep_improved_cost_)

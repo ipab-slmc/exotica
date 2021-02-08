@@ -60,7 +60,7 @@ private:
     const unsigned int dim_ = 1;
     CollisionScenePtr cscene_;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
+    void UpdateInternal(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
 }  // namespace exotica
 

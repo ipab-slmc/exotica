@@ -39,7 +39,7 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     Eigen::MatrixXd J(dim_, x.size());
-    Update(x, phi, J, false);
+    UpdateInternal(x, phi, J, false);
 }
 
 void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
@@ -49,13 +49,13 @@ void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
     if (phi.rows() != dim_) ThrowNamed("Wrong size of phi!");
     phi.setZero();
     J.setZero();
-    Update(x, phi, J, true);
+    UpdateInternal(x, phi, J, true);
 }
 
-void SmoothCollisionDistance::Update(Eigen::VectorXdRefConst x,
-                                     Eigen::VectorXdRef phi,
-                                     Eigen::MatrixXdRef J,
-                                     bool updateJacobian)
+void SmoothCollisionDistance::UpdateInternal(Eigen::VectorXdRefConst x,
+                                             Eigen::VectorXdRef phi,
+                                             Eigen::MatrixXdRef J,
+                                             bool updateJacobian)
 {
     if (!scene_->AlwaysUpdatesCollisionScene())
         cscene_->UpdateCollisionObjectTransforms();

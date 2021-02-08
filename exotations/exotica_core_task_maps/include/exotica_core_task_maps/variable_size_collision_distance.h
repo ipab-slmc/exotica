@@ -55,7 +55,7 @@ private:
     std::size_t dim_;
     CollisionScenePtr cscene_;
 
-    void Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
+    void UpdateInternal(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian = true);
 };
 }  // namespace exotica
 

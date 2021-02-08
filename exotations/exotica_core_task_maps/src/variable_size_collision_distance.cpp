@@ -37,17 +37,17 @@ void VariableSizeCollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::Vec
 {
     if (phi.rows() != static_cast<int>(dim_)) ThrowNamed("Wrong size of phi!");
     Eigen::MatrixXd J;
-    Update(x, phi, J, false);
+    UpdateInternal(x, phi, J, false);
 }
 
 void VariableSizeCollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J)
 {
     if (phi.rows() != static_cast<int>(dim_)) ThrowNamed("Wrong size of phi!");
     if (J.rows() != static_cast<int>(dim_) || J.cols() != scene_->GetKinematicTree().GetNumControlledJoints()) ThrowNamed("Wrong size of Jacobian!");
-    Update(x, phi, J, true);
+    UpdateInternal(x, phi, J, true);
 }
 
-void VariableSizeCollisionDistance::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian)
+void VariableSizeCollisionDistance::UpdateInternal(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen::MatrixXdRef J, bool updateJacobian)
 {
     std::vector<CollisionProxy> proxies = cscene_->GetRobotToWorldCollisionDistance(world_margin_);
 

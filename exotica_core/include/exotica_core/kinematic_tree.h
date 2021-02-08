@@ -68,7 +68,7 @@ enum JointLimitType
 };
 
 constexpr double inf = std::numeric_limits<double>::infinity();
-constexpr double pi = std::atan(1) * 4;
+constexpr double pi = M_PI;
 
 inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)
 {

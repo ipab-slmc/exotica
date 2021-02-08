@@ -207,6 +207,10 @@ public:
         ret += add(d)
     ret += """    }
 
+    virtual ~""" + class_name + """()
+    {
+    }
+
     virtual Initializer GetTemplate() const
     {
         return (Initializer)""" + class_name + """();

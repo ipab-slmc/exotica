@@ -43,7 +43,7 @@ public:
     SamplingProblem();
     virtual ~SamplingProblem();
 
-    virtual void Instantiate(const SamplingProblemInitializer& init);
+    void Instantiate(const SamplingProblemInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x);
     bool IsValid(Eigen::VectorXdRefConst x);  // Not overriding on purpose - this updates and calls IsValid

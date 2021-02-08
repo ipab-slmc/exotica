@@ -42,9 +42,9 @@ namespace exotica
 class MotionSolver : public Object, Uncopyable, public virtual InstantiableBase
 {
 public:
-    MotionSolver();
+    MotionSolver() = default;
     virtual ~MotionSolver() = default;
-    virtual void InstantiateBase(const Initializer& init);
+    void InstantiateBase(const Initializer& init) override;
     virtual void SpecifyProblem(PlanningProblemPtr pointer);
     virtual void Solve(Eigen::MatrixXd& solution) = 0;
     PlanningProblemPtr GetProblem() const { return problem_; }

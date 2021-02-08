@@ -41,10 +41,6 @@ void MotionSolver::InstantiateBase(const Initializer& init)
     SetNumberOfMaxIterations(MotionSolverInitializer(init).MaxIterations);
 }
 
-MotionSolver::MotionSolver()
-{
-}
-
 void MotionSolver::SpecifyProblem(PlanningProblemPtr pointer)
 {
     problem_ = pointer;

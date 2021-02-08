@@ -43,7 +43,7 @@ public:
     UnconstrainedEndPoseProblem();
     virtual ~UnconstrainedEndPoseProblem();
 
-    virtual void Instantiate(const UnconstrainedEndPoseProblemInitializer& init);
+    void Instantiate(const UnconstrainedEndPoseProblemInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x);
 
     bool IsValid() override { return true; }

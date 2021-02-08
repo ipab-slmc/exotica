@@ -170,7 +170,7 @@ public:
         tGoal_.reset(new NN<Motion *>());
     }
 
-    virtual void setup();
+    void setup() override;
 
 protected:
     /// \brief Representation of a motion

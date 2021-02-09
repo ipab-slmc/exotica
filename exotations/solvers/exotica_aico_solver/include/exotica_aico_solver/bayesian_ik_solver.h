@@ -51,7 +51,7 @@ public:
 
     /// \brief Solves the problem
     /// @param solution Returned end pose solution.
-    void Solve(Eigen::MatrixXd& solution);
+    void Solve(Eigen::MatrixXd& solution) override;
 
     /// \brief Binds the solver to a specific problem which must be pre-initalised
     /// @param pointer Shared pointer to the motion planning problem

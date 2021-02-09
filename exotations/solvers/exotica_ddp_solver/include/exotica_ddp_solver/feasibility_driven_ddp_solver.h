@@ -52,8 +52,8 @@ protected:
     int NDX_;
     int last_T_ = -1;
 
-    void IncreaseRegularization();
-    void DecreaseRegularization();
+    void IncreaseRegularization() override;
+    void DecreaseRegularization() override;
     const Eigen::Vector2d& ExpectedImprovement();
     void UpdateExpectedImprovement();
     inline bool IsNaN(const double value)

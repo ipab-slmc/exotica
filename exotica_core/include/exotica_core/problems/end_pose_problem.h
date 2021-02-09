@@ -44,7 +44,7 @@ public:
     EndPoseProblem();
     virtual ~EndPoseProblem();
 
-    virtual void Instantiate(const EndPoseProblemInitializer& init);
+    void Instantiate(const EndPoseProblemInitializer& init) override;
     void Update(Eigen::VectorXdRefConst x);
     bool IsValid() override;
 

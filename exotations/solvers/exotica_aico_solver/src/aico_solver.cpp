@@ -144,7 +144,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
         }
 
         // 0. Check maximum backtrack iterations
-        if (damping && sweep_ >= max_backtrack_iterations_)
+        if (damping != 0.0 && sweep_ >= max_backtrack_iterations_)
         {
             if (debug_) HIGHLIGHT("Maximum backtrack iterations reached, exiting.");
             prob_->termination_criterion = TerminationCriterion::BacktrackIterationLimit;
@@ -157,7 +157,7 @@ void AICOSolver::Solve(Eigen::MatrixXd& solution)
             // Check convergence if
             //    a) damping is on and the iteration has concluded (the sweep improved the cost)
             //    b) damping is off [each sweep equals one iteration]
-            if ((damping && sweep_improved_cost_) || !damping)
+            if ((damping != 0.0 && sweep_improved_cost_) || !(damping != 0.0))
             {
                 // 1. Check step tolerance
                 // || x_t-x_t-1 || <= stepTolerance * max(1, || x_t ||)
@@ -391,7 +391,7 @@ void AICOSolver::UpdateTimestep(int t, bool update_fwd, bool update_bwd,
     if (update_fwd) UpdateFwdMessage(t);
     if (update_bwd) UpdateBwdMessage(t);
 
-    if (damping)
+    if (damping != 0.0)
     {
         Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
         AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * damping_reference_[t]);
@@ -412,7 +412,7 @@ void AICOSolver::UpdateTimestep(int t, bool update_fwd, bool update_bwd,
         if (update_fwd) UpdateFwdMessage(t);
         if (update_bwd) UpdateBwdMessage(t);
 
-        if (damping)
+        if (damping != 0.0)
         {
             Binv[t] = Sinv[t] + Vinv[t] + R[t] + Eigen::MatrixXd::Identity(prob_->N, prob_->N) * damping;
             AinvBSymPosDef(b[t], Binv[t], Sinv[t] * s[t] + Vinv[t] * v[t] + r[t] + damping * damping_reference_[t]);
@@ -544,7 +544,7 @@ double AICOSolver::Step()
     best_sweep_ = sweep_;
 
     // If damping (similar to line-search) is being used, consider reverting this step
-    if (damping) PerhapsUndoStep();
+    if (damping != 0.0) PerhapsUndoStep();
 
     ++sweep_;
     if (sweep_improved_cost_)

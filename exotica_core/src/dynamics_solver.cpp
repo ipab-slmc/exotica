@@ -32,8 +32,6 @@
 
 namespace exotica
 {
-template class AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic>;
-
 template <typename T, int NX, int NU>
 AbstractDynamicsSolver<T, NX, NU>::AbstractDynamicsSolver() = default;
 
@@ -471,4 +469,5 @@ const Eigen::Matrix<T, NX, NU>& AbstractDynamicsSolver<T, NX, NU>::get_Fu() cons
     return Fu_;
 }
 
+template class AbstractDynamicsSolver<double, Eigen::Dynamic, Eigen::Dynamic>;
 }  // namespace exotica

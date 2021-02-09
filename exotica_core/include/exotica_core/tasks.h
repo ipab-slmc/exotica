@@ -54,6 +54,9 @@ struct TaskIndexing
 
 struct Task
 {
+    Task() = default;
+    virtual ~Task() = default;
+
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
 
     TaskMapMap task_maps;
@@ -71,6 +74,9 @@ protected:
 
 struct TimeIndexedTask : public Task
 {
+    TimeIndexedTask() = default;
+    virtual ~TimeIndexedTask() = default;
+
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
 
@@ -120,6 +126,9 @@ struct TimeIndexedTask : public Task
 
 struct EndPoseTask : public Task
 {
+    EndPoseTask() = default;
+    virtual ~EndPoseTask() = default;
+
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_Phi, Eigen::MatrixXdRefConst big_jacobian, HessianRefConst big_hessian);
@@ -145,6 +154,9 @@ struct EndPoseTask : public Task
 
 struct SamplingTask : public Task
 {
+    SamplingTask() = default;
+    virtual ~SamplingTask() = default;
+
     virtual void Initialize(const std::vector<exotica::Initializer>& inits, std::shared_ptr<PlanningProblem> prob, TaskSpaceVector& Phi);
     void UpdateS();
     void Update(const TaskSpaceVector& big_Phi);

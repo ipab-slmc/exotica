@@ -19,7 +19,6 @@
                         <ControlLimitsLow>-10</ControlLimitsLow>
                         <ControlLimitsHigh>10</ControlLimitsHigh>
                         <dt>0.02</dt>
-                        <!-- <Integrator>RK1</Integrator> -->
                     </CartpoleDynamicsSolver>
                 </DynamicsSolver>
             </Scene>

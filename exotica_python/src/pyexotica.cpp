@@ -40,6 +40,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <octomap/OcTree.h>
 #include <ros/package.h>
 
 #include <unsupported/Eigen/CXX11/Tensor>

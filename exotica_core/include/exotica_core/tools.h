@@ -41,9 +41,17 @@
 #include <exotica_core/tools/uncopyable.h>
 #include <exotica_core/version.h>
 
-#include <geometric_shapes/shapes.h>
-#include <octomap/OcTree.h>
 #include <std_msgs/ColorRGBA.h>
+
+// Forward declarations
+namespace octomap
+{
+class OcTree;
+}
+namespace shapes
+{
+class Shape;
+}
 
 /**
  * \brief A double-wrapper MACRO functionality for generating unique object names: The actual functionality is provided by EX_UNIQ (for 'exotica unique')

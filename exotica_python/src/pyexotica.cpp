@@ -175,12 +175,12 @@ void AddInitializers(py::module& module)
     py::module inits = module.def_submodule("Initializers", "Initializers for core EXOTica classes.");
     inits.def("Initializer", &CreateInitializer);
     std::vector<Initializer> initializers = Setup::GetInitializers();
-    for (Initializer& i : initializers)
+    for (const Initializer& i : initializers)
     {
-        std::string full_name = i.GetName();
-        std::string name = full_name.substr(8);  // This removes the prefix "exotica/"
+        const std::string full_name = i.GetName();
+        const std::string name = full_name.substr(8);  // This removes the prefix "exotica/"
         known_initializers[full_name] = CreateInitializer(i);
-        inits.def((name + "Initializer").c_str(), [i]() { return CreateInitializer(i); }, (name + "Initializer constructor.").c_str());
+        inits.def((name + "Initializer").c_str(), [full_name]() { return CreateInitializer(known_initializers[full_name]); }, (name + "Initializer constructor.").c_str());
     }
 
     inits.def("load_xml", (Initializer(*)(std::string, bool)) & XMLLoader::Load, "Loads initializer from XML", py::arg("xml"), py::arg("parseAsXMLString") = false);
@@ -1589,6 +1589,7 @@ PYBIND11_MODULE(_pyexotica, module)
     AddInitializers(module);
 
     auto cleanup_exotica = []() {
+        known_initializers.clear();
         Setup::Destroy();
     };
     module.add_object("_cleanup", py::capsule(cleanup_exotica));

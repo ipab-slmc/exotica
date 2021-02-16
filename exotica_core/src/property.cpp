@@ -40,12 +40,12 @@ namespace exotica
 boost::any Property::Get() const { return value_; }
 Property::Property(const std::string& prop_name) : name_(prop_name), required_(true) {}
 Property::Property(const std::string& prop_name, bool is_required) : name_(prop_name), required_(is_required) {}
-Property::Property(const std::string& prop_name, bool is_required, boost::any val) : name_(prop_name), required_(is_required) { value_ = val; }
+Property::Property(const std::string& prop_name, bool is_required, boost::any val) : name_(prop_name), required_(is_required), value_(val) {}
 bool Property::IsRequired() const { return required_; }
 bool Property::IsSet() const { return !value_.empty(); }
 bool Property::IsStringType() const { return value_.type() == typeid(std::string); }
 bool Property::IsInitializerVectorType() const { return value_.type() == typeid(std::vector<exotica::Initializer>); }
-std::string Property::GetName() const { return name_; }
+const std::string& Property::GetName() const { return name_; }
 std::string Property::GetType() const { return GetTypeName(value_.type()); }
 Property::Property(std::initializer_list<boost::any> _val)
 {
@@ -72,7 +72,7 @@ Initializer::Initializer(const std::string& name, const std::map<std::string, bo
     }
 }
 
-std::string Initializer::GetName() const
+const std::string& Initializer::GetName() const
 {
     return name_;
 }

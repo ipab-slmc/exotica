@@ -58,7 +58,7 @@ public:
     bool IsSet() const;
     bool IsStringType() const;
     bool IsInitializerVectorType() const;
-    std::string GetName() const;
+    const std::string& GetName() const;
     std::string GetType() const;
 
 private:
@@ -73,7 +73,7 @@ public:
     Initializer();
     Initializer(const std::string& name);
     Initializer(const std::string& name, const std::map<std::string, boost::any>& properties);
-    std::string GetName() const;
+    const std::string& GetName() const;
     void SetName(const std::string& name);
     void AddProperty(const Property& prop);
     boost::any GetProperty(const std::string& name) const;
@@ -88,6 +88,8 @@ public:
 class InitializerBase
 {
 public:
+    InitializerBase() = default;
+    virtual ~InitializerBase() = default;
     virtual void Check(const Initializer& other) const = 0;
     virtual Initializer GetTemplate() const = 0;
     virtual std::vector<Initializer> GetAllTemplates() const = 0;
@@ -96,6 +98,8 @@ public:
 class InstantiableBase
 {
 public:
+    InstantiableBase() = default;
+    virtual ~InstantiableBase() = default;
     virtual Initializer GetInitializerTemplate() = 0;
     virtual void InstantiateInternal(const Initializer& init) = 0;
     virtual void InstantiateBase(const Initializer& init) {}
@@ -106,7 +110,7 @@ template <class C, typename = typename std::enable_if<std::is_base_of<Initialize
 class Instantiable : public virtual InstantiableBase
 {
 public:
-    virtual void InstantiateInternal(const Initializer& init)
+    void InstantiateInternal(const Initializer& init) override
     {
         InstantiateBase(init);
         const C tmp(init);
@@ -114,12 +118,12 @@ public:
         Instantiate(tmp);
     }
 
-    virtual Initializer GetInitializerTemplate()
+    Initializer GetInitializerTemplate() override
     {
         return C().GetTemplate();
     }
 
-    virtual std::vector<Initializer> GetAllTemplates() const
+    std::vector<Initializer> GetAllTemplates() const override
     {
         return C().GetAllTemplates();
     }

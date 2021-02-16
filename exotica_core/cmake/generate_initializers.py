@@ -200,9 +200,9 @@ def copy(data):
             + data["Name"]
             + '", '
             + is_required(data)
-            + ", "
+            + ", boost::any("
             + (data["Name"])
-            + "));\n"
+            + ")));\n"
         )
     else:
         return ""
@@ -269,7 +269,10 @@ inline std::vector<Initializer> Get"""
 namespace exotica
 {
 
-class """ + class_name + " : public InitializerBase"+"""
+class """
+        + class_name
+        + " : public InitializerBase"
+        + """
 {
 public:
     static std::string GetContainerName() { return """
@@ -301,7 +304,11 @@ public:
     {
     }
 
-    """ + class_name + """(const Initializer& other) : """ + class_name + """()
+    """
+        + class_name
+        + """(const Initializer& other) : """
+        + class_name
+        + """()
     {
 """
     )

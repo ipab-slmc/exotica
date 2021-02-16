@@ -2,12 +2,11 @@
 #ifndef INITIALIZEPROJECTHEADER_${PROJECT_NAME}_H_
 #define INITIALIZEPROJECTHEADER_${PROJECT_NAME}_H_
 
-#include<exotica_core/property.h>
+#include <exotica_core/property.h>
 ${_InitializerClassesIncludes}
 
 namespace exotica
 {
-
 inline std::vector<Initializer> get${PROJECT_NAME}Initializers()
 {
     std::vector<Initializer> ret;
@@ -15,7 +14,6 @@ inline std::vector<Initializer> get${PROJECT_NAME}Initializers()
 
     return ret;
 }
-
-}
+}  // namespace exotica
 
 #endif \\ INITIALIZEPROJECTHEADER_${PROJECT_NAME}_H_

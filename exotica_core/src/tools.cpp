@@ -34,6 +34,8 @@
 #include <regex>
 #include <typeinfo>  // The run-time type information (RTTI) Functionality of C++
 
+#include <geometric_shapes/shapes.h>
+#include <octomap/OcTree.h>
 #include "exotica_core/tools.h"
 
 #include <ros/package.h>

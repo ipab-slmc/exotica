@@ -1,1 +1,1 @@
-from target_marker import TargetMarker
+from .target_marker import TargetMarker

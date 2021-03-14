@@ -48,7 +48,7 @@ namespace exotica
  */
 void PointToLineDistance(const Eigen::Vector2d& P1, const Eigen::Vector2d& P2, const Eigen::Vector2d& P3, double& d)
 {
-    d = ((-P1.x() + P2.x()) * (P1.y() - P3.y()) - (P1.x() - P3.x()) * (-P1.y() + P2.y())) / (P2 - P1).norm();  //std::sqrt(std::pow(-P1.x() + P2.x(), 2) + std::pow(-P1.y() + P2.y(), 2));
+    d = ((-P1.x() + P2.x()) * (P1.y() - P3.y()) - (P1.x() - P3.x()) * (-P1.y() + P2.y())) / (P2 - P1).norm();
 }
 
 /**

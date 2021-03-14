@@ -32,7 +32,7 @@
 
 #include <exotica_core/task_map.h>
 
-#include <exotica_core_task_maps/distance_to_line_initializer.h>
+#include <exotica_core_task_maps/distance_to_line_2d_initializer.h>
 
 #include <visualization_msgs/MarkerArray.h>
 

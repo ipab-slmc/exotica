@@ -73,7 +73,7 @@ void PointToLineDistanceDerivative(const Eigen::Vector2d& P1,
                      std::sqrt(squared_distance_between_P1_and_P2);
 }
 
-class DistanceToLine : public TaskMap, public Instantiable<DistanceToLineInitializer>
+class DistanceToLine2D : public TaskMap, public Instantiable<DistanceToLine2DInitializer>
 {
 public:
     void AssignScene(ScenePtr scene) final;

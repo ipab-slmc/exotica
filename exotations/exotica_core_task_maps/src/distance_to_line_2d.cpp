@@ -28,19 +28,19 @@
 //
 
 #include <exotica_core/server.h>
-#include <exotica_core_task_maps/distance_to_line.h>
+#include <exotica_core_task_maps/distance_to_line_2d.h>
 
-REGISTER_TASKMAP_TYPE("DistanceToLine", exotica::DistanceToLine);
+REGISTER_TASKMAP_TYPE("DistanceToLine2D", exotica::DistanceToLine2D);
 
 namespace exotica
 {
-void DistanceToLine::AssignScene(ScenePtr scene)
+void DistanceToLine2D::AssignScene(ScenePtr scene)
 {
     scene_ = scene;
     Initialize();
 }
 
-void DistanceToLine::Initialize()
+void DistanceToLine2D::Initialize()
 {
     if (frames_.size() != 3)
     {
@@ -79,7 +79,7 @@ void DistanceToLine::Initialize()
     }
 }
 
-void DistanceToLine::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi)
+void DistanceToLine2D::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi)
 {
     if (phi.rows() != 1) ThrowNamed("Wrong size of Phi!");
 
@@ -110,7 +110,7 @@ void DistanceToLine::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef ph
     }
 }
 
-void DistanceToLine::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
+void DistanceToLine2D::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian)
 {
     if (phi.rows() != 1) ThrowNamed("Wrong size of Phi!");
     if (jacobian.rows() != 1 || jacobian.cols() != kinematics[0].jacobian(0).data.cols()) ThrowNamed("Wrong size of jacobian! " << kinematics[0].jacobian(0).data.cols());
@@ -122,7 +122,7 @@ void DistanceToLine::Update(Eigen::VectorXdRefConst /*q*/, Eigen::VectorXdRef ph
     PointToLineDistanceDerivative(P1, P2, P3, kinematics[0].jacobian[0].data, kinematics[0].jacobian[1].data, kinematics[0].jacobian[2].data, jacobian);
 }
 
-int DistanceToLine::TaskSpaceDim()
+int DistanceToLine2D::TaskSpaceDim()
 {
     return 1;
 }

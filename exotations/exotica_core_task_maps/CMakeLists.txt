@@ -13,6 +13,7 @@ AddInitializer(
   center_of_mass
   continuous_joint_pose
   control_regularization
+  distance_to_line_2d
   interaction_mesh
   eff_position
   eff_position_xy
@@ -65,6 +66,7 @@ set(SOURCES
     src/center_of_mass.cpp
     src/continuous_joint_pose.cpp
     src/control_regularization.cpp
+    src/distance_to_line_2d.cpp
     src/interaction_mesh.cpp
     src/eff_position.cpp
     src/eff_position_xy.cpp

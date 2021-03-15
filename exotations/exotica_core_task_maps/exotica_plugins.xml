@@ -12,6 +12,9 @@
   <class name="exotica/Distance" type="exotica::Distance" base_class_type="exotica::TaskMap">
     <description>Distance</description>
   </class>
+  <class name="exotica/DistanceToLine2D" type="exotica::DistanceToLine2D" base_class_type="exotica::TaskMap">
+    <description>Signed distance between line defined by two frames and a query point (third frame)</description>
+  </class>
   <class name="exotica/PointToLine" type="exotica::PointToLine" base_class_type="exotica::TaskMap">
     <description>Point to line distance</description>
   </class>

@@ -546,6 +546,40 @@ TEST(ExoticaTaskMaps, testDistance)
     }
 }
 
+TEST(ExoticaTaskMaps, testDistanceToLine2D)
+{
+    try
+    {
+        // Fixed frames build line
+        {
+            TEST_COUT << "DistanceToLine2D test: Fixed frames";
+            Initializer map("exotica/DistanceToLine2D", {{"Name", std::string("MyTask")},
+                                                         {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("base")}, {"BaseOffset", std::string("-0.5 -0.5 0")}}),
+                                                                                                   Initializer("Frame", {{"Link", std::string("base")}, {"BaseOffset", std::string("0.5 0.5 0")}}),
+                                                                                                   Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+            EXPECT_TRUE(test_random(problem));
+            EXPECT_TRUE(test_jacobian(problem));
+        }
+
+        // Robot (moving) frames build line
+        {
+            TEST_COUT << "DistanceToLine2D test: Moving links";
+            Initializer map("exotica/DistanceToLine2D", {{"Name", std::string("MyTask")},
+                                                         {"EndEffector", std::vector<Initializer>({Initializer("Frame", {{"Link", std::string("link1")}}),
+                                                                                                   Initializer("Frame", {{"Link", std::string("link3")}}),
+                                                                                                   Initializer("Frame", {{"Link", std::string("endeff")}})})}});
+            UnconstrainedEndPoseProblemPtr problem = setup_problem(map);
+            EXPECT_TRUE(test_random(problem));
+            EXPECT_TRUE(test_jacobian(problem));
+        }
+    }
+    catch (const std::exception& e)
+    {
+        ADD_FAILURE() << "Uncaught exception! " << e.what();
+    }
+}
+
 TEST(ExoticaTaskMaps, testJointLimit)
 {
     try

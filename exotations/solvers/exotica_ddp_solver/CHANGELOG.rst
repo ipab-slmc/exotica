@@ -2,6 +2,12 @@
 Changelog for package exotica_ddp_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Clang support and bug fixes (`#731 <https://github.com/ipab-slmc/exotica/issues/731>`_)
+* Upgrade clang format from v3.9 to v6.0 (`#730 <https://github.com/ipab-slmc/exotica/issues/730>`_)
+* Contributors: Wolfgang Merkt
+
 6.0.2 (2020-11-23)
 ------------------
 

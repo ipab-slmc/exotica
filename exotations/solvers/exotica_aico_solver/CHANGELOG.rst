@@ -2,6 +2,11 @@
 Changelog for package exotica_aico_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Clang support and bug fixes (`#731 <https://github.com/ipab-slmc/exotica/issues/731>`_)
+* Contributors: Wolfgang Merkt
+
 6.0.2 (2020-11-23)
 ------------------
 

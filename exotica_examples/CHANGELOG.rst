@@ -2,6 +2,14 @@
 Changelog for package exotica_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix TargetMarker
+* Fix segmentation fault on exiting Python (`#732 <https://github.com/ipab-slmc/exotica/issues/732>`_)
+* Remove explicit specification of Integrator
+* Upgrade clang format from v3.9 to v6.0 (`#730 <https://github.com/ipab-slmc/exotica/issues/730>`_)
+* Contributors: Wolfgang Merkt
+
 6.0.2 (2020-11-23)
 ------------------
 

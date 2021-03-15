@@ -2,6 +2,9 @@
 Changelog for package exotica_dynamics_solvers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.0.2 (2020-11-23)
 ------------------
 

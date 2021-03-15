@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>exotica_core</name>
-  <version>6.0.2</version>
+  <version>6.1.0</version>
   <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>

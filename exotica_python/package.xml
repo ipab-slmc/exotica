@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>exotica_python</name>
-  <version>6.0.2</version>
+  <version>6.1.0</version>
   <description>Python bindings for EXOTica</description>
   <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>

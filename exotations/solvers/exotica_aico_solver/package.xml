@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_aico_solver</name>
-  <version>6.0.2</version>
+  <version>6.1.0</version>
   <description>Implementation of the Approximate Inference Control algorithm (AICO)</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>

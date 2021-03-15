@@ -2,8 +2,8 @@
 Changelog for package exotica_ilqg_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.1.0 (2021-03-15)
+------------------
 * Upgrade clang format from v3.9 to v6.0 (`#730 <https://github.com/ipab-slmc/exotica/issues/730>`_)
 * Contributors: Wolfgang Merkt
 

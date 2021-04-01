@@ -31,7 +31,7 @@ class InteractiveCostTuning(object):
         self.rho = {}
         self.original_rho = {}
         self.cost_task_map_names = []
-        for k in problem.get_task_maps().keys():
+        for k in list(problem.get_task_maps().keys()):
             try:
                 r = problem.get_rho(k)
                 self.rho[k] = r

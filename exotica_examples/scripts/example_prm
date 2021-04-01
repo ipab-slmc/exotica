@@ -21,7 +21,7 @@ prm.clear()
 prm.grow_roadmap(1)
 
 solution = None
-for i in xrange(10):
+for i in range(10):
     # Solve
     solution = prm.solve()
 

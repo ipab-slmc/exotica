@@ -20,7 +20,7 @@ solver = exotica_scipy_solver.SciPyTimeIndexedSolver(problem=problem, method='tr
 for t in range(0, problem.T - 1):
     problem.equality.set_rho('Pose', 0.0, t)
 
-# for t in xrange(0, problem.T):
+# for t in range(0, problem.T):
 #     if float(t) * problem.tau < 0.8:
 #         problem.set_rho_eq('Position', 0.0, t)
 #     else:

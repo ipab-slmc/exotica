@@ -99,6 +99,6 @@ class SciPyTimeIndexedSolver(object):
 
         traj = np.zeros((self.problem.T, self.problem.N))
         traj[0, :] = self.problem.start_state
-        for t in xrange(0, self.problem.T - 1):
+        for t in range(0, self.problem.T - 1):
             traj[t + 1, :] = res.x[t*self.problem.N:(t+1)*self.problem.N]
         return traj

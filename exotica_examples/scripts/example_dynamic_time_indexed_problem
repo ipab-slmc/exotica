@@ -16,7 +16,7 @@ problem = exo.Setup.create_problem(prob)
 
 print("Constant acceleration to show evolution of system dynamics:")
 s = time()
-for t in xrange(problem.T - 1):
+for t in range(problem.T - 1):
     u_rand = 0.1 * np.ones((problem.N, 1))
     problem.update(u_rand, t)
     problem.get_scene().get_kinematic_tree().publish_frames()
@@ -36,7 +36,7 @@ plt.show()
 '''
 
 # Set costs: only penalise states at end of trajectory (Q_f)
-for t in xrange(problem.T - 1):
+for t in range(problem.T - 1):
     problem.set_Q(0. * problem.get_Q(t), t)
 
 # Set random guess (initial control trajectory)
@@ -49,34 +49,34 @@ problem.X_star = X_star
 
 # Compute cost of roll-out of initial control trajectory
 cost = 0.0
-for t in xrange(problem.T):
+for t in range(problem.T):
     cost += problem.get_state_cost(t)
-for t in xrange(problem.T - 1):
+for t in range(problem.T - 1):
     cost += problem.get_control_cost(t)
 print("Initial cost:", cost)
 
 # Set up simple optimization problem
 def cost_function(u):
-    for t in xrange(problem.T - 1):
+    for t in range(problem.T - 1):
         problem.update(u[7 * t: 7 * t + 7], t)
     cost = 0.0
-    for t in xrange(problem.T):
+    for t in range(problem.T):
         cost += problem.get_state_cost(t)
-    for t in xrange(problem.T - 1):
+    for t in range(problem.T - 1):
         cost += problem.get_control_cost(t)
     return cost
 
 '''
 # TODO: This needs to use a recursive update (backwards)
 def cost_jacobian(u):
-    for t in xrange(problem.T - 1):
+    for t in range(problem.T - 1):
         problem.update(u[7 * t: 7 * t + 7], t)
     # Update value function recursively - TODO
     jac = np.zeros(u.shape[0],)
-    for t in xrange(1, problem.T):
+    for t in range(1, problem.T):
         # print(t, problem.get_state_cost(t), problem.get_state_cost_jacobian(t))
         jac[7 * t - 7: 7 * t] += problem.get_state_cost_jacobian(t)
-    # for t in xrange(0, problem.T-1):
+    # for t in range(0, problem.T-1):
     #    jac[7 * t : 7 * t + 7] += problem.get_control_cost_jacobian(t)
     return jac
 
@@ -90,7 +90,7 @@ res = opt.minimize(cost_function, x0=problem.U.flatten(), method='BFGS')
 e = time()
 print("Optimal solution found in", e-s)
 
-for t in xrange(problem.T - 1):
+for t in range(problem.T - 1):
     problem.update(res.x[problem.N * t:problem.N * t + problem.N], t)
 
 from pyexotica.publish_trajectory import publish_trajectory

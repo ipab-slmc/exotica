@@ -32,43 +32,9 @@
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
-#include <pinocchio/parsers/urdf.hpp>
 
 namespace exotica
 {
-void PinocchioDynamicsSolverWithGravityCompensation::AssignScene(ScenePtr scene_in)
-{
-    constexpr bool verbose = false;
-    if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
-    {
-        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), model_, verbose);
-    }
-    else
-    {
-        ThrowPretty("Only BaseType::FIXED is currently supported with this DynamicsSolver.");
-    }
-
-    num_positions_ = model_.nq;
-    num_velocities_ = model_.nv;
-    num_controls_ = model_.nv;
-
-    pinocchio_data_.reset(new pinocchio::Data(model_));
-
-    // Pre-allocate data for f, fx, fu
-    const int ndx = get_num_state_derivative();
-    xdot_analytic_.setZero(ndx);
-    fx_.setZero(ndx, ndx);
-    fx_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
-    fu_.setZero(ndx, num_controls_);
-    Fx_.setZero(ndx, ndx);
-    Fu_.setZero(ndx, num_controls_);
-    u_nle_.setZero(num_controls_);
-    u_command_.setZero(num_controls_);
-    a_.setZero(num_velocities_);
-    du_command_dq_.setZero(num_controls_, num_velocities_);
-    du_nle_dq_.setZero(num_controls_, num_velocities_);
-}
-
 Eigen::VectorXd PinocchioDynamicsSolverWithGravityCompensation::f(const StateVector& x, const ControlVector& u)
 {
     // Obtain torque to compensate gravity and dynamic effects (Coriolis)

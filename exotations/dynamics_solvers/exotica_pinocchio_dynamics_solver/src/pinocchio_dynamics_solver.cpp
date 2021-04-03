@@ -31,49 +31,11 @@
 
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-#include <pinocchio/parsers/urdf.hpp>
 
 REGISTER_DYNAMICS_SOLVER_TYPE("PinocchioDynamicsSolver", exotica::PinocchioDynamicsSolver)
 
 namespace exotica
 {
-void PinocchioDynamicsSolver::AssignScene(ScenePtr scene_in)
-{
-    constexpr bool verbose = false;
-    if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FIXED)
-    {
-        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), model_, verbose);
-    }
-    /*else if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::PLANAR)
-    {
-        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), pinocchio::JointModelPlanar(), model_, verbose);
-    }
-    else if (scene_in->GetKinematicTree().GetControlledBaseType() == BaseType::FLOATING)
-    {
-        pinocchio::urdf::buildModel(scene_in->GetKinematicTree().GetRobotModel()->getURDF(), pinocchio::JointModelFreeFlyer(), model_, verbose);
-    }*/
-    else
-    {
-        ThrowPretty("This condition should never happen. Unknown BaseType.");
-    }
-
-    num_positions_ = model_.nq;
-    num_velocities_ = model_.nv;
-    num_controls_ = model_.nv;
-
-    pinocchio_data_.reset(new pinocchio::Data(model_));
-
-    // Pre-allocate data for f, fx, fu
-    const int ndx = get_num_state_derivative();
-    xdot_analytic_.setZero(ndx);
-    fx_.setZero(ndx, ndx);
-    fx_.topRightCorner(num_velocities_, num_velocities_).setIdentity();
-    fu_.setZero(ndx, num_controls_);
-    Fx_.setZero(ndx, ndx);
-    Fu_.setZero(ndx, num_controls_);
-}
-
 Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVector& u)
 {
     // TODO: THIS DOES NOT WORK FOR A FLOATING BASE YET!!
@@ -81,15 +43,6 @@ Eigen::VectorXd PinocchioDynamicsSolver::f(const StateVector& x, const ControlVe
     xdot_analytic_.head(num_velocities_) = x.tail(num_velocities_);
     xdot_analytic_.tail(num_velocities_) = pinocchio_data_->ddq;
     return xdot_analytic_;
-}
-
-Eigen::VectorXd PinocchioDynamicsSolver::InverseDynamics(const StateVector& x)
-{
-    // compute dynamic drift -- Coriolis, centrifugal, gravity
-    // Assume 0 acceleration
-    Eigen::VectorXd u = pinocchio::rnea(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), Eigen::VectorXd::Zero(num_velocities_));
-
-    return u;
 }
 
 Eigen::VectorXd PinocchioDynamicsSolver::StateDelta(const StateVector& x_1, const StateVector& x_2)
@@ -167,5 +120,4 @@ void PinocchioDynamicsSolver::Integrate(const StateVector& x, const StateVector&
             ThrowPretty("Not implemented!");
     };
 }
-
 }  // namespace exotica

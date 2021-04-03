@@ -28,8 +28,11 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/pinocchio_dynamics_solver.cpp
+  src/pinocchio_dynamics_solver_assign_scene.cpp
   src/pinocchio_dynamics_solver_derivatives.cpp
+  src/pinocchio_dynamics_solver_inverse_dynamics.cpp
   src/pinocchio_gravity_compensation_dynamics_solver.cpp
+  src/pinocchio_gravity_compensation_dynamics_solver_assign_scene.cpp
   src/pinocchio_gravity_compensation_dynamics_solver_derivatives.cpp
 )
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-variadic-macros -Wno-deprecated-declarations -Wno-comment -Wno-ignored-attributes)

@@ -28,46 +28,8 @@
 //
 
 #include <exotica_core/exotica_core.h>
+#include <exotica_core/tools/test_helpers.h>
 #include <gtest/gtest.h>
-
-// Extend testing printout //////////////////////
-
-namespace testing
-{
-namespace internal
-{
-#if !ROS_VERSION_MINIMUM(1, 15, 0)
-enum GTestColor
-{
-    COLOR_DEFAULT,
-    COLOR_RED,
-    COLOR_GREEN,
-    COLOR_YELLOW
-};
-#endif
-extern void ColoredPrintf(testing::internal::GTestColor color, const char* fmt, ...);
-}  // namespace internal
-}  // namespace testing
-#define PRINTF(...)                                                                        \
-    do                                                                                     \
-    {                                                                                      \
-        testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
-        testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__);    \
-    } while (0)
-
-// C++ stream interface
-class TestCout : public std::stringstream
-{
-public:
-    ~TestCout()
-    {
-        PRINTF("%s\n", str().c_str());
-    }
-};
-
-#define TEST_COUT TestCout()
-
-//////////////////////////////////////////////
 
 using namespace exotica;
 #include <string>

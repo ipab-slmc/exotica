@@ -116,7 +116,10 @@ void PinocchioDynamicsSolverWithGravityCompensation::ComputeDerivatives(const St
 
 Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fx(const StateVector& x, const ControlVector& u)
 {
-    Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
+    // This causes redundant computations but this method is no longer called in solvers.
+    ComputeDerivatives(x, u);
+
+    /*Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
     Eigen::VectorBlock<const Eigen::VectorXd> v = x.tail(num_velocities_);
 
     // Obtain torque to compensate gravity and dynamic effects (Coriolis)
@@ -141,14 +144,17 @@ Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fx(const StateVe
     du_nle_dq_.noalias() = pinocchio_data_->Minv * pinocchio_data_->dtau_dq;
 
     // du_dq_
-    fx_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = du_nle_dq_ - du_command_dq_;
+    fx_.block(num_velocities_, 0, num_velocities_, num_velocities_).noalias() = du_nle_dq_ - du_command_dq_;*/
 
     return fx_;
 }
 
 Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fu(const StateVector& x, const ControlVector& u)
 {
-    Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
+    // This causes redundant computations but this method is no longer called in solvers.
+    ComputeDerivatives(x, u);
+
+    /*Eigen::VectorBlock<const Eigen::VectorXd> q = x.head(num_positions_);
     Eigen::VectorBlock<const Eigen::VectorXd> v = x.tail(num_velocities_);
 
     // Obtain torque to compensate gravity and dynamic effects (Coriolis)
@@ -162,7 +168,7 @@ Eigen::MatrixXd PinocchioDynamicsSolverWithGravityCompensation::fu(const StateVe
 
     pinocchio::computeAllTerms(model_, *pinocchio_data_.get(), q, v);
     pinocchio::cholesky::decompose(model_, *pinocchio_data_.get());
-    pinocchio::cholesky::computeMinv(model_, *pinocchio_data_.get(), Minv);
+    pinocchio::cholesky::computeMinv(model_, *pinocchio_data_.get(), Minv);*/
 
     return fu_;
 }

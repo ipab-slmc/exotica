@@ -84,7 +84,10 @@ Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlV
 {
     // Four quadrants should be: 0, Identity, ddq_dq, ddq_dv
     // 0 and Identity are set during initialisation. Here, we pass references to ddq_dq, ddq_dv to the algorithm.
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
+    // pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
+
+    // This causes redundant computations but this method is no longer called in solvers.
+    ComputeDerivatives(x, u);
 
     return fx_;
 }
@@ -92,7 +95,10 @@ Eigen::MatrixXd PinocchioDynamicsSolver::fx(const StateVector& x, const ControlV
 Eigen::MatrixXd PinocchioDynamicsSolver::fu(const StateVector& x, const ControlVector& u)
 {
     // NB: ddq_dtau is computed with the same call - i.e., we are duplicating computation.
-    pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
+    // pinocchio::computeABADerivatives(model_, *pinocchio_data_.get(), x.head(num_positions_), x.tail(num_velocities_), u, fx_.block(num_velocities_, 0, num_velocities_, num_velocities_), fx_.block(num_velocities_, num_velocities_, num_velocities_, num_velocities_), fu_.bottomRightCorner(num_velocities_, num_velocities_));
+
+    // This causes redundant computations but this method is no longer called in solvers.
+    ComputeDerivatives(x, u);
 
     return fu_;
 }

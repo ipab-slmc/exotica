@@ -46,7 +46,7 @@ public:
     void Instantiate(const SamplingProblemInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst x);
-    bool IsValid(Eigen::VectorXdRefConst x);  // Not overriding on purpose - this updates and calls IsValid
+    bool IsStateValid(Eigen::VectorXdRefConst x);
     bool IsValid() override;
     void PreUpdate() override;
 

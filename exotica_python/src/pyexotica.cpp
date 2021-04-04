@@ -1132,6 +1132,7 @@ PYBIND11_MODULE(_pyexotica, module)
     sampling_problem.def("set_rho_neq", &SamplingProblem::SetRhoNEQ);
     sampling_problem.def("get_goal_neq", &SamplingProblem::GetGoalNEQ);
     sampling_problem.def("get_rho_neq", &SamplingProblem::GetRhoNEQ);
+    sampling_problem.def("is_state_valid", &SamplingProblem::IsStateValid);
 
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> time_indexed_sampling_problem(prob, "TimeIndexedSamplingProblem");
     time_indexed_sampling_problem.def("update", &TimeIndexedSamplingProblem::Update);

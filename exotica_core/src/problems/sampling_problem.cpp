@@ -279,7 +279,7 @@ bool SamplingProblem::IsValid()
     return (inequality_is_valid && equality_is_valid);
 }
 
-bool SamplingProblem::IsValid(Eigen::VectorXdRefConst x)
+bool SamplingProblem::IsStateValid(Eigen::VectorXdRefConst x)
 {
     Update(x);
     return IsValid();

@@ -9,7 +9,6 @@
   </PRMSolver>
 
   <SamplingProblem Name="MyProblem">
-
     <PlanningScene>
       <Scene>
         <JointGroup>arm</JointGroup>
@@ -30,5 +29,4 @@
 
     <Goal>0 0 0 0 0 0 0</Goal>
   </SamplingProblem>
-
 </PlannerDemoConfig>

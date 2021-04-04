@@ -39,7 +39,7 @@ start_pose = [[0]*len(goal_pose[0]), goal_pose[0], goal_pose[1]]
 # Plan 3 trajectories
 solution = []
 for i in range(0, 3):
-    print(i)
+    print("Plan OMPL", i)
     ompl.get_problem().start_state = start_pose[i]
     ompl.get_problem().goal_state = goal_pose[i]
     handle_attaching(i, start_pose[i], ompl.get_problem().get_scene())

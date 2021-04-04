@@ -381,6 +381,7 @@ visualization_msgs::Marker Scene::ProxyToMarker(const std::vector<CollisionProxy
     ret.points.resize(proxies.size() * 6);
     ret.colors.resize(proxies.size() * 6);
     ret.scale.x = 0.005;
+    ret.pose.orientation.w = 1.0;
     double normalLength = 0.01;
     std_msgs::ColorRGBA normal = GetColor(0.8, 0.8, 0.8);
     std_msgs::ColorRGBA far = GetColor(0.5, 0.5, 0.5);

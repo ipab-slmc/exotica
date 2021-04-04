@@ -713,6 +713,8 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
 {
     if (Server::IsRos())
     {
+        const ros::Time timestamp = ros::Time::now();
+
         // Step 1: Publish frames for every element in the tree.
         {
             int i = 0;
@@ -720,7 +722,7 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
             {
                 tf::Transform T;
                 tf::transformKDLToTF(element.lock()->frame, T);
-                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, element.lock()->segment.getName()));
+                if (i > 0) debug_tree_[i - 1] = tf::StampedTransform(T, timestamp, tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, element.lock()->segment.getName()));
                 ++i;
             }
             Server::SendTransform(debug_tree_);
@@ -729,9 +731,9 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
             {
                 tf::Transform T;
                 tf::transformKDLToTF(frame.temp_B, T);
-                debug_frames_[i * 2] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
+                debug_frames_[i * 2] = tf::StampedTransform(T, timestamp, tf::resolve(tf_prefix, GetRootFrameName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()));
                 tf::transformKDLToTF(frame.temp_AB, T);
-                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, ros::Time::now(), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
+                debug_frames_[i * 2 + 1] = tf::StampedTransform(T, timestamp, tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "B" + frame.frame_B.lock()->segment.getName()), tf::resolve(tf_prefix, "Frame" + std::to_string(i) + "A" + frame.frame_A.lock()->segment.getName()));
                 ++i;
             }
             Server::SendTransform(debug_frames_);
@@ -744,6 +746,7 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
             marker_array_msg_.markers.clear();
             for (int i = 0; i < tree_.size(); ++i)
             {
+                // Mesh from path
                 if (tree_[i].lock()->shape_resource_path != "")
                 {
                     visualization_msgs::Marker mrk;
@@ -762,6 +765,7 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
                     mrk.scale.z = tree_[i].lock()->scale(2);
                     marker_array_msg_.markers.push_back(mrk);
                 }
+                // Non-robot collision objects
                 else if (tree_[i].lock()->shape && (!tree_[i].lock()->closest_robot_link.lock() || !tree_[i].lock()->closest_robot_link.lock()->is_robot_link))
                 {
                     if (tree_[i].lock()->shape->type != shapes::ShapeType::OCTREE)
@@ -777,6 +781,7 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
                         mrk.pose.orientation.w = 1.0;
                         marker_array_msg_.markers.push_back(mrk);
                     }
+                    // Octree
                     else
                     {
                         // OcTree needs separate handling as it's not supported in constructMarkerFromShape

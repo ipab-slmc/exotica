@@ -263,6 +263,19 @@ bool SamplingProblem::IsValid()
     const bool inequality_is_valid = ((inequality.S * inequality.ydiff).array() <= 0.0).all();
     const bool equality_is_valid = ((equality.S * equality.ydiff).array().abs() == 0.0).all();
 
+    if (debug_)
+    {
+        HIGHLIGHT_NAMED("SamplingProblem::IsValid", "NEQ = " << std::boolalpha << inequality_is_valid << ", EQ = " << equality_is_valid);
+        if (!equality_is_valid)
+        {
+            HIGHLIGHT_NAMED("SamplingProblem::IsValid", "Equality: ydiff = " << equality.ydiff.transpose() << ", S * ydiff = " << (equality.S * equality.ydiff).transpose());
+        }
+        if (!inequality_is_valid)
+        {
+            HIGHLIGHT_NAMED("SamplingProblem::IsValid", "Inequality: ydiff = " << inequality.ydiff.transpose() << ", S * ydiff = " << (inequality.S * inequality.ydiff).transpose());
+        }
+    }
+
     return (inequality_is_valid && equality_is_valid);
 }
 

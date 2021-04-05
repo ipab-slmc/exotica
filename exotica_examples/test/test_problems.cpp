@@ -566,7 +566,7 @@ TEST(ExoticaProblems, SamplingProblem)
         TEST_COUT << "Testing problem update";
         problem->Update(x);
         TEST_COUT << "Testing valid state";
-        if (!problem->IsValid(x)) ADD_FAILURE() << "Start state is invalid!";
+        if (!problem->IsStateValid(x)) ADD_FAILURE() << "Start state is invalid!";
     }
     catch (const std::exception& e)
     {

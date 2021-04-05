@@ -1,10 +1,8 @@
 <?xml version="1.0" ?>
 <IKSolverDemoConfig>
-
-  <IKSolver Name="MySolver" MaxIterations="100" />
+  <BayesianIKSolver Name="MySolver" MaxIterations="100" />
 
   <UnconstrainedEndPoseProblem Name="My Problem">
-
     <PlanningScene>
       <Scene>
         <JointGroup>arm</JointGroup>
@@ -15,21 +13,23 @@
         </Links>
       </Scene>
     </PlanningScene>
-    
+
     <Maps>
       <LookAt Name="LookAt">
         <EndEffector>
-          <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/><!-- EndEffector #1 => Target to look at, in relative frame of EffPoint -->
+          <!-- EndEffector #1 => Target to look at, in relative frame of EffPoint -->
+          <Frame Link="LookAtTarget" Base="lwr_arm_6_link"/>
         </EndEffector>
       </LookAt>
+      <JointPose Name="Regularization"/>
     </Maps>
 
     <Cost>
       <Task Task="LookAt" Rho="1"/>
+      <Task Task="Regularization" Rho="1e-5"/>
     </Cost>
 
     <StartState>0 0 0 0 0 0 0</StartState>
-    <NominalState>0 0 0 0 0 0 0</NominalState>
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedEndPoseProblem>
 </IKSolverDemoConfig>

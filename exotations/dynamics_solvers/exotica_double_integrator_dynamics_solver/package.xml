@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_double_integrator_dynamics_solver</name>
-  <version>6.1.0</version>
+  <version>6.1.1</version>
   <description>Double integrator dynamics solver plug-in for Exotica</description>
 
   <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>

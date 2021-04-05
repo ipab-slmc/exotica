@@ -2,8 +2,8 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.1.1 (2021-04-05)
+------------------
 * Fixes for Python 3 and newly exposed features (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
   * Fix issues identified by static analysis
   * Expose EndPoseTask::GetS

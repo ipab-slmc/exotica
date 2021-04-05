@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_core_task_maps</name>
-  <version>6.1.0</version>
+  <version>6.1.1</version>
   <description>Common taskmaps provided with EXOTica.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>exotica</name>
-  <version>6.1.0</version>
+  <version>6.1.1</version>
   <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning. This package serves similar to a metapackage and contains dependencies onto all core-released exotica packages. It also builds the documentation.</description>
 
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>

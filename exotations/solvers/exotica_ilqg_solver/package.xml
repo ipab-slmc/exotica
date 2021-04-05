@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>exotica_ilqg_solver</name>
-  <version>6.1.0</version>
+  <version>6.1.1</version>
   <description>ILQG Solver (Todorov and Li, 2004)</description>
 
   <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>

@@ -2,8 +2,8 @@
 Changelog for package exotica_scipy_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.1.1 (2021-04-05)
+------------------
 * EndPoseSolver: Specify solver options only where applicable (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
 * Python 3 fixes
 * Contributors: Wolfgang Merkt

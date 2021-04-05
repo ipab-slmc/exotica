@@ -2,8 +2,8 @@
 Changelog for package exotica_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.1.1 (2021-04-05)
+------------------
 * Fix broken examples (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
 * Fix unit tests on Debian Buster (`#734 <https://github.com/ipab-slmc/exotica/issues/734>`_)
 * Fix test robot URDF with collision links for ROS Noetic

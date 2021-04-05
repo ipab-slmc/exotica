@@ -2,8 +2,8 @@
 Changelog for package exotica_core_task_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.1.1 (2021-04-05)
+------------------
 * Fix unit tests on Debian Buster (`#734 <https://github.com/ipab-slmc/exotica/issues/734>`_)
 * Contributors: Wolfgang Merkt
 

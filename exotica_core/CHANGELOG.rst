@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.1.1 (2021-04-05)
+------------------
 * Fix broken examples and expose new features (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
   * Add EndPoseTask::GetS
   * SamplingProblem: Rename IsValid(q) to IsStateValid(q)

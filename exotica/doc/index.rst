@@ -8,8 +8,9 @@ EXOTica
     :width: 40%
     :align: right
 
-For the EXOtica package research home page, please go
-`here <http://wcms.inf.ed.ac.uk/ipab/slmc/research/EXOTica>`__.
+EXOTica was originally conceived and developed in the `SLMC lab at the University of Edinburgh <http://web.inf.ed.ac.uk/slmc>`__. It is now used across a variety of research labs.
+
+.. For the EXOtica package research home page, please go `here <http://wcms.inf.ed.ac.uk/ipab/slmc/research/EXOTica>`__.
 
 
 Getting started

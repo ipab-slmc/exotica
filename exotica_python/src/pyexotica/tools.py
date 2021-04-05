@@ -8,6 +8,7 @@ __all__ = [
     "check_trajectory_continuous_time",
     "check_whether_trajectory_is_collision_free_by_subsampling",
     "get_colliding_links",
+    "plot_task_cost_over_time",
 ]
 
 
@@ -42,8 +43,7 @@ def check_whether_trajectory_is_collision_free_by_subsampling(
     scene, trajectory, num_subsamples=10, debug=False
 ):
     """
-    num_subsamples specifies how many steps are checked between two configurations.
-    Returns True if trajectory is collision-free, and False otherwise.
+    num_subsamples specifies how many steps are checked between two configurations. Returns True if trajectory is collision-free, and False otherwise.
 
     TODO: Support setting time for Scene update.
     """

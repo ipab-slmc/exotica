@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from pyexotica.transformations import euler_from_quaternion
+import pyexotica as exo
+
+def euler_from_quaternion(quat):
+    # Input is wxyz
+    # Exotica is xyzw
+    return exo.KDLFrame([0, 0, 0] + [quat[1], quat[2], quat[3], quat[0]]).get_rpy()
 
 def parseSceneFile(file_name, debug=False):
     data = []
-    with open(file_name, 'rU') as fin:
+    with open(file_name, 'r') as fin:
         for line in fin:
             line = line.strip()
             if line:
@@ -129,6 +134,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) != 3:
         print("Two arguments required: [scene input file] [sdf output file]")
+        exit(-1)
+
     scene_file = os.path.abspath(sys.argv[1])
     sdf_file = os.path.abspath(sys.argv[2])
 

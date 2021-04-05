@@ -23,9 +23,9 @@ class InteractiveCostTuning(object):
         self.master.winfo_toplevel().title("Interactive Cost Tuning")
 
         # Set icon
-        icon = rp.RosStack().get_path('exotica') + '/doc/images/EXOTica_icon.png'
-        img = tk.PhotoImage(file=icon)
-        self.master.tk.call('wm', 'iconphoto', self.master._w, img)
+        # icon = rp.RisStack().get_path('exotica') + '/doc/images/EXOTica_icon.png'
+        # img = tk.PhotoImage(file=icon)
+        # self.master.tk.call('wm', 'iconphoto', self.master._w, img)
 
         # Grab current rhos and cost task map names
         self.rho = {}

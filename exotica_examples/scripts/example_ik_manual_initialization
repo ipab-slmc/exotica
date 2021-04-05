@@ -36,7 +36,7 @@ def setup_problem():
     problem_init[1]['Name'] = "MyProblem"
     problem_init[1]['W'] = np.arange(7, 0, -1)
     problem_init[1]['StartState'] = np.zeros(7)
-    problem_init[1]['NominalState'] = np.zeros(7)
+    # problem_init[1]['NominalState'] = np.zeros(7)
     problem_init[1]['PlanningScene'] = scene_init
     problem_init[1]['Maps'] = [eff_frame_map_init]
     problem_init[1]['Cost'] = [eff_frame_map_task_init]

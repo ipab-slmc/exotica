@@ -74,15 +74,23 @@ class SciPyEndPoseSolver(object):
         if self.problem.use_bounds:
             bounds = Bounds(self.problem.get_bounds()[:,0], self.problem.get_bounds()[:,1])
 
+        hessian = None
+        if self.method != "SLSQP":
+            hessian = SR1()
+
+        options = {'disp': self.debug, 'maxiter': self.max_iterations}
+        if self.method == "trust-constr":
+            options['initial_tr_radius'] = 1000.
+
         s = time()
         res = minimize(self.cost_fun,
                     x0,
                     method=self.method,
                     bounds=bounds,
                     jac=True,
-                    hess=SR1(),
+                    hess=hessian,
                     constraints=cons,
-                    options={'disp': self.debug, 'initial_tr_radius':1000., 'maxiter': self.max_iterations})
+                    options=options)
         e = time()
         if self.debug:
             print(e-s, res.x)

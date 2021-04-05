@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from interactive_markers.interactive_marker_server import *
-from visualization_msgs.msg import *
+from interactive_markers.interactive_marker_server import InteractiveMarkerServer
+from visualization_msgs.msg import Marker, InteractiveMarker, InteractiveMarkerControl
 from geometry_msgs.msg import Pose, Point, Quaternion
 import PyKDL as kdl
 import pyexotica as exo
@@ -80,10 +80,11 @@ class TargetMarker:
 
     def addControl(self, direction, control_type):
         control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = direction[0]
-        control.orientation.y = direction[1]
-        control.orientation.z = direction[2]
+        quat = exo.KDLFrame([0, 0, 0] + direction + [1]).get_quaternion()
+        control.orientation.x = quat[0]
+        control.orientation.y = quat[1]
+        control.orientation.z = quat[2]
+        control.orientation.w = quat[3]
         control.interaction_mode = control_type
         self.int_marker.controls.append(control)
 

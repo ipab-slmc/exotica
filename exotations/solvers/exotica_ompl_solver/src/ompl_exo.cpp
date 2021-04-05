@@ -37,7 +37,7 @@ OMPLStateValidityChecker::OMPLStateValidityChecker(const ompl::base::SpaceInform
 
 bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
 {
-    double tmp;
+    double tmp = 0.0;
     return isValid(state, tmp);
 }
 
@@ -51,7 +51,7 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &d
     boost::static_pointer_cast<OMPLStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
 #endif
 
-    if (!prob_->IsValid(q))
+    if (!prob_->IsStateValid(q))
     {
         dist = -1;
         return false;

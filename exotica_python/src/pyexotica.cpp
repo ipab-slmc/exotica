@@ -888,7 +888,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("set_goal", &EndPoseTask::SetGoal)
         .def("get_goal", &EndPoseTask::GetGoal)
         .def("set_rho", &EndPoseTask::SetRho)
-        .def("get_rho", &EndPoseTask::GetRho);
+        .def("get_rho", &EndPoseTask::GetRho)
+        .def("get_S", &EndPoseTask::GetS);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
         .def_readonly("length_Phi", &SamplingTask::length_Phi)
@@ -1132,6 +1133,7 @@ PYBIND11_MODULE(_pyexotica, module)
     sampling_problem.def("set_rho_neq", &SamplingProblem::SetRhoNEQ);
     sampling_problem.def("get_goal_neq", &SamplingProblem::GetGoalNEQ);
     sampling_problem.def("get_rho_neq", &SamplingProblem::GetRhoNEQ);
+    sampling_problem.def("is_state_valid", &SamplingProblem::IsStateValid);
 
     py::class_<TimeIndexedSamplingProblem, std::shared_ptr<TimeIndexedSamplingProblem>, PlanningProblem> time_indexed_sampling_problem(prob, "TimeIndexedSamplingProblem");
     time_indexed_sampling_problem.def("update", &TimeIndexedSamplingProblem::Update);

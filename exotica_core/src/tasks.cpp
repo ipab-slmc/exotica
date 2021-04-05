@@ -200,6 +200,19 @@ double EndPoseTask::GetRho(const std::string& task_name) const
     ThrowPretty("Cannot get rho. Task Map '" << task_name << "' does not exist.");
 }
 
+Eigen::MatrixXd EndPoseTask::GetS(const std::string& task_name) const
+{
+    for (size_t i = 0; i < indexing.size(); ++i)
+    {
+        if (tasks[i]->GetObjectName() == task_name)
+        {
+            // We are interested in the square matrix of dimension length_jacobian
+            return S.block(indexing[i].start_jacobian, indexing[i].start_jacobian, indexing[i].length_jacobian, indexing[i].length_jacobian);
+        }
+    }
+    ThrowPretty("Cannot get S. Task map '" << task_name << "' does not exist.");
+}
+
 Eigen::VectorXd EndPoseTask::GetTaskError(const std::string& task_name) const
 {
     for (size_t i = 0; i < indexing.size(); ++i)
@@ -375,7 +388,7 @@ Eigen::VectorXd TimeIndexedTask::GetTaskError(const std::string& task_name, int 
             return ydiff[t].segment(indexing[i].start_jacobian, indexing[i].length_jacobian);
         }
     }
-    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get ydiff. Task map '" << task_name << "' does not exist.");
 }
 
 Eigen::MatrixXd TimeIndexedTask::GetS(const std::string& task_name, int t) const
@@ -389,7 +402,7 @@ Eigen::MatrixXd TimeIndexedTask::GetS(const std::string& task_name, int t) const
             return S[t].block(indexing[i].start_jacobian, indexing[i].start_jacobian, indexing[i].length_jacobian, indexing[i].length_jacobian);
         }
     }
-    ThrowPretty("Cannot get rho. Task map '" << task_name << "' does not exist.");
+    ThrowPretty("Cannot get S. Task map '" << task_name << "' does not exist.");
 }
 
 void TimeIndexedTask::ReinitializeVariables(int _T, PlanningProblemPtr _prob, const TaskSpaceVector& _Phi)

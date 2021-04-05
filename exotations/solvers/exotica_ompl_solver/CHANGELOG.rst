@@ -2,6 +2,11 @@
 Changelog for package exotica_ompl_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* SamplingProblem: Rename IsValid(q) to IsStateValid(q) (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 * Upgrade clang format from v3.9 to v6.0 (`#730 <https://github.com/ipab-slmc/exotica/issues/730>`_)

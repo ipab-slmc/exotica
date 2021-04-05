@@ -2,6 +2,9 @@
 Changelog for package exotica_ompl_control_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.1.0 (2021-03-15)
 ------------------
 

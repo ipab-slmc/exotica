@@ -2,6 +2,9 @@
 Changelog for package exotica_levenberg_marquardt_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.1.0 (2021-03-15)
 ------------------
 * [exotica_levenberg_marquardt_solver] Use better default for Convergence

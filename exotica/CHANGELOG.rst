@@ -2,6 +2,11 @@
 Changelog for package exotica
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [exotica] Update version to 6.1.1 for documentation
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 * [exotica] Adjust version for documentation

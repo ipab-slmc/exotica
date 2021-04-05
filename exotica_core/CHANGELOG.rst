@@ -2,6 +2,18 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix broken examples and expose new features (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
+  * Add EndPoseTask::GetS
+  * SamplingProblem: Rename IsValid(q) to IsStateValid(q)
+  * SamplingProblem: More debug output for IsValid
+  * KinematicTree: Use same timestamp for tfs
+  * Scene: Fix uninitialised quaternion
+* Fix unit tests on Debian Buster (`#734 <https://github.com/ipab-slmc/exotica/issues/734>`_)
+* Fix test robot URDF with collision links
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 * Fix segmentation fault on exiting Python (`#732 <https://github.com/ipab-slmc/exotica/issues/732>`_)

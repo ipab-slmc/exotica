@@ -2,6 +2,14 @@
 Changelog for package exotica_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix broken examples (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
+* Fix unit tests on Debian Buster (`#734 <https://github.com/ipab-slmc/exotica/issues/734>`_)
+* Fix test robot URDF with collision links for ROS Noetic
+* Python 3 fixes
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 * Fix TargetMarker

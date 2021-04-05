@@ -2,6 +2,17 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fixes for Python 3 and newly exposed features (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)
+  * Fix issues identified by static analysis
+  * Expose EndPoseTask::GetS
+  * Remove transformations.py (usage replaced by exo.KDLFrame)
+  * Install convert_moveit_scene_to_sdf & remove use of transformations.py
+  * SamplingProblem: Rename IsValid(q) to IsStateValid(q)
+* Python 3 fixes
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 * Fix segmentation fault on exiting Python (`#732 <https://github.com/ipab-slmc/exotica/issues/732>`_)

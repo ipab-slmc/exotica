@@ -2,6 +2,11 @@
 Changelog for package exotica_pinocchio_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reduce compilation time and required memory
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 

@@ -2,6 +2,11 @@
 Changelog for package exotica_core_task_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix unit tests on Debian Buster (`#734 <https://github.com/ipab-slmc/exotica/issues/734>`_)
+* Contributors: Wolfgang Merkt
+
 6.1.0 (2021-03-15)
 ------------------
 * Add DistanceToLine2D task map (`#733 <https://github.com/ipab-slmc/exotica/issues/733>`_)

@@ -888,7 +888,8 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("set_goal", &EndPoseTask::SetGoal)
         .def("get_goal", &EndPoseTask::GetGoal)
         .def("set_rho", &EndPoseTask::SetRho)
-        .def("get_rho", &EndPoseTask::GetRho);
+        .def("get_rho", &EndPoseTask::GetRho)
+        .def("get_S", &EndPoseTask::GetS);
 
     py::class_<SamplingTask, std::shared_ptr<SamplingTask>>(module, "SamplingTask")
         .def_readonly("length_Phi", &SamplingTask::length_Phi)

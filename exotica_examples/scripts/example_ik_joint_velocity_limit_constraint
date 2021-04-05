@@ -36,7 +36,7 @@ class Example:
         q = self.solver.solve()[0]
         publish_pose(q, self.problem)
         qdot = (q - self.q) / DT
-        print "qdot =", qdot
+        print("qdot =", qdot)
         self.t += DT
         self.q = q
 

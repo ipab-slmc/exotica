@@ -1,6 +1,6 @@
-from sympy import *
+from sympy import Symbol, sin, cos, tan, diff
 # from pprint import pprint
-from sympy.matrices import *
+from sympy.matrices import Matrix
 import numpy as np
 
 x_ = Symbol('x_')

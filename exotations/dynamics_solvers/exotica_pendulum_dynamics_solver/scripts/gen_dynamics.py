@@ -1,4 +1,4 @@
-from sympy import *
+from sympy import Symbol, sin, diff
 from pprint import pprint
 
 theta = Symbol('theta')

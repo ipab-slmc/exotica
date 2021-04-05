@@ -1,12 +1,10 @@
 <?xml version="1.0" ?>
 <IKSolverDemoConfig>
-
   <IKSolver Name="MySolver">
     <MaxIterations>1</MaxIterations>
   </IKSolver>
 
   <UnconstrainedEndPoseProblem Name="MyProblem">
-
     <PlanningScene>
       <Scene>
         <JointGroup>arm</JointGroup>
@@ -28,8 +26,7 @@
       <Task Task="p2l" Rho="1"/>
     </Cost>
 
-    <NominalState>0 0 0 0 0 0 0</NominalState>
+    <!-- <NominalState>0 0 0 0 0 0 0</NominalState> -->
     <W> 7 6 5 4 3 2 1 </W>
   </UnconstrainedEndPoseProblem>
-
 </IKSolverDemoConfig>

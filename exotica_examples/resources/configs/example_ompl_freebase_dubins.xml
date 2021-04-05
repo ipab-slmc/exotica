@@ -11,7 +11,7 @@
   </RRTConnectSolver>
 
   <SamplingProblem Name="MyProblem">
-    <Debug>1</Debug>
+    <!-- <Debug>1</Debug> -->
 
     <PlanningScene>
       <Scene>

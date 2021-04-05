@@ -15,13 +15,13 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 project = u'EXOTica'
-copyright = u'2020, Vladimir Ivan, Wolfgang Merkt, Sethu Vijayakumar - and contributors'
+copyright = u'2021, Vladimir Ivan, Wolfgang Merkt, Sethu Vijayakumar - and contributors'
 author = u'Vladimir Ivan, Wolfgang Merkt, Sethu Vijayakumar - and contributors'
 
 # The short X.Y version.
-version = u'6.0.2'
+version = u'6.1.1'
 # The full version, including alpha/beta/rc tags.
-release = u'6.0.2'
+release = u'6.1.1'
 
 language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Doxyfile']

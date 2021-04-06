@@ -189,7 +189,7 @@ void XMLLoader::LoadXML(std::string file_name, Initializer& solver, Initializer&
     }
 
     std::vector<Initializer> initializers;
-    tinyxml2::XMLHandle root_tag = xml_file.RootElement()->FirstChild();
+    tinyxml2::XMLHandle root_tag(xml_file.RootElement()->FirstChild());
     while (root_tag.ToNode())
     {
         if (root_tag.ToElement() == nullptr)

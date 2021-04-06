@@ -47,6 +47,9 @@ if("${TinyXML2_VERSION}" VERSION_GREATER "5.90.0")
   add_definitions(-DTINYXML_HAS_ERROR_STR)
 endif()
 
+# Deactivate some warnings on Conda
+add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+
 include(exotica)
 include(add_initializer)
 

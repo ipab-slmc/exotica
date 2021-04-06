@@ -1,0 +1,33 @@
+name: test
+channels:
+  - robostack
+  - conda-forge
+dependencies:
+  # build deps
+  - compilers
+  - ninja
+  - cmake
+  - catkin_pkg
+  # Other deps
+  - cppzmq
+  - eigen
+  - msgpack-python
+  - orocos-kdl
+  - python
+  - tinyxml2
+  - zeromq
+  - ros-distro-mutex 0.1 noetic
+  - ros-noetic-catkin
+  - ros-noetic-cmake-modules
+  - ros-noetic-eigen-conversions
+  - ros-noetic-geometry-msgs
+  - ros-noetic-kdl-parser
+  - ros-noetic-moveit-core
+  - ros-noetic-moveit-msgs
+  - ros-noetic-moveit-ros-planning
+  - ros-noetic-pluginlib
+  - ros-noetic-roscpp
+  - ros-noetic-rosunit
+  - ros-noetic-std-msgs
+  - ros-noetic-tf
+  - ros-noetic-tf-conversions

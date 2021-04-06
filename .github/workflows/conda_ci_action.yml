@@ -3,7 +3,7 @@ name: Build Exotica on all platforms
 on: push
 
 jobs:
-  run_rviz_compilation:
+  run_exotica_compilation:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -14,7 +14,7 @@ jobs:
     - name: Set up Dependencies
       uses: mamba-org/provision-with-micromamba@main
       with:
-        environment-file: .github/ci_env.yml
+        environment-file: .github/conda_ci_env.yml
     - name: Install System Dependencies
       if: runner.os == 'Linux'
       run: |

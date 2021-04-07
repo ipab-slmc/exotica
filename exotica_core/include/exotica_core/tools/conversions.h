@@ -49,9 +49,8 @@
 namespace Eigen
 {
 /// \brief Convenience wrapper for storing references to sub-matrices/vectors
-typedef Eigen::internal::ref_selector<Eigen::VectorXd>::type VectorXdRefConst;
-typedef Eigen::internal::ref_selector<Eigen::MatrixXd>::type MatrixXdRefConst;
-
+typedef const Eigen::Ref<const Eigen::VectorXd>& VectorXdRefConst;
+typedef const Eigen::Ref<const Eigen::MatrixXd>& MatrixXdRefConst;
 typedef typename Eigen::Ref<Eigen::VectorXd> VectorXdRef;
 typedef typename Eigen::Ref<Eigen::MatrixXd> MatrixXdRef;
 

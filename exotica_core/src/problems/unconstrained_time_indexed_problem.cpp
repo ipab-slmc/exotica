@@ -159,8 +159,9 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
             else if (flags_ & KIN_J)
             {
                 tasks_[i]->Update(x[t],
-                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),  // Adding eval() is a work-around for issue #737 when using Eigen 3.3.9
-                                  Eigen::MatrixXdRef(jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian)));
+                                  Phi[t].data.segment(tasks_[i]->start, tasks_[i]->length),
+                                  Eigen::MatrixXdRef(jacobian[t].middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian))  // Adding MatrixXdRef(...) is a work-around for issue #737 when using Eigen 3.3.9
+                );
             }
             else
             {

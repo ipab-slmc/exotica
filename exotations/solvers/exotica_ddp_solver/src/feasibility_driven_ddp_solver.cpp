@@ -76,6 +76,10 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
     Quu_ldlt_.resize(T);
     Quuk_.resize(T);
 
+    Quu_inv_.resize(T);
+    fx_.resize(T);
+    fu_.resize(T);
+
     for (int t = 0; t < T; ++t)
     {
         Vxx_[t] = Eigen::MatrixXd::Zero(NDX_, NDX_);
@@ -103,18 +107,19 @@ void AbstractFeasibilityDrivenDDPSolver::AllocateData()
         FuTVxx_p_[t] = Eigen::MatrixXd::Zero(NU_, NDX_);
         Quu_ldlt_[t] = Eigen::LDLT<Eigen::MatrixXd>(NU_);
         Quuk_[t] = Eigen::VectorXd(NU_);
+
+        Quu_inv_[t] = Eigen::MatrixXd(NU_, NU_);
+        fx_[t] = Eigen::MatrixXd(NDX_, NDX_);
+        fu_[t] = Eigen::MatrixXd(NDX_, NU_);
     }
     Vxx_.back() = Eigen::MatrixXd::Zero(NDX_, NDX_);
     Vx_.back() = Eigen::VectorXd::Zero(NDX_);
     xs_try_.back().setZero(NX_);
     fs_.back() = Eigen::VectorXd::Zero(NDX_);
+    dx_.back() = Eigen::VectorXd::Zero(NDX_);
 
     FxTVxx_p_ = Eigen::MatrixXd::Zero(NDX_, NDX_);
     fTVxx_p_ = Eigen::VectorXd::Zero(NDX_);
-
-    Quu_inv_.assign(T, Eigen::MatrixXd(NU_, NU_));
-    fx_.assign(T, Eigen::MatrixXd(NDX_, NDX_));
-    fu_.assign(T, Eigen::MatrixXd(NDX_, NU_));
 
     // If T changed, we need to re-allocate.
     last_T_ = T_;

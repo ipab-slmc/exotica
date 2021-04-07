@@ -395,7 +395,7 @@ const Eigen::Vector2d& AbstractFeasibilityDrivenDDPSolver::ExpectedImprovement()
     {
         for (int t = 0; t < T_; ++t)
         {
-            dx_[t] = prob_->GetScene()->GetDynamicsSolver()->StateDelta(xs_[t], xs_try_[t]);
+            prob_->GetScene()->GetDynamicsSolver()->StateDelta(xs_[t], xs_try_[t], dx_[t]);
             fTVxx_p_.noalias() = Vxx_[t] * dx_[t];
             dv_ -= fs_[t].dot(fTVxx_p_);
         }
@@ -493,8 +493,8 @@ void AbstractFeasibilityDrivenDDPSolver::ForwardPass(const double steplength)
             // We need to obtain a state based on the expected reduction of the gap given the step length (dt=unit time)
             prob_->GetScene()->GetDynamicsSolver()->Integrate(xnext_, fs_[t] * (steplength - 1), 1., xs_try_[t]);
         }
-        dx_[t] = prob_->GetScene()->GetDynamicsSolver()->StateDelta(xs_try_[t], xs_[t]);  // NB: StateDelta in Exotica is the other way round than in Pinocchio
-        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];              // This is weird. It works better WITHOUT the feedback ?!
+        prob_->GetScene()->GetDynamicsSolver()->StateDelta(xs_try_[t], xs_[t], dx_[t]);  // NB: StateDelta in Exotica is the other way round than in Pinocchio
+        us_try_[t].noalias() = us_[t] - k_[t] * steplength - K_[t] * dx_[t];             // This is weird. It works better WITHOUT the feedback ?!
 
         if (clamp_to_control_limits_in_forward_pass_)
         {
@@ -565,7 +565,7 @@ double AbstractFeasibilityDrivenDDPSolver::CalcDiff()
         // Defects for t=0..T
         for (int t = 0; t < prob_->get_T(); ++t)
         {
-            fs_[t] = prob_->GetScene()->GetDynamicsSolver()->StateDelta(prob_->get_X(t), xs_[t]);  // Exotica's convention differs...
+            prob_->GetScene()->GetDynamicsSolver()->StateDelta(prob_->get_X(t), xs_[t], fs_[t]);  // Exotica's convention differs...
         }
     }
     else if (!was_feasible_)

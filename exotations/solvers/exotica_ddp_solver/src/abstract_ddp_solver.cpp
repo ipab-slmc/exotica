@@ -284,12 +284,14 @@ double AbstractDDPSolver::ForwardPass(const double alpha)
     control_cost_try_ = 0.0;
 
     Eigen::VectorXd u_hat(NU_);  // TODO: allocate outside
+    Eigen::VectorXd xdiff(NDX_);
 
     for (int t = 0; t < T_ - 1; ++t)
     {
+        dynamics_solver_->StateDelta(prob_->get_X(t), X_ref_[t], xdiff);
         u_hat = U_ref_[t];
         u_hat.noalias() += alpha * k_[t];
-        u_hat.noalias() += K_[t] * dynamics_solver_->StateDelta(prob_->get_X(t), X_ref_[t]);
+        u_hat.noalias() += K_[t] * xdiff;
 
         // Clamp controls, if desired:
         if (base_parameters_.ClampControlsInForwardPass)

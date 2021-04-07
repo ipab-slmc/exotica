@@ -120,8 +120,8 @@ void UnconstrainedEndPoseProblem::Update(Eigen::VectorXdRefConst x)
             else if (flags_ & KIN_J)
             {
                 tasks_[i]->Update(x,
-                                  Phi.data.segment(tasks_[i]->start, tasks_[i]->length).eval(),  // Adding eval() is a work-around for issue #737 when using Eigen 3.3.9
-                                  jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian));
+                                  Phi.data.segment(tasks_[i]->start, tasks_[i]->length),  // Adding eval() is a work-around for issue #737 when using Eigen 3.3.9
+                                  Eigen::MatrixXdRef(jacobian.middleRows(tasks_[i]->start_jacobian, tasks_[i]->length_jacobian)));
             }
             else
             {

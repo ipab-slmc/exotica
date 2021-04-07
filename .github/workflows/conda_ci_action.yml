@@ -41,6 +41,7 @@ jobs:
                  -G "Ninja"
         ninja
         ninja run_tests
+        catkin_test_results
     - name: Build Exotica on Windows
       if: runner.os == 'Windows'
       working-directory: ./exotica_core

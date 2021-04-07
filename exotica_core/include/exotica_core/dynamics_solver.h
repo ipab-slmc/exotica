@@ -139,6 +139,11 @@ public:
         return x_1 - x_2;
     }
 
+    void StateDelta(const StateVector& x_1, const StateVector& x_2, Eigen::VectorXdRef xout)
+    {
+        xout = StateDelta(x_1, x_2);
+    }
+
     /// \brief Return the difference of the StateDelta operation between two state vectors.
     ///     The ArgumentPosition argument can be used to select whether to take derivative w.r.t. x_1 or x_2.
     virtual Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> dStateDelta(const StateVector& x_1, const StateVector& x_2, const ArgumentPosition first_or_second)

@@ -839,7 +839,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     // This allows composition of multiple functions
     //  useful when you want to apply different cost functions to different controls
     // if (parameters_.LossType == "L2")
-    cost += U_.col(t).transpose() * R_ * U_.col(t);
+    cost += U_.col(t).cwiseAbs2().cwiseProduct(R_.diagonal()).sum();
 
     // Sparsity-related control cost
     for (int iu = 0; iu < scene_->get_num_controls(); ++iu)

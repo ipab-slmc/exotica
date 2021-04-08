@@ -40,6 +40,7 @@ jobs:
                  -DCATKIN_SKIP_TESTING=OFF \
                  -G "Ninja"
         ninja
+        env
         ninja run_tests
         catkin_test_results
     - name: Build Exotica on Windows

@@ -74,17 +74,14 @@ double SphereCollision::Distance(const KDL::Frame& eff_A, const KDL::Frame& eff_
     return 1.0 / (1.0 + exp(5.0 * eps_ * ((eff_A.p - eff_B.p).Norm() - r_A - r_B)));
 }
 
-Eigen::VectorXd SphereCollision::Jacobian(const KDL::Frame& eff_A, const KDL::Frame& eff_B, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double r_A, double r_B)
+void SphereCollision::Jacobian(const KDL::Frame& eff_A, const KDL::Frame& eff_B, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double r_A, double r_B, Eigen::Block<Eigen::Ref<Eigen::MatrixXd>, 1, -1, false> ret)
 {
-    const int n = jacA.columns();
-    Eigen::VectorXd ret = Eigen::VectorXd::Zero(n);
     const Eigen::Vector3d eA_minus_eB = Eigen::Map<const Eigen::Vector3d>(eff_A.p.data) - Eigen::Map<const Eigen::Vector3d>(eff_B.p.data);
     const double eA_minus_eB_norm = eA_minus_eB.norm();
-    for (int i = 0; i < n; ++i)
+    for (unsigned int i = 0; i < jacA.columns(); ++i)
     {
-        ret(i) = -static_cast<double>((jacA.data.col(i).head<3>() - jacB.data.col(i).head<3>()).adjoint() * eA_minus_eB) / eA_minus_eB_norm;
+        ret(i) += -static_cast<double>((jacA.data.col(i).head<3>() - jacB.data.col(i).head<3>()).adjoint() * eA_minus_eB) / eA_minus_eB_norm;
     }
-    return ret;
 }
 
 void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi)
@@ -145,7 +142,7 @@ void SphereCollision::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, 
                     int i = A->second[ii];
                     int j = B->second[jj];
                     phi(phiI) += Distance(kinematics[0].Phi(i), kinematics[0].Phi(j), radiuses_[i], radiuses_[j]);
-                    jacobian.row(phiI) += Jacobian(kinematics[0].Phi(i), kinematics[0].Phi(j), kinematics[0].jacobian(i), kinematics[0].jacobian(j), radiuses_[i], radiuses_[j]);
+                    Jacobian(kinematics[0].Phi(i), kinematics[0].Phi(j), kinematics[0].jacobian(i), kinematics[0].jacobian(j), radiuses_[i], radiuses_[j], jacobian.row(phiI));
                 }
             }
             ++phiI;

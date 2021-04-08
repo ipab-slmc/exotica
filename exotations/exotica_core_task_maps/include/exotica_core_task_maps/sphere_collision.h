@@ -49,7 +49,7 @@ public:
 
 private:
     double Distance(const KDL::Frame& eff_A, const KDL::Frame& eff_B, double r_A, double r_B);
-    Eigen::VectorXd Jacobian(const KDL::Frame& eff_A, const KDL::Frame& eff_B, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double r_A, double r_B);
+    void Jacobian(const KDL::Frame& eff_A, const KDL::Frame& eff_B, const KDL::Jacobian& jacA, const KDL::Jacobian& jacB, double r_A, double r_B, Eigen::Block<Eigen::Ref<Eigen::MatrixXd>, 1, -1, false> ret);
 
     std::map<std::string, std::vector<int>> groups_;
     std::vector<double> radiuses_;

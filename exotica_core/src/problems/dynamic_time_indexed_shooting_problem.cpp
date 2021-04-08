@@ -550,7 +550,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     U_.col(t) = u_in;
 
     // Update xdiff
-    X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
+    scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t), X_diff_.col(t));
 
     // Update current state kinematics and costs
     if (num_tasks > 0) UpdateTaskMaps(X_.col(t), U_.col(t), t);
@@ -581,7 +581,7 @@ void DynamicTimeIndexedShootingProblem::Update(Eigen::VectorXdRefConst x_in, Eig
     }
 
     // Update xdiff
-    X_diff_.col(t + 1) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t + 1), X_star_.col(t + 1));
+    scene_->GetDynamicsSolver()->StateDelta(X_.col(t + 1), X_star_.col(t + 1), X_diff_.col(t + 1));
 
     // Stochastic noise, if enabled
     if (stochastic_matrices_specified_ && stochastic_updates_enabled_)
@@ -635,7 +635,7 @@ void DynamicTimeIndexedShootingProblem::UpdateTerminalState(Eigen::VectorXdRefCo
     }
 
     X_.col(t) = x_in;
-    X_diff_.col(t) = scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t));
+    scene_->GetDynamicsSolver()->StateDelta(X_.col(t), X_star_.col(t), X_diff_.col(t));
 
     // Set the corresponding KinematicResponse for KinematicTree in order to
     // have Kinematics elements updated based in x_in.
@@ -839,7 +839,7 @@ double DynamicTimeIndexedShootingProblem::GetControlCost(int t) const
     // This allows composition of multiple functions
     //  useful when you want to apply different cost functions to different controls
     // if (parameters_.LossType == "L2")
-    cost += U_.col(t).transpose() * R_ * U_.col(t);
+    cost += U_.col(t).cwiseAbs2().cwiseProduct(R_.diagonal()).sum();
 
     // Sparsity-related control cost
     for (int iu = 0; iu < scene_->get_num_controls(); ++iu)

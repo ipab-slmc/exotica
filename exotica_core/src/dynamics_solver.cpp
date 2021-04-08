@@ -303,6 +303,9 @@ void AbstractDynamicsSolver<T, NX, NU>::InitializeSecondOrderDerivatives()
     fxu_default_ = Eigen::Tensor<T, 3>(ndx, ndx, num_controls_);
     fxu_default_.setZero();
 
+    dStateDelta_.setIdentity(get_num_state_derivative(), get_num_state_derivative());
+    ddStateDelta_.setConstant(get_num_state_derivative(), Eigen::MatrixXd::Zero(get_num_state_derivative(), get_num_state_derivative()));
+
     second_order_derivatives_initialized_ = true;
 }
 

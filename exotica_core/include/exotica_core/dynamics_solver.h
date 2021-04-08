@@ -139,6 +139,11 @@ public:
         return x_1 - x_2;
     }
 
+    void StateDelta(const StateVector& x_1, const StateVector& x_2, Eigen::VectorXdRef xout)
+    {
+        xout = StateDelta(x_1, x_2);
+    }
+
     /// \brief Return the difference of the StateDelta operation between two state vectors.
     ///     The ArgumentPosition argument can be used to select whether to take derivative w.r.t. x_1 or x_2.
     virtual Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> dStateDelta(const StateVector& x_1, const StateVector& x_2, const ArgumentPosition first_or_second)
@@ -146,20 +151,24 @@ public:
         assert(x_1.size() == x_2.size());
         assert(first_or_second == ArgumentPosition::ARG0 || first_or_second == ArgumentPosition::ARG1);
 
+        if (!second_order_derivatives_initialized_) InitializeSecondOrderDerivatives();
+
         if (first_or_second == ArgumentPosition::ARG0)
-            return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Identity(get_num_state_derivative(), get_num_state_derivative());
+            return dStateDelta_;
         else
-            return -1.0 * Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Identity(get_num_state_derivative(), get_num_state_derivative());
+            return -1.0 * dStateDelta_;
     }
 
     virtual Hessian ddStateDelta(const StateVector& x_1, const StateVector& x_2, const ArgumentPosition first_or_second)
     {
-        assert(x_1.size() == x_2.size());
-
         // In Euclidean spaces, this is zero.
-        Hessian ddStateDelta;
-        ddStateDelta.setConstant(get_num_state_derivative(), Eigen::MatrixXd::Zero(get_num_state_derivative(), get_num_state_derivative()));
-        return ddStateDelta;
+
+        assert(x_1.size() == x_2.size());
+        assert(first_or_second == ArgumentPosition::ARG0 || first_or_second == ArgumentPosition::ARG1);
+
+        if (!second_order_derivatives_initialized_) InitializeSecondOrderDerivatives();
+
+        return ddStateDelta_;
     }
 
     /// \brief Returns the position-part of the state vector to update the scene.
@@ -219,6 +228,8 @@ public:
 private:
     bool control_limits_initialized_ = false;
     Eigen::VectorXd raw_control_limits_low_, raw_control_limits_high_;
+    Eigen::MatrixXd dStateDelta_;
+    Hessian ddStateDelta_;
 
 protected:
     int num_controls_ = -1;          ///< Number of controls in the dynamic system.

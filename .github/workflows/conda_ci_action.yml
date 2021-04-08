@@ -1,20 +1,20 @@
-name: Build Exotica on all platforms
+name: Conda-CI
 
 on: push
 
 jobs:
-  run_rviz_compilation:
+  run_exotica_compilation:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest] # [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest] #, windows-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Dependencies
       uses: mamba-org/provision-with-micromamba@main
       with:
-        environment-file: .github/ci_env.yml
+        environment-file: .github/conda_ci_env.yml
     - name: Install System Dependencies
       if: runner.os == 'Linux'
       run: |
@@ -40,7 +40,10 @@ jobs:
                  -DCATKIN_SKIP_TESTING=OFF \
                  -G "Ninja"
         ninja
-        ninja run_tests
+        if [[ `uname -s` == "Linux" ]]; then
+          ninja run_tests
+          catkin_test_results
+        fi
     - name: Build Exotica on Windows
       if: runner.os == 'Windows'
       working-directory: ./exotica_core

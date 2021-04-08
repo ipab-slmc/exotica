@@ -11,14 +11,11 @@ jobs:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: kinetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
-          - {ROS_DISTRO: kinetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
-          - {ROS_DISTRO: kinetic, PRERELEASE: true}
           - {ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0"}
           - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
           - {ROS_DISTRO: melodic, PRERELEASE: true}
-          #- {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
+          - {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           - {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
           - {ROS_DISTRO: noetic, PRERELEASE: true}
     env:

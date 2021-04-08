@@ -29,7 +29,7 @@ catkin_package(
 pybind11_add_module(_pyexotica MODULE src/pyexotica.cpp)
 target_link_libraries(_pyexotica PRIVATE ${PYTHON_LIBRARIES} ${catkin_LIBRARIES})
 target_compile_options(_pyexotica PRIVATE "-Wno-deprecated-declarations")  # because we are refactoring and triggereing this ourselves.
-target_include_directories(_pyexotica PUBLIC ${catkin_INCLUDE_DIRS} ${pybind11_catkin_INCLUDE_DIRS}/pybind11_catkin) # the latter is a work-around until 2.4.3 is released
+target_include_directories(_pyexotica PUBLIC ${catkin_INCLUDE_DIRS})
 add_dependencies(_pyexotica ${catkin_EXPORTED_TARGETS})
 set_target_properties(_pyexotica PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CATKIN_GLOBAL_PYTHON_DESTINATION}/pyexotica)
 set(PYTHON_LIB_DIR ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/pyexotica)

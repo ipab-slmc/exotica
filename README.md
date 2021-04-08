@@ -14,14 +14,14 @@ The other is the *Task Definition* which describes the task itself by providing 
 Additionally, users can select different underlying dynamics models by specifying a *DynamicsSolver*. Similarly, different collision checking methods and libraries can be selected using the *CollisionScene* plug-ins.
 
 ## Prerequisites
-* Ubuntu 16.04 (ROS Kinetic), Ubuntu 18.04 (ROS Melodic), or Ubuntu 20.04 (ROS Noetic).
+* Ubuntu 18.04 (ROS Melodic) or Ubuntu 20.04 (ROS Noetic).
 * [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/) (```catkin_make``` is no longer supported)
 * [rosdep](http://wiki.ros.org/rosdep)
 * [ROS](http://wiki.ros.org/Installation)
 
 ## Installation
 ### From binary
-Exotica is available as binaries for ROS Kinetic, Melodic, and Noetic and can be installed via
+Exotica is available as binaries for ROS Kinetic (EOL with v6.1.1), Melodic (current), and Noetic (current) and can be installed via
 
 ```bash
 sudo apt install ros-$ROS_DISTRO-exotica

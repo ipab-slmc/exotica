@@ -47,6 +47,9 @@ if("${TinyXML2_VERSION}" VERSION_GREATER "5.90.0")
   add_definitions(-DTINYXML_HAS_ERROR_STR)
 endif()
 
+# Deactivate some warnings on Conda
+add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+
 include(exotica)
 include(add_initializer)
 
@@ -172,14 +175,14 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(DIRECTORY cmake/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-install(FILES cmake/initializer_project_header.h.in DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
-install(PROGRAMS cmake/generate_initializers.py DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cmake/)
+install(DIRECTORY cmake DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(test_autodiff test/test_autodiff.cpp)
-  target_link_libraries(test_autodiff ${catkin_LIBRARIES} ${PROJECT_NAME})
-  add_dependencies(test_autodiff ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  if(NOT APPLE)
+    catkin_add_gtest(test_autodiff test/test_autodiff.cpp)
+    target_link_libraries(test_autodiff ${catkin_LIBRARIES} ${PROJECT_NAME})
+    add_dependencies(test_autodiff ${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  endif(NOT APPLE)
 
   catkin_add_gtest(test_kinematics test/test_kinematics.cpp)
   target_link_libraries(test_kinematics ${catkin_LIBRARIES} ${PROJECT_NAME})

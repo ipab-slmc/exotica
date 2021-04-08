@@ -49,10 +49,10 @@
 namespace Eigen
 {
 /// \brief Convenience wrapper for storing references to sub-matrices/vectors
-typedef Ref<VectorXd> VectorXdRef;
-typedef const Ref<const VectorXd>& VectorXdRefConst;
-typedef Ref<MatrixXd> MatrixXdRef;
-typedef const Ref<const MatrixXd>& MatrixXdRefConst;
+typedef const Eigen::Ref<const Eigen::VectorXd>& VectorXdRefConst;
+typedef const Eigen::Ref<const Eigen::MatrixXd>& MatrixXdRefConst;
+typedef typename Eigen::Ref<Eigen::VectorXd> VectorXdRef;
+typedef typename Eigen::Ref<Eigen::MatrixXd> MatrixXdRef;
 
 Eigen::VectorXd VectorTransform(double px = 0.0, double py = 0.0, double pz = 0.0, double qx = 0.0, double qy = 0.0, double qz = 0.0, double qw = 1.0);
 Eigen::VectorXd IdentityTransform();
@@ -153,16 +153,18 @@ typedef Eigen::Array<KDL::Twist, Eigen::Dynamic, 1> ArrayTwist;
 typedef Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1> ArrayJacobian;
 typedef Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1> Hessian;
 typedef Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>, Eigen::Dynamic, 1> ArrayHessian;
-typedef Eigen::Ref<Eigen::Array<KDL::Frame, Eigen::Dynamic, 1>> ArrayFrameRef;
-typedef Eigen::Ref<Eigen::Array<KDL::Twist, Eigen::Dynamic, 1>> ArrayTwistRef;
-typedef Eigen::Ref<Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1>> ArrayJacobianRef;
-typedef Eigen::Ref<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>> HessianRef;
-typedef Eigen::Ref<Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>, Eigen::Dynamic, 1>> ArrayHessianRef;
-typedef const Eigen::Ref<Eigen::Array<KDL::Frame, Eigen::Dynamic, 1>>& ArrayFrameRefConst;
-typedef const Eigen::Ref<Eigen::Array<KDL::Twist, Eigen::Dynamic, 1>>& ArrayTwistRefConst;
-typedef const Eigen::Ref<Eigen::Array<KDL::Jacobian, Eigen::Dynamic, 1>>& ArrayJacobianRefConst;
-typedef const Eigen::Ref<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>> HessianRefConst;
-typedef const Eigen::Ref<Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, 1>, Eigen::Dynamic, 1>> ArrayHessianRefConst;
+
+typedef Eigen::Ref<ArrayFrame> ArrayFrameRef;
+typedef Eigen::Ref<ArrayTwist> ArrayTwistRef;
+typedef Eigen::Ref<ArrayJacobian> ArrayJacobianRef;
+typedef Eigen::Ref<Hessian> HessianRef;
+typedef Eigen::Ref<ArrayHessian> ArrayHessianRef;
+
+typedef Eigen::internal::ref_selector<ArrayFrame>::type ArrayFrameRefConst;
+typedef Eigen::internal::ref_selector<ArrayTwist>::type ArrayTwistRefConst;
+typedef Eigen::internal::ref_selector<ArrayJacobian>::type ArrayJacobianRefConst;
+typedef Eigen::internal::ref_selector<Hessian>::type HessianRefConst;
+typedef Eigen::internal::ref_selector<ArrayHessian>::type ArrayHessianRefConst;
 
 inline bool IsContainerType(std::string type)
 {

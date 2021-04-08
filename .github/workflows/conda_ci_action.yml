@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest] #, windows-latest]
+        os: [ubuntu-latest, macos-latest] #, windows-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Dependencies
@@ -40,9 +40,10 @@ jobs:
                  -DCATKIN_SKIP_TESTING=OFF \
                  -G "Ninja"
         ninja
-        env
-        ninja run_tests
-        catkin_test_results
+        if [[ `uname -s` == "Linux" ]]; then
+          ninja run_tests
+          catkin_test_results
+        fi
     - name: Build Exotica on Windows
       if: runner.os == 'Windows'
       working-directory: ./exotica_core

@@ -34,6 +34,7 @@ jobs:
         export CTEST_OUTPUT_ON_FAILURE=1
         mkdir build
         cd build
+        ln -s ../../exotica_superbuild/CMakeLists_subdirectory.txt ../../exotica_superbuild/CMakeLists.txt # symlink desired build type - subdirectory required for run_tests
         cmake .. -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
                  -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
                  -DCMAKE_BUILD_TYPE=Release \

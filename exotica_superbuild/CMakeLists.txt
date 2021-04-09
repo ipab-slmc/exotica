@@ -39,7 +39,11 @@ ExternalProject_Add(exotica_core_task_maps
   DEPENDS exotica_core exotica_python)
 
 # Collision Scenes
-# ExternalProject_Add(${CMAKE_CURRENT_SOURCE_DIR}/../exotations/exotica_collision_scene_fcl_latest)  # Requires FCL
+ExternalProject_Add(exotica_collision_scene_fcl_latest
+  URL ${CMAKE_CURRENT_SOURCE_DIR}/../exotations/exotica_collision_scene_fcl_latest
+  CMAKE_ARGS ${CL_ARGS}
+  INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
+  DEPENDS exotica_core)
 
 # Motion Solvers
 ExternalProject_Add(exotica_aico_solver

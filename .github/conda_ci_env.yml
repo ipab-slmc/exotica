@@ -33,5 +33,6 @@ dependencies:
   - ros-noetic-tf-conversions
   - pinocchio
   - ompl
+  - pybind11
   #- fcl
   #- matplotlib

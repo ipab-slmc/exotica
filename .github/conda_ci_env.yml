@@ -31,3 +31,7 @@ dependencies:
   - ros-noetic-std-msgs
   - ros-noetic-tf
   - ros-noetic-tf-conversions
+  - pinocchio
+  - ompl
+  #- fcl
+  #- matplotlib

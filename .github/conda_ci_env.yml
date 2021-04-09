@@ -34,5 +34,5 @@ dependencies:
   - pinocchio
   - ompl
   - pybind11
-  #- fcl
+  - fcl
   #- matplotlib

@@ -33,7 +33,7 @@ macro(GenInitializers)
     DEPENDS ${_InitializerInputFiles} ${_InitializerScriptDir}/generate_initializers.py
   )
   list(APPEND _InitializerOutputFiles)
-  add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles} ${ARGN})
+  add_custom_target(${PROJECT_NAME}_initializers DEPENDS ${_InitializerOutputFiles} ${ARGN} ${exotica_core_EXPORTED_TARGETS})
 
   install(FILES ${_InitializerOutputFiles} ${_InitializerProjectFile}
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

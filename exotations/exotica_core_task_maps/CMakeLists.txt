@@ -48,7 +48,7 @@ AddInitializer(
   smooth_collision_distance
   sum_of_penetrations
 )
-GenInitializers(${exotica_core_EXPORTED_TARGETS})
+GenInitializers()
 
 catkin_package(
   INCLUDE_DIRS include

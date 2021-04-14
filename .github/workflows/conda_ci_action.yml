@@ -36,13 +36,14 @@ jobs:
         cd build
         ln -s $GITHUB_WORKSPACE/exotica_superbuild/CMakeLists_subdirectory.txt $GITHUB_WORKSPACE/exotica_superbuild/CMakeLists.txt # symlink desired build type - subdirectory required for run_tests
         cmake .. -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
-                 -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+                   -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
                  -DCMAKE_BUILD_TYPE=Release \
                  -DCATKIN_SKIP_TESTING=OFF \
                  -DSETUPTOOLS_DEB_LAYOUT=OFF \
                  -G "Ninja"
         ninja
         if [[ `uname -s` == "Linux" ]]; then
+          export ROS_PACKAGE_PATH=$CONDA_PREFIX/share
           ninja run_tests
           catkin_test_results
         fi

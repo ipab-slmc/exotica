@@ -1298,11 +1298,10 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("hessian", [](Scene* instance, const std::string& e1) { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), "", KDL::Frame()); });
     scene.def("add_trajectory_from_file", &Scene::AddTrajectoryFromFile);
     scene.def("add_trajectory", (void (Scene::*)(const std::string&, const std::string&)) & Scene::AddTrajectory);
-    scene.def("add_trajectory_from_array", 
-              [](Scene* instance, const std::string& link, const Eigen::MatrixXd& data, double radius) 
-              { 
-                  instance->AddTrajectory(link, std::shared_ptr<Trajectory>(new Trajectory(data, radius))); 
-              }, 
+    scene.def("add_trajectory_from_array",
+              [](Scene* instance, const std::string& link, const Eigen::MatrixXd& data, double radius) {
+                  instance->AddTrajectory(link, std::shared_ptr<Trajectory>(new Trajectory(data, radius)));
+              },
               py::arg("link"), py::arg("data"), py::arg("radius"));
     scene.def("get_trajectory", [](Scene* instance, const std::string& link) { return instance->GetTrajectory(link)->ToString(); });
     scene.def("remove_trajectory", &Scene::RemoveTrajectory);

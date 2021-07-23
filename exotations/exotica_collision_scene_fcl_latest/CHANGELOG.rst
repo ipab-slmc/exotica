@@ -2,8 +2,8 @@
 Changelog for package exotica_collision_scene_fcl_latest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * Switch to FCL on Noetic, use fcl_catkin on older distros (`#735 <https://github.com/ipab-slmc/exotica/issues/735>`_)
 * Contributors: Wolfgang Merkt
 

@@ -2,8 +2,8 @@
 Changelog for package exotica_pinocchio_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * Use clang for Pinocchio dynamics solver (`#746 <https://github.com/ipab-slmc/exotica/issues/746>`_)
 * Contributors: Wolfgang Merkt
 

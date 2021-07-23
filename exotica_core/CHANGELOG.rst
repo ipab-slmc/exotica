@@ -2,8 +2,8 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * Add EndPoseTask::GetTaskJacobian
 * Fix build issues with Eigen 3.3.9; enable compilation of exotica_core on Conda (`#740 <https://github.com/ipab-slmc/exotica/issues/740>`_)
 * Performance improvements (`#741 <https://github.com/ipab-slmc/exotica/issues/741>`_)

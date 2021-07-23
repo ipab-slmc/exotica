@@ -2,8 +2,8 @@
 Changelog for package exotica_examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * Fix example_shapes
 * Contributors: Wolfgang Merkt
 

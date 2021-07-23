@@ -2,8 +2,8 @@
 Changelog for package exotica_core_task_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * PointToPlane: Add PositiveOnly mode for use as inequality term (`#744 <https://github.com/ipab-slmc/exotica/issues/744>`_)
 * CoM: Change debug markers
 * test_maps: Turn off JointVelocityLimit test

@@ -2,8 +2,8 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * Trajectory from array in python (`#743 <https://github.com/ipab-slmc/exotica/issues/743>`_)
 * Add EndPoseTask::GetTaskJacobian
 * Fix build issues with Eigen 3.3.9 (`#740 <https://github.com/ipab-slmc/exotica/issues/740>`_)

@@ -2,8 +2,8 @@
 Changelog for package exotica_cartpole_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2021-07-23)
+------------------
 * Python code improvements from static analysis
 * Contributors: Wolfgang Merkt
 

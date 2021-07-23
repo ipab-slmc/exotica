@@ -2,7 +2,7 @@
 Python Bindings
 ***************
 
-By default, the Python bindings will be compiled for 2.7. In order to build for different versions of Python you can specify ``PYBIND_PYTHON_EXECUTABLE`` in the additional CMake arguments of your catkin workspace:
+By default, the Python bindings will be built for the default Python version for the corresponding ROS distribution (``$ROS_PYTHON_VERSION``). In order to build for different versions of Python you can specify ``PYBIND_PYTHON_EXECUTABLE`` in the additional CMake arguments of your catkin workspace:
 
 .. code-block:: bash
 

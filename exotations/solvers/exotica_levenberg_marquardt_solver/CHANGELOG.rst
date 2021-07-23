@@ -2,6 +2,9 @@
 Changelog for package exotica_levenberg_marquardt_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.1.1 (2021-04-05)
 ------------------
 

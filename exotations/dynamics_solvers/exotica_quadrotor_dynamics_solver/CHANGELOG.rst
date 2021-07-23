@@ -2,6 +2,12 @@
 Changelog for package exotica_quadrotor_dynamics_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Performance improvements (`#741 <https://github.com/ipab-slmc/exotica/issues/741>`_)
+* Python code improvements from static analysis
+* Contributors: Wolfgang Merkt
+
 6.1.1 (2021-04-05)
 ------------------
 

@@ -2,6 +2,21 @@
 Changelog for package exotica_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add EndPoseTask::GetTaskJacobian
+* Fix build issues with Eigen 3.3.9; enable compilation of exotica_core on Conda (`#740 <https://github.com/ipab-slmc/exotica/issues/740>`_)
+* Performance improvements (`#741 <https://github.com/ipab-slmc/exotica/issues/741>`_)
+* DynamicTimeIndexedShootingProblem: Allocation-free control cost computation
+* DynamicsSolver: dStateDelta and ddStateDelta return previously allocated transition derivative
+* DynamicsSolver: Add in-place StateDelta
+* Fix installation directives for cmake directory
+* Deactivate Boost bind warnings arising from ROS messages
+* Update minimum CMake version for add_initializer.cmake
+* XMLLoader: Fix for `#737 <https://github.com/ipab-slmc/exotica/issues/737>`_
+* Scene: Fix uninitialised quaternion
+* Contributors: Wolfgang Merkt
+
 6.1.1 (2021-04-05)
 ------------------
 * Fix broken examples and expose new features (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)

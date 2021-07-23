@@ -2,6 +2,9 @@
 Changelog for package exotica_ilqr_solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 6.1.1 (2021-04-05)
 ------------------
 

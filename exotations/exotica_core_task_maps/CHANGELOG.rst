@@ -2,6 +2,14 @@
 Changelog for package exotica_core_task_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* PointToPlane: Add PositiveOnly mode for use as inequality term (`#744 <https://github.com/ipab-slmc/exotica/issues/744>`_)
+* CoM: Change debug markers
+* test_maps: Turn off JointVelocityLimit test
+* SphereCollision: Remove unnecessary allocations (`#741 <https://github.com/ipab-slmc/exotica/issues/741>`_)
+* Contributors: Wolfgang Merkt
+
 6.1.1 (2021-04-05)
 ------------------
 * Fix unit tests on Debian Buster (`#734 <https://github.com/ipab-slmc/exotica/issues/734>`_)

@@ -2,6 +2,15 @@
 Changelog for package exotica_python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Trajectory from array in python (`#743 <https://github.com/ipab-slmc/exotica/issues/743>`_)
+* Add EndPoseTask::GetTaskJacobian
+* Fix build issues with Eigen 3.3.9 (`#740 <https://github.com/ipab-slmc/exotica/issues/740>`_)
+* Performance improvements (`#741 <https://github.com/ipab-slmc/exotica/issues/741>`_)
+* Remove temporary workaround, formatting
+* Contributors: Vladimir Ivan, Wolfgang Merkt
+
 6.1.1 (2021-04-05)
 ------------------
 * Fixes for Python 3 and newly exposed features (`#736 <https://github.com/ipab-slmc/exotica/issues/736>`_)

@@ -17,6 +17,7 @@
   <exec_depend>exotica_core</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>pinocchio</exec_depend>
+  <depend>clang</depend>
 
   <export>
     <exotica_core plugin="${prefix}/exotica_plugins.xml" />

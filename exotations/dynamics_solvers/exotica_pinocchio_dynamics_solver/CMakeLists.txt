@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(exotica_pinocchio_dynamics_solver)
 
+# Set clang as compiler
+if(NOT CMAKE_CXX_COMPILER)
+  set(CMAKE_CXX_COMPILER clang++)
+endif()
+if(NOT CMAKE_C_COMPILER)
+  set(CMAKE_C_COMPILER clang)
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   exotica_core
   roscpp

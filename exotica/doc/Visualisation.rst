@@ -13,7 +13,7 @@ Then open two terminals and in the first one start the ZMQ server:
 
     meshcat-server
 
-In the secont terminal start the file server:
+In the second terminal start the file server:
 
 .. code-block:: bash
 
@@ -27,7 +27,7 @@ Once the servers are running, you can connect to it from exotica:
     vis.delete() # Clear existing scene
     vis.display_scene() # Display this scene
 
-You can now open a web browser at ``http://127.0.0.1:7000/static/`` (don't forget the ``/static/`` at the end). You can get this URL by running ``vis.get_web_url()``. Alternatively, if you are using jupyter, you can display the visualisation directly in your nodebook by running:
+You can now open a web browser at ``http://127.0.0.1:7000/static/`` (don't forget the ``/static/`` at the end). You can get this URL by running ``vis.get_web_url()``. Alternatively, if you are using jupyter, you can display the visualisation directly in your notebook by running:
 
 .. code-block:: python
 

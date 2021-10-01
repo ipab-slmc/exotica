@@ -10,10 +10,13 @@ __all__ = ['TargetMarker']
 def list_to_pose(p):
     if len(p) == 3:
         return Pose(Point(x = p[0], y = p[1], z = p[2]), Quaternion(x = 0., y = 0., z = 0., w = 1.))
+    elif len(p) == 6:
+        quat = exo.KDLFrame(p).get_quaternion()
+        return Pose(Point(x = p[0], y = p[1], z = p[2]), Quaternion(x = quat[0], y = quat[1], z = quat[2], w = quat[3]))
     elif len(p) == 7:
         return Pose(Point(x = p[0], y = p[1], z = p[2]), Quaternion(x = p[3], y = p[4], z = p[5], w = p[6]))
     else:
-        raise RuntimeError('Invalid transform!')
+        raise RuntimeError('Invalid transform! Can only accept vectors of length 3, 6 or 7')
 
 
 class TargetMarker:

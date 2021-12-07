@@ -35,7 +35,6 @@
 
 typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
 
-#if ROS_VERSION_MINIMUM(1, 12, 0)  // if ROS version >= ROS_KINETIC
 template <class T, class T1>
 std::shared_ptr<T> ompl_cast(std::shared_ptr<T1> ptr)
 {
@@ -43,15 +42,6 @@ std::shared_ptr<T> ompl_cast(std::shared_ptr<T1> ptr)
 }
 template <class T>
 using ompl_ptr = std::shared_ptr<T>;
-#else
-template <class T, class T1>
-boost::shared_ptr<T> ompl_cast(boost::shared_ptr<T1> ptr)
-{
-    return boost::static_pointer_cast<T>(ptr);
-}
-template <class T>
-using ompl_ptr = boost::shared_ptr<T>;
-#endif
 
 namespace exotica
 {

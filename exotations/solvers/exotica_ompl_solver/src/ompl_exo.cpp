@@ -44,12 +44,7 @@ bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
 bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &dist) const
 {
     Eigen::VectorXd q(prob_->N);
-
-#if ROS_VERSION_MINIMUM(1, 12, 0)  // if ROS version >= ROS_KINETIC
     std::static_pointer_cast<OMPLStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
-#else
-    boost::static_pointer_cast<OMPLStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
-#endif
 
     if (!prob_->IsStateValid(q))
     {

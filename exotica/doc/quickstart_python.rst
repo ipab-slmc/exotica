@@ -137,7 +137,6 @@ For this part of the tutorial, we'll be looking at the `example_ik.py <https://g
 
     import pyexotica as exo
     from numpy import array
-    from numpy import matrix
     import math
     from pyexotica.publish_trajectory import *
     from time import sleep

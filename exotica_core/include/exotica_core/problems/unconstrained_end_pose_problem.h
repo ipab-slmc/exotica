@@ -58,6 +58,7 @@ public:
 
     double GetScalarCost() const;
     Eigen::RowVectorXd GetScalarJacobian() const;
+    Eigen::MatrixXd GetHessian() const;
 
     /**
      * @brief GetScalarTaskCost get weighted sum-of-squares of cost vector

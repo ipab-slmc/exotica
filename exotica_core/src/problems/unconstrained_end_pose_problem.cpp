@@ -93,6 +93,27 @@ Eigen::RowVectorXd UnconstrainedEndPoseProblem::GetScalarJacobian() const
     return cost.jacobian.transpose() * cost.S * cost.ydiff * 2.0;
 }
 
+Eigen::MatrixXd UnconstrainedEndPoseProblem::GetHessian() const
+{
+    Eigen::MatrixXd general_cost_hessian = Eigen::MatrixXd::Zero(N, N);
+
+    // Contract task-map Hessian
+    if (flags_ & KIN_H)
+    {
+        Eigen::RowVectorXd ydiffTS = cost.ydiff.transpose() * cost.S;  // (1*m)
+        for (int i = 0; i < cost.length_jacobian; ++i)                 // length m
+        {
+            general_cost_hessian.noalias() += ydiffTS(i) * cost.hessian(i);
+        }
+    }
+    else
+    {
+        std::cerr << "[UnconstrainedEndPoseProblem::GetHessian] Hessian requested but DerivativeOrder < 2" << std::endl;
+    }
+
+    return 2. * general_cost_hessian;
+}
+
 double UnconstrainedEndPoseProblem::GetScalarTaskCost(const std::string& task_name) const
 {
     const Eigen::VectorXd ydiff = cost.GetTaskError(task_name);

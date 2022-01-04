@@ -6,7 +6,7 @@ has_ipopt = False
 try:
     from ipopt import minimize_ipopt
     has_ipopt = True
-except:
+except ImportError:
     pass
 
 import pyexotica as exo

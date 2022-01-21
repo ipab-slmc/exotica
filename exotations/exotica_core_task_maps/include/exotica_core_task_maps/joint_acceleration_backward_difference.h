@@ -65,9 +65,9 @@ public:
 
 private:
     int N_;                                       ///< Number of dofs for robot.
-    Eigen::Vector2d backward_difference_params_;  ///< Binomial cooeficient parameters.
+    Eigen::Vector2d backward_difference_params_;  ///< Binomial coefficient parameters.
     Eigen::MatrixXd q_;                           ///< Log of previous two joint states.
-    Eigen::VectorXd qbd_;                         ///< x+qbd_ is a simplifed estimate of the second time derivative.
+    Eigen::VectorXd qbd_;                         ///< x+qbd_ is a simplified estimate of the second time derivative.
     Eigen::MatrixXd I_;                           ///< Identity matrix.
 };
 }  // namespace exotica

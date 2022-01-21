@@ -387,7 +387,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
                         std::shared_ptr<urdf::Mesh> mesh = std::static_pointer_cast<urdf::Mesh>(ToStdPtr(urdf_visual->geometry));
                         visual.shape_resource_path = mesh->filename;
                         visual.scale = Eigen::Vector3d(mesh->scale.x, mesh->scale.y, mesh->scale.z);
-                        visual.shape = std::shared_ptr<shapes::Mesh>(shapes::createMeshFromResource(mesh->filename));
+                        visual.shape.reset(shapes::createMeshFromResource(mesh->filename));
                     }
                     break;
                     default:

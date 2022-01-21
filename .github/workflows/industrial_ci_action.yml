@@ -14,10 +14,10 @@ jobs:
           - {name: "Format check", ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0"}
           - {name: "Melodic / Debug", ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           - {name: "Melodic / Release", ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
-          - {name: "Melodic / Pre-Release Test", ROS_DISTRO: melodic, PRERELEASE: true}
+          #- {name: "Melodic / Pre-Release Test", ROS_DISTRO: melodic, PRERELEASE: true}
           - {name: "Noetic / Debug", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
           - {name: "Noetic / Release", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
-          - {name: "Noetic / Pre-Release Test", ROS_DISTRO: noetic, PRERELEASE: true}
+          #- {name: "Noetic / Pre-Release Test", ROS_DISTRO: noetic, PRERELEASE: true}
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache # Enable ccache

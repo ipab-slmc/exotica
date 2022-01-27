@@ -58,6 +58,10 @@ public:
 
     KinematicElement(int _id, std::shared_ptr<KinematicElement> _parent, const KDL::Segment& _segment) : id(_id), parent(_parent), segment(_segment)
     {
+        if (_parent)
+        {
+            parent_name = _parent->segment.getName();
+        }
     }
 
     ~KinematicElement()

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
+// Copyright (c) 2018-2022, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <geometric_shapes/mesh_operations.h>
 
 #include <octomap/OcTree.h>
 #include <ros/package.h>
@@ -1541,7 +1543,23 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("computeVertexNormals", &shapes::Mesh::computeVertexNormals)
         .def("mergeVertices", &shapes::Mesh::mergeVertices)
         .def_readonly("vertex_count", &shapes::Mesh::vertex_count)
-        .def_readonly("triangle_count", &shapes::Mesh::triangle_count);
+        .def_readonly("triangle_count", &shapes::Mesh::triangle_count)
+        .def_property_readonly("vertices", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->vertices, instance->vertex_count); })
+        .def_property_readonly("triangles", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>>(instance->triangles, instance->triangle_count); })
+        .def_property_readonly("triangle_normals", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->triangle_normals, instance->triangle_count); })
+        .def_property_readonly("vertex_normals", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->vertex_normals, instance->vertex_count); })
+        .def_static("createMeshFromResource", [](const std::string& resource) {
+            return shapes::createMeshFromResource("file://" + ParsePath(resource));
+        },
+                    py::arg("resource_path"), py::return_value_policy::take_ownership)
+        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices) {
+            return shapes::createMeshFromVertices(vertices);
+        },
+                    py::arg("vertices"), py::return_value_policy::take_ownership)
+        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices, const std::vector<unsigned int>& triangles) {
+            return shapes::createMeshFromVertices(vertices, triangles);
+        },
+                    py::arg("vertices"), py::arg("triangles"), py::return_value_policy::take_ownership);
 
     py::class_<shapes::OcTree, shapes::Shape, std::shared_ptr<shapes::OcTree>>(module, "OcTree")
         .def(py::init())

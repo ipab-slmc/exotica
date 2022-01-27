@@ -49,5 +49,6 @@ catkin_install_python(PROGRAMS scripts/convert_moveit_scene_to_sdf DESTINATION $
 if(CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(test/test_no_unknown_initializer_types.py)
   # catkin_add_nosetests(test/test_box_qp.py)  # 2020-11-06: Deactivated as SciPy is not always predictable.
+  catkin_add_nosetests(test/test_mesh.py)
   catkin_add_nosetests(test/test_sparse_costs.py)
 endif()

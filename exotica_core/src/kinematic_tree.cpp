@@ -216,7 +216,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     {
         model_base_type_ = BaseType::FLOATING;
         model_tree_.resize(7);
-        KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotZ, KDL::Joint::RotY, KDL::Joint::RotX};
+        const KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotZ, KDL::Joint::RotY, KDL::Joint::RotX};
         const std::vector<std::string> floating_base_suffix = {
             "/trans_x", "/trans_y", "/trans_z",
             "/rot_z", "/rot_y", "/rot_x"};
@@ -242,8 +242,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     {
         model_base_type_ = BaseType::PLANAR;
         model_tree_.resize(4);
-        KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY,
-                                         KDL::Joint::RotZ};
+        const KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY,
+                                               KDL::Joint::RotZ};
         for (int i = 0; i < 3; ++i)
         {
             model_tree_[i + 1] = std::make_shared<KinematicElement>(
@@ -285,6 +285,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         for (int i = 0; i < tree_.size() - 1; ++i)
             HIGHLIGHT_NAMED(
                 "Tree", "Joint: " << tree_[i].lock()->segment.getJoint().getName() << " - Link: " << tree_[i].lock()->segment.getName()
+                                  << ", parent: " << tree_[i].lock()->parent_name
                                   << ", mass: " << tree_[i].lock()->segment.getInertia().getMass()
                                   << ", CoM: " << tree_[i].lock()->segment.getInertia().getCOG());
     }

@@ -69,67 +69,67 @@ public:
     /// \param task_name    Name of task
     /// \param goal         Goal
     /// \param t            Timestep
-    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    [[deprecated]] void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
 
     /// \brief Returns the goal for a given task at a given timestep (cost task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
+    [[deprecated]] Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
 
     /// \brief Sets Rho for a given task at a given timestep (cost task).
     /// \param task_name    Name of task
     /// \param rho          Rho (scaling/precision)
     /// \param t            Timestep
-    void SetRho(const std::string& task_name, const double rho, int t = 0);
+    [[deprecated]] void SetRho(const std::string& task_name, const double rho, int t = 0);
 
     /// \brief Returns the precision (Rho) for a given task at a given timestep (cost task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    double GetRho(const std::string& task_name, int t = 0);
+    [[deprecated]] double GetRho(const std::string& task_name, int t = 0);
 
     /// \brief Sets goal for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param goal         Goal
     /// \param t            Timestep
-    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    [[deprecated]] void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
 
     /// \brief Returns the goal for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0);
 
     /// \brief Sets Rho for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param rho          Rho (scaling/precision)
     /// \param t            Timestep
-    void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
+    [[deprecated]] void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
 
     /// \brief Returns the precision (Rho) for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    double GetRhoEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] double GetRhoEQ(const std::string& task_name, int t = 0);
 
     /// \brief Sets goal for a given task at a given timestep (inequality task).
     /// \param task_name    Name of task
     /// \param goal         Goal
     /// \param t            Timestep
-    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    [[deprecated]] void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
 
     /// \brief Returns the goal for a given task at a given timestep (goal task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
 
     /// \brief Sets Rho for a given task at a given timestep (inequality task).
     /// \param task_name    Name of task
     /// \param rho          Rho (scaling/precision)
     /// \param t            Timestep
-    void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
+    [[deprecated]] void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
 
     /// \brief Returns the precision (Rho) for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    double GetRhoNEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] double GetRhoNEQ(const std::string& task_name, int t = 0);
 
     /// \brief Returns the joint bounds (first column lower, second column upper).
     Eigen::MatrixXd GetBounds() const;

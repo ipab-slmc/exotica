@@ -47,6 +47,10 @@ namespace exotica
 {
 class Scene;
 
+/**
+ * @brief The AllowedCollisionMatrix is a data structure containing links for which a detected collision does not result in a state to be considered invalid/in-collision. This can exclude links that are in collision by default, neighbouring links, or links that could never be possibly in collision (e.g. if out of reach).
+ * 
+ */
 class AllowedCollisionMatrix
 {
 public:

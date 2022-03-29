@@ -245,7 +245,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
 
             if (dVexp_ >= 0)
             {  // descent direction
-                if (d_[0] < th_grad_ || dV_ > th_acceptstep_ * dVexp_)
+                if (std::abs(d_[0]) < th_grad_ || dV_ > th_acceptstep_ * dVexp_)
                 {
                     was_feasible_ = is_feasible_;
                     SetCandidate(xs_try_, us_try_, (was_feasible_) || (steplength_ == 1.0));

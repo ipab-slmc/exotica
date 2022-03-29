@@ -259,7 +259,7 @@ void AbstractFeasibilityDrivenDDPSolver::Solve(Eigen::MatrixXd& solution)
             }
             else
             {  // reducing the gaps by allowing a small increment in the cost value
-                if (dV_ > th_acceptnegstep_ * dVexp_)
+                if (!is_feasible_ && dV_ > th_acceptnegstep_ * dVexp_)
                 {
                     // if (debug_) INFO_NAMED("FDDP", "Ascent direction: " << dV_ << " > " << th_acceptnegstep_ * dVexp_)
                     was_feasible_ = is_feasible_;

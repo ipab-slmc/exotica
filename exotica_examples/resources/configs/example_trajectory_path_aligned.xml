@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+  <ControlLimitedFeasibilityDrivenDDPSolver Name="MySolver">
+    <!-- Larger initial regularisation values lead to better results -->
+    <RegularizationRate>0.1</RegularizationRate>
+
+    <!-- Kinematics Hessians might lead to ill-conditioning, let's do not use Cholesky -->
+    <BoxQPUseCholeskyFactorization>0</BoxQPUseCholeskyFactorization>
+
+    <!-- Advanced termination criterion; not triggered right now (max iterations is the limit) -->
+    <FunctionTolerance>1e-4</FunctionTolerance>
+    <GradientTolerance>1e-5</GradientTolerance>
+    <GradientToleranceConvergenceThreshold>1e-5</GradientToleranceConvergenceThreshold>
+
+    <!-- Other advanced settings -->
+    <UseNewBoxQP>1</UseNewBoxQP>
+    <BoxQPUsePolynomialLinesearch>1</BoxQPUsePolynomialLinesearch>
+  </ControlLimitedFeasibilityDrivenDDPSolver>
+
+  <DynamicTimeIndexedShootingProblem Name="MyProblem">
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{remote_sensing_locomanipulation}/urdf/anymal-kinova/urdf/anymal_c_kinova.urdf</URDF>
+        <SRDF>{remote_sensing_locomanipulation}/urdf/anymal-kinova/urdf/anymal_c_kinova.srdf</SRDF>
+        <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+        <DynamicsSolver>
+          <DoubleIntegratorDynamicsSolver Name="MyDynamicsSolver">
+            <!-- The Kinova joints are limited to 200deg/s^2 - which is quite slow! -->
+            <ControlLimitsLow>-3.49</ControlLimitsLow>
+            <ControlLimitsHigh>3.49</ControlLimitsHigh>
+            <dt>0.02</dt>
+          </DoubleIntegratorDynamicsSolver>
+        </DynamicsSolver>
+        <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
+      </Scene>
+    </PlanningScene>
+
+    <Maps>
+      <!-- End-Effector Task: 3d position + 2d orientation -->
+      <EffAxisAlignment Debug="1" Name="Angle">
+        <EndEffector>
+          <Frame Link="j1n6s300_end_effector" Axis="0 0 1"/>
+        </EndEffector>
+      </EffAxisAlignment>
+
+      <EffPosition Debug="1" Name="Position">
+        <EndEffector>
+          <!-- This offset reorients the frame such that the hand is "open pointing forward with two fingers at the bottom -->
+          <Frame Link="j1n6s300_end_effector" LinkOffset="0 0 0" BaseOffset=" 0 0 0 0 0 0 1"/>
+        </EndEffector>
+      </EffPosition>
+
+      <!-- This is only a position-limit task. There is no explicit velocity-limit task yet. -->
+      <JointLimit Name="JointLimit"/>
+
+      <!-- Note: This only checks environment collisions - not self-collisions! -->
+      <SmoothCollisionDistance Name="Collision">
+        <Debug>0</Debug>
+        <WorldMargin>0.03</WorldMargin>
+        <CheckSelfCollision>0</CheckSelfCollision>
+        <Linear>1</Linear>
+      </SmoothCollisionDistance>
+    </Maps>
+
+    <Cost>
+      <Task Task="Position" Rho="1e4"/>
+      <Task Task="Angle" Rho="1e4"/>
+      <Task Task="JointLimit" Rho="1e1"/>
+      <Task Task="Collision" Rho="1"/>
+    </Cost>
+
+    <!-- Use second-order derivatives of the cost functions. Slower per iteration; but nicer solutions. Could also get better solutions by using more cost terms. Let's go with this, for now. -->
+    <DerivativeOrder>2</DerivativeOrder>
+
+    <!-- T is the number of timesteps, tau the delta between timesteps. We will modify T in the Python code to fit the problem -->
+    <T>50</T>
+    <tau>0.1</tau>
+
+    <!-- R_rate is the magnitude of the control penalisation/regularisation. A low-ish value to keep things numerically well-conditioned is recommended. Too high and it takes too long to converge; too low and we will see numerical ill-conditioning. -->
+    <R_rate>1e-1</R_rate>
+
+    <!-- Q and Q_rate allow us to penalise state costs along the trajectory (but not the final state). We can use it, for instance, to reduce velocities (the diagonal entries are specified). Note, that we deactivate it in Q_rate and do not use it in this example. -->
+    <Q>
+      0 0 0 0 0 0
+      1 1 1 1 1 1
+    </Q>
+    <Q_rate>0</Q_rate>
+
+    <!-- Qf_rate sets the weight to penalise the final timestep towards the GoalState defined below. Set this to zero if a target goal-state is not desired -->
+    <Qf_rate>1</Qf_rate>
+
+    <!-- The start state needs to cover the positions + velocities for the controlled joint group, so here 6+6=12-->
+    <StartState>
+      1.57 2.57 0.5 0 0.6 -0.5
+      0 0 0 0 0 0
+    </StartState>
+
+    <GoalState>
+      1.57 2.57 0.5 0 0.6 -0.5
+      0 0 0 0 0 0
+    </GoalState>
+
+  </DynamicTimeIndexedShootingProblem>
+</PlannerDemoConfig>

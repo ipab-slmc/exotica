@@ -1503,27 +1503,27 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<shapes::Sphere, shapes::Shape, std::shared_ptr<shapes::Sphere>>(module, "Sphere")
         .def(py::init())
-        .def(py::init<double>())
+        .def(py::init<double>(), py::arg("radius"))
         .def_readonly_static("name", &shapes::Sphere::STRING_NAME)
         .def_readwrite("radius", &shapes::Sphere::radius);
 
     py::class_<shapes::Cylinder, shapes::Shape, std::shared_ptr<shapes::Cylinder>>(module, "Cylinder")
         .def(py::init())
-        .def(py::init<double, double>())
+        .def(py::init<double, double>(), py::arg("radius"), py::arg("length"))
         .def_readonly_static("name", &shapes::Cylinder::STRING_NAME)
         .def_readwrite("radius", &shapes::Cylinder::radius)
         .def_readwrite("length", &shapes::Cylinder::length);
 
     py::class_<shapes::Cone, shapes::Shape, std::shared_ptr<shapes::Cone>>(module, "Cone")
         .def(py::init())
-        .def(py::init<double, double>())
+        .def(py::init<double, double>(), py::arg("radius"), py::arg("length"))
         .def_readonly_static("name", &shapes::Cone::STRING_NAME)
         .def_readwrite("radius", &shapes::Cone::radius)
         .def_readwrite("length", &shapes::Cone::length);
 
     py::class_<shapes::Box, shapes::Shape, std::shared_ptr<shapes::Box>>(module, "Box")
         .def(py::init())
-        .def(py::init<double, double, double>())
+        .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
         .def_readonly_static("name", &shapes::Box::STRING_NAME);
 
     py::class_<shapes::Plane, shapes::Shape, std::shared_ptr<shapes::Plane>>(module, "Plane")

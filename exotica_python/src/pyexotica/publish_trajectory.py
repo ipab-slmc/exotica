@@ -17,6 +17,15 @@ def publish_pose(q, problem, t=0.0):
 
 
 def publish_trajectory(traj, T, problem, once=False):
+    '''
+    Plays back a trajectory by updating the scene in a problem and publishing the corresponding tf transforms.
+
+        Parameters:
+                traj (list[list[]]): A trajectory consisting of a list of configurations which can be either Python lists or np.array.
+                T (float): Time taken for playback. The timestep between configurations is assumed constant and is calculated as T/len(traj)
+                problem (pyexotica.PlanningProblem): The planning problem whose Scene will be used for playback
+                once (bool): Whether to play the trajectory once or in a loop. By default, will play back the trajectory until a KeyboardInterrupt has been received.
+    '''
     if len(traj) == 0:
         raise ValueError("Trajectory has zero elements")
     signal.signal(signal.SIGINT, sig_int_handler)

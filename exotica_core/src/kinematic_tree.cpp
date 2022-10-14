@@ -1372,14 +1372,16 @@ void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
     if (x.rows() == num_controlled_joints_)
     {
         Update(x);
-        return;
+    }
+    else
+    {
+        if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
+        for (int i = 0; i < model_joints_names_.size(); ++i)
+        {
+            tree_state_(model_joints_map_.at(model_joints_names_[i]).lock()->id) = x(i);
+        }
     }
 
-    if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
-    for (int i = 0; i < model_joints_names_.size(); ++i)
-    {
-        tree_state_(model_joints_map_.at(model_joints_names_[i]).lock()->id) = x(i);
-    }
     UpdateTree();
     UpdateFK();
     if (flags_ & KIN_J) UpdateJ();

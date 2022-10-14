@@ -333,10 +333,29 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     // Create random distributions for state sampling
     generator_ = std::mt19937(rd_());
 
-    // Add visual shapes
+    // Get URDF links to set up additional properties, e.g. mimic joints and visual shapes
     const urdf::ModelInterfaceSharedPtr& urdf = model_->getURDF();
     std::vector<urdf::LinkSharedPtr> urdf_links;
     urdf->getLinks(urdf_links);
+
+    // Set up mimic joints
+    for (urdf::LinkSharedPtr urdf_link : urdf_links)
+    {
+        if (urdf_link->parent_joint != nullptr && urdf_link->parent_joint->mimic != nullptr)
+        {
+            const auto& mimic = urdf_link->parent_joint->mimic;
+            if (debug) HIGHLIGHT(urdf_link->name << " is a mimic joint; mimicking " << mimic->joint_name << "; multiplier=" << mimic->multiplier << ", offset=" << mimic->offset);
+
+            std::shared_ptr<KinematicElement> mimicked_element = model_joints_map_[mimic->joint_name].lock();
+            std::shared_ptr<KinematicElement> element = tree_map_[urdf_link->name].lock();
+            element->is_mimic_joint = true;
+            element->mimic_multiplier = mimic->multiplier;
+            element->mimic_offset = mimic->offset;
+            element->mimic_joint_id = mimicked_element->id;
+        }
+    }
+
+    // Add visual shapes
     for (urdf::LinkSharedPtr urdf_link : urdf_links)
     {
         if (urdf_link->visual_array.size() > 0)
@@ -688,7 +707,14 @@ void KinematicTree::UpdateTree()
         {
             if (element->segment.getJoint().getType() != KDL::Joint::JointType::None)
             {
-                element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->id));
+                if (!element->is_mimic_joint)
+                {
+                    element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->id));
+                }
+                else
+                {
+                    element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->mimic_joint_id));
+                }
             }
             else
             {

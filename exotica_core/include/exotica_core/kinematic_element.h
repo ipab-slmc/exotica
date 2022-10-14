@@ -96,6 +96,10 @@ public:
         {
             return generated_offset;
         }
+        else if (is_mimic_joint)
+        {
+            return segment.pose(mimic_offset + mimic_multiplier * x);
+        }
         else
         {
             return segment.pose(x);
@@ -124,6 +128,10 @@ public:
     KDL::Frame frame = KDL::Frame::Identity();
     KDL::Frame generated_offset = KDL::Frame::Identity();
     bool is_trajectory_generated = false;
+    bool is_mimic_joint = false;
+    int mimic_joint_id = -1;  // ID of the joint to mimic
+    double mimic_multiplier = 1.0;
+    double mimic_offset = 0.0;
     std::vector<double> joint_limits;
     double velocity_limit = std::numeric_limits<double>::quiet_NaN();
     double acceleration_limit = std::numeric_limits<double>::quiet_NaN();

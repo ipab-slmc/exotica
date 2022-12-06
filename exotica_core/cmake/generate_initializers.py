@@ -225,6 +225,13 @@ def add(data):
         return ""
 
 
+def has_required_data(data):
+    for d in data:
+        if "Required" in d and d["Required"]:
+            return True
+    return False
+
+
 def check(data, name):
     if "Required" in data and data["Required"]:
         return (
@@ -337,7 +344,9 @@ public:
         + """Initializers();
     }
 
-    virtual void Check(const Initializer& other) const
+    virtual void Check(const Initializer& """
+        + ("other" if has_required_data(data) else "/*other*/")
+        + """) const
     {
 """
     )

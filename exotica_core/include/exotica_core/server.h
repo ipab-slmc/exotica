@@ -79,11 +79,6 @@ public:
     /// @param model Robot model
     void GetModel(const std::string &path, robot_model::RobotModelPtr &model, const std::string &urdf = "", const std::string &srdf = "");
 
-    /// \brief Get robot model
-    /// @param path Robot model name
-    /// @return robot model
-    robot_model::RobotModelConstPtr GetModel(const std::string &path, const std::string &urdf = "", const std::string &srdf = "");
-
     /// \brief Get the name of ther server
     /// @return Server name
     std::string GetName();

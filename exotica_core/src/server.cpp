@@ -137,18 +137,6 @@ void Server::GetModel(const std::string& path, robot_model::RobotModelPtr& model
     }
 }
 
-robot_model::RobotModelConstPtr Server::GetModel(const std::string& path, const std::string& urdf, const std::string& srdf)
-{
-    if (robot_models_.count(path))
-    {
-        return robot_models_[path];
-    }
-    else
-    {
-        return LoadModel(path, urdf, srdf);
-    }
-}
-
 bool Server::HasModel(const std::string& path)
 {
     return robot_models_.find(path) != robot_models_.end();

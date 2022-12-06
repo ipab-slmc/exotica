@@ -40,6 +40,7 @@
 #include <Eigen/Dense>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unsupported/Eigen/CXX11/Tensor>
 #pragma GCC diagnostic pop
 
@@ -232,7 +233,7 @@ inline std::string Trim(const std::string& s)
 }
 
 template <typename T>
-T ToNumber(const std::string& val)
+T ToNumber(const std::string& /*val*/)
 {
     throw std::runtime_error("conversion not implemented!");
 }

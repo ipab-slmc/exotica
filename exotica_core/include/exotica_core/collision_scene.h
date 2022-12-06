@@ -175,37 +175,37 @@ public:
     /// @param o1 Name of object 1.
     /// @param o2 Name of object 2.
     /// @return True is the two objects are not colliding.
-    virtual bool IsCollisionFree(const std::string& o1, const std::string& o2, double safe_distance = 0.0) { ThrowPretty("Not implemented!"); }
+    virtual bool IsCollisionFree(const std::string& /*o1*/, const std::string& /*o2*/, double /*safe_distance*/ = 0.0) { ThrowPretty("Not implemented!"); }
     /// \brief Computes collision distances.
     /// \param self Indicate if self collision check is required.
     /// \return Collision proximity objects for all colliding pairs of shapes.
     ///
-    virtual std::vector<CollisionProxy> GetCollisionDistance(bool self) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(bool /*self*/) { ThrowPretty("Not implemented!"); }
     /// \brief Computes collision distances between two objects.
     /// \param o1 Name of object 1.
     /// \param o2 Name of object 2.
     /// \return Vector of proximity objects.
-    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const std::string& o2) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& /*o1*/, const std::string& /*o2*/) { ThrowPretty("Not implemented!"); }
     /// @brief Gets the closest distance of any collision object which is allowed to collide with any collision object related to object o1.
     /// @param[in] o1 Name of object 1.
     /// @return Vector of proximity objects.
-    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& /*o1*/, const bool& /*self*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the closest distance of any collision object which is allowed to collide with any collision object related to object o1.
     /// @param[in]  o1    Name of object 1.
     /// @param[in]  disable_collision_scene_update    Allows disabling of collision object transforms (requires manual update).
     /// @return     Vector of proximity objects.
-    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& o1, const bool& self, const bool& disable_collision_scene_update) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::string& /*o1*/, const bool& /*self*/, const bool& /*disable_collision_scene_update*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the closest distance of any collision object which is
     /// allowed to collide with any collision object related to any of the objects.
     /// @param[in]  objects    Vector of object names.
     /// @return     Vector of proximity objects.
-    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& objects, const bool& self) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetCollisionDistance(const std::vector<std::string>& /*objects*/, const bool& /*self*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the closest distances between links within the robot that are closer than check_margin
     /// @param[in]  check_margin    Margin for distance checks - only objects closer than this margin will be checked
-    virtual std::vector<CollisionProxy> GetRobotToRobotCollisionDistance(double check_margin) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetRobotToRobotCollisionDistance(double /*check_margin*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the closest distances between links of the robot and the environment that are closer than check_margin
     /// @param[in]  check_margin    Margin for distance checks - only objects closer than this margin will be checked
-    virtual std::vector<CollisionProxy> GetRobotToWorldCollisionDistance(double check_margin) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<CollisionProxy> GetRobotToWorldCollisionDistance(double /*check_margin*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Gets the collision world links.
     /// @return     The collision world links.
     virtual std::vector<std::string> GetCollisionWorldLinks() = 0;
@@ -222,11 +222,11 @@ public:
     /// @param[in]  tf2_beg  The beginning transform for o2.
     /// @param[in]  tf2_end  The end transform for o2.
     /// @return     ContinuousCollisionProxy.
-    virtual ContinuousCollisionProxy ContinuousCollisionCheck(const std::string& o1, const KDL::Frame& tf1_beg, const KDL::Frame& tf1_end, const std::string& o2, const KDL::Frame& tf2_beg, const KDL::Frame& tf2_end) { ThrowPretty("Not implemented!"); }
+    virtual ContinuousCollisionProxy ContinuousCollisionCheck(const std::string& /*o1*/, const KDL::Frame& /*tf1_beg*/, const KDL::Frame& /*tf1_end*/, const std::string& /*o2*/, const KDL::Frame& /*tf2_beg*/, const KDL::Frame& /*tf2_end*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Performs a continuous collision check by casting the active objects passed in against the static environment.
     /// @param[in]  motion_transforms   A tuple consisting out of collision object name and its beginning and final transform.
     /// @return     Vector of deepest ContinuousCollisionProxy (one per dimension).
-    virtual std::vector<ContinuousCollisionProxy> ContinuousCollisionCast(const std::vector<std::vector<std::tuple<std::string, Eigen::Isometry3d, Eigen::Isometry3d>>>& motion_transforms) { ThrowPretty("Not implemented!"); }
+    virtual std::vector<ContinuousCollisionProxy> ContinuousCollisionCast(const std::vector<std::vector<std::tuple<std::string, Eigen::Isometry3d, Eigen::Isometry3d>>>& /*motion_transforms*/) { ThrowPretty("Not implemented!"); }
     /// @brief      Returns the translation of the named collision object.
     /// @param[in]  name    Name of the collision object to query.
     virtual Eigen::Vector3d GetTranslation(const std::string& name) = 0;

@@ -1075,9 +1075,16 @@ void KinematicTree::SetJointVelocityLimits(Eigen::VectorXdRefConst velocity_in)
             controlled_joints_[i].lock()->velocity_limit = velocity_in(i);
         }
     }
+    else if (velocity_in.rows() == 1)
+    {
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+        {
+            controlled_joints_[i].lock()->velocity_limit = velocity_in(0);
+        }
+    }
     else
     {
-        ThrowPretty("Got " << velocity_in.rows() << " but " << num_controlled_joints_ << " expected.");
+        ThrowPretty("Got " << velocity_in.rows() << " but 1 or " << num_controlled_joints_ << " expected.");
     }
 
     UpdateJointLimits();
@@ -1094,9 +1101,18 @@ void KinematicTree::SetJointAccelerationLimits(Eigen::VectorXdRefConst accelerat
 
         has_acceleration_limit_ = true;
     }
+    else if (acceleration_in.rows() == 1)
+    {
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+        {
+            controlled_joints_[i].lock()->acceleration_limit = acceleration_in(0);
+        }
+
+        has_acceleration_limit_ = true;
+    }
     else
     {
-        ThrowPretty("Got " << acceleration_in.rows() << " but " << num_controlled_joints_ << " expected.");
+        ThrowPretty("Got " << acceleration_in.rows() << " but 1 or " << num_controlled_joints_ << " expected.");
     }
 
     UpdateJointLimits();

@@ -77,7 +77,7 @@ void TimeIndexedSamplingProblem::Instantiate(const TimeIndexedSamplingProblemIni
     if (t_goal_ <= t_start)
         ThrowNamed("Invalid goal time t_goal= " << t_goal_ << ", where t_start=" << t_start);
 
-    if (init.JointVelocityLimits.size() == N)
+    if (init.JointVelocityLimits.size() == N)  // TODO: Deprecate
     {
         vel_limits = init.JointVelocityLimits;
     }

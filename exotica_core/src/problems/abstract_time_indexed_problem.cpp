@@ -103,6 +103,7 @@ void AbstractTimeIndexedProblem::ReinitializeVariables()
 
     // Updates related to tau
     ct = 1.0 / tau_ / T_;
+    q_dot_max_ = scene_->GetKinematicTree().GetVelocityLimits();
     xdiff_max_ = q_dot_max_ * tau_;
 
     // Pre-update
@@ -169,6 +170,10 @@ void AbstractTimeIndexedProblem::PreUpdate()
             }
         }
     }
+
+    // Update joint velocity constraints
+    q_dot_max_ = scene_->GetKinematicTree().GetVelocityLimits();
+    xdiff_max_ = q_dot_max_ * tau_;
 
     // Create a new set of kinematic solutions with the size of the trajectory
     // based on the latest KinematicResponse in order to reflect model state
@@ -491,23 +496,15 @@ int AbstractTimeIndexedProblem::get_joint_velocity_constraint_dimension() const
 
 Eigen::VectorXd AbstractTimeIndexedProblem::GetJointVelocityLimits() const
 {
-    return q_dot_max_;
+    WARNING("Deprecated method: Please use KinematicTree::GetVelocityLimits");
+    return scene_->GetKinematicTree().GetVelocityLimits();
 }
 
 void AbstractTimeIndexedProblem::SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in)
 {
-    if (qdot_max_in.size() == N)
-    {
-        q_dot_max_ = qdot_max_in;
-    }
-    else if (qdot_max_in.size() == 1)
-    {
-        q_dot_max_ = qdot_max_in(0) * Eigen::VectorXd::Ones(N);
-    }
-    else
-    {
-        ThrowPretty("Received size " << qdot_max_in.size() << " but expected 1 or " << N);
-    }
+    WARNING("Deprecated method: Please use KinematicTree::SetJointVelocityLimits");
+    scene_->GetKinematicTree().SetJointVelocityLimits(qdot_max_in);
+
     xdiff_max_ = q_dot_max_ * tau_;
 }
 

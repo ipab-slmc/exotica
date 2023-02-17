@@ -171,7 +171,7 @@ void AbstractTimeIndexedProblem::PreUpdate()
     }
 
     // Create a new set of kinematic solutions with the size of the trajectory
-    // based on the lastest KinematicResponse in order to reflect model state
+    // based on the latest KinematicResponse in order to reflect model state
     // updates etc.
     kinematic_solutions_.clear();
     kinematic_solutions_.resize(T_);

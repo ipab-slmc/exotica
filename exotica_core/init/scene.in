@@ -2,12 +2,18 @@ class Scene
 
 extend <exotica_core/object>
 
-Required std::string JointGroup;
+Required std::string JointGroup;  // Defines the planning group defined in the SRDF. This determines which joints are available for planning as so-called controlled joints
 
+// Robot description: Can load from a ROS parameter server or from URDF/SRDF files
 Optional std::string RobotDescription = "robot_description";
 Optional std::string URDF = "";
 Optional std::string SRDF = "";
 Optional bool SetRobotDescriptionRosParams = false;  // to be used in conjunction with URDF or SRDF to set the robot_description and robot_description_semantic from the files/string in URDF/SRDF
+
+// Options to override robot properties
+Optional Eigen::VectorXd JointVelocityLimits = Eigen::VectorXd();  // Set or override the joint velocity limits provided in the URDF. Requires a vector of size N (controlled joints). This updates the velocity limits in the KinematicTree
+Optional Eigen::VectorXd JointAccelerationLimits = Eigen::VectorXd();  // Set or override the joint acceleration limits provided in the URDF. Requires a vector of size N (controlled joints). This updates the acceleration limits in the KinematicTree
+// TODO: Position lower and upper bounds -- currently set in various problems directly
 
 // CollisionScene
 Optional std::vector<exotica::Initializer> CollisionScene = std::vector<exotica::Initializer>();

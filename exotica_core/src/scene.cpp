@@ -288,6 +288,20 @@ void Scene::Instantiate(const SceneInitializer& init)
     // Will need to trigger special logic below to handle this (w.r.t. normalisation).
     has_quaternion_floating_base_ = (GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && num_state_ == num_state_derivative_ + 1);
 
+    // Set or override velocity and acceleration limits
+    if (init.JointVelocityLimits.rows() > 0)
+    {
+        if (init.JointVelocityLimits.rows() != kinematica_.GetNumControlledJoints()) ThrowPretty("Size of JointVelocityLimits incorrect: Provided " << init.JointVelocityLimits.rows() << ", expected " << kinematica_.GetNumControlledJoints());
+        if (debug_) HIGHLIGHT_NAMED(object_name_, "Overriding velocity limits: " << init.JointVelocityLimits.transpose());
+        kinematica_.SetJointVelocityLimits(init.JointVelocityLimits.cwiseAbs());
+    }
+    if (init.JointAccelerationLimits.rows() > 0)
+    {
+        if (init.JointAccelerationLimits.rows() != kinematica_.GetNumControlledJoints()) ThrowPretty("Size of JointAccelerationLimits incorrect: Provided " << init.JointAccelerationLimits.rows() << ", expected " << kinematica_.GetNumControlledJoints());
+        if (debug_) HIGHLIGHT_NAMED(object_name_, "Overriding acceleration limits: " << init.JointAccelerationLimits.transpose());
+        kinematica_.SetJointAccelerationLimits(init.JointAccelerationLimits.cwiseAbs());
+    }
+
     if (debug_) INFO_NAMED(object_name_, "Exotica Scene initialized");
 }
 

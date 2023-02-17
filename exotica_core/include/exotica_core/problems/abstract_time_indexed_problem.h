@@ -216,10 +216,10 @@ public:
     std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const;
 
     /// \brief Returns the per-DoF joint velocity limit vector.
-    Eigen::VectorXd GetJointVelocityLimits() const;
+    [[deprecated]] Eigen::VectorXd GetJointVelocityLimits() const;
 
     /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.
-    void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in);
+    [[deprecated]] void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in);
 
     TimeIndexedTask cost;        //!< Cost task
     TimeIndexedTask inequality;  //!< General inequality task
@@ -271,8 +271,8 @@ protected:
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
 
-    Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
-    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetJointVelocityLimits or ReinitializeVariables.
+    [[deprecated]] Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
+    Eigen::VectorXd xdiff_max_;                 //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetJointVelocityLimits or ReinitializeVariables.
 
     // The first element in the pair is the timestep (t) and the second element is the task.id (id).
     std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;

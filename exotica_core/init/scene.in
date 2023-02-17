@@ -2,8 +2,9 @@ class Scene
 
 extend <exotica_core/object>
 
-Required std::string JointGroup;
+Required std::string JointGroup;  // Defines the planning group defined in the SRDF. This determines which joints are available for planning as so-called controlled joints
 
+// Robot description: Can load from a ROS parameter server or from URDF/SRDF files
 Optional std::string RobotDescription = "robot_description";
 Optional std::string URDF = "";
 Optional std::string SRDF = "";

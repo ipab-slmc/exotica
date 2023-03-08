@@ -234,7 +234,7 @@ double SamplingProblem::GetRhoNEQ(const std::string& task_name)
 
 void SamplingProblem::Update(Eigen::VectorXdRefConst x)
 {
-    scene_->Update(x);
+    scene_->Update(x, t_start);
     for (int i = 0; i < num_tasks; ++i)
     {
         if (tasks_[i]->is_used)

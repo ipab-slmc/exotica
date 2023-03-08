@@ -271,7 +271,7 @@ protected:
         }
         else
             changed = false;
-        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->t_start || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetGoalTime()) return false;
+        if (tb < si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetStartTime() || tb > si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetGoalTime()) return false;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(qb, tb, b->state);
         return true;
     }

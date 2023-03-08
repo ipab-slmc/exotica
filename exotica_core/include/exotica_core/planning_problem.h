@@ -91,7 +91,6 @@ public:
     KinematicRequestFlags GetFlags() const { return flags_; }
     /// \brief Evaluates whether the problem is valid.
     virtual bool IsValid() { ThrowNamed("Not implemented"); };
-    double t_start;
     TerminationCriterion termination_criterion;
 
     int N = 0;  ///! Dimension of planning problem. TODO: Update from positions/velocities/controls and make private.
@@ -108,7 +107,8 @@ protected:
     TaskMapVec tasks_;
     KinematicRequestFlags flags_ = KinematicRequestFlags::KIN_FK;
     Eigen::VectorXd start_state_;
-    unsigned int number_of_problem_updates_ = 0;  // Stores number of times the problem has been updated
+    double t_start{0.0};                         // Start time, e.g. used for time-indexed references in the Scene
+    unsigned int number_of_problem_updates_{0};  // Stores number of times the problem has been updated
     std::vector<std::pair<std::chrono::high_resolution_clock::time_point, double>> cost_evolution_;
 };
 

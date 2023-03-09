@@ -553,6 +553,8 @@ TEST(ExoticaTaskMaps, testJointLimit)
         EXPECT_TRUE(test_random(problem));
         EXPECT_TRUE(test_jacobian(problem));
         EXPECT_TRUE(test_hessian(problem));
+
+        // TODO: Test dynamic case (!)
     }
     catch (const std::exception& e)
     {

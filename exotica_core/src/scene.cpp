@@ -288,7 +288,19 @@ void Scene::Instantiate(const SceneInitializer& init)
     // Will need to trigger special logic below to handle this (w.r.t. normalisation).
     has_quaternion_floating_base_ = (GetKinematicTree().GetModelBaseType() == BaseType::FLOATING && num_state_ == num_state_derivative_ + 1);
 
-    // Set or override velocity and acceleration limits
+    // Set or override position, velocity, and acceleration limits
+    if (init.JointPositionLimitsLower.rows() > 0)
+    {
+        if (init.JointPositionLimitsLower.rows() != kinematica_.GetNumControlledJoints()) ThrowPretty("Size of JointPositionLimitsLower incorrect: Provided " << init.JointPositionLimitsLower.rows() << ", expected " << kinematica_.GetNumControlledJoints());
+        if (debug_) HIGHLIGHT_NAMED(object_name_, "Overriding lower position limits: " << init.JointPositionLimitsLower.transpose());
+        kinematica_.SetJointLimitsLower(init.JointPositionLimitsLower);
+    }
+    if (init.JointPositionLimitsUpper.rows() > 0)
+    {
+        if (init.JointPositionLimitsUpper.rows() != kinematica_.GetNumControlledJoints()) ThrowPretty("Size of JointPositionLimitsUpper incorrect: Provided " << init.JointPositionLimitsUpper.rows() << ", expected " << kinematica_.GetNumControlledJoints());
+        if (debug_) HIGHLIGHT_NAMED(object_name_, "Overriding upper position limits: " << init.JointPositionLimitsUpper.transpose());
+        kinematica_.SetJointLimitsUpper(init.JointPositionLimitsUpper);
+    }
     if (init.JointVelocityLimits.rows() > 0)
     {
         if (init.JointVelocityLimits.rows() != kinematica_.GetNumControlledJoints()) ThrowPretty("Size of JointVelocityLimits incorrect: Provided " << init.JointVelocityLimits.rows() << ", expected " << kinematica_.GetNumControlledJoints());

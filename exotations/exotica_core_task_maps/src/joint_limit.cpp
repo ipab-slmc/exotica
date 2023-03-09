@@ -165,7 +165,7 @@ void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Ei
 void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
 {
     // Hessian is 0.
-    Update(x, u, phi, dphi_dx);
+    Update(x, u, phi, dphi_dx, dphi_du);
 }
 
 }  // namespace exotica

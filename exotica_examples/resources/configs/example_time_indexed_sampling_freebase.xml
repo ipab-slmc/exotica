@@ -7,13 +7,13 @@
   </TimeIndexedRRTConnectSolver>
 
   <TimeIndexedSamplingProblem Name="MyProblem">
-    <T>3</T>
     <GoalTime>3</GoalTime>
     <PlanningScene>
       <Scene>
         <JointGroup>arm_freebase</JointGroup>
         <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
         <SRDF>{exotica_examples}/resources/robots/lwr_simplified_freebase.srdf</SRDF>
+        <JointVelocityLimits>2 2 2 2 2 2 2 2 2 2</JointVelocityLimits>
         <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
         <Trajectories>
           <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_moving_obstacle.traj" />
@@ -29,7 +29,6 @@
       <Task Task="Collision"/>
     </Equality>
 
-    <JointVelocityLimits>2 2 2 2 2 2 2 2 2 2</JointVelocityLimits>
     <FloatingBaseLowerLimits>-10 -10 0</FloatingBaseLowerLimits>
     <FloatingBaseUpperLimits> 10  10 3.1415</FloatingBaseUpperLimits>
     <Goal>0 0 0 2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>

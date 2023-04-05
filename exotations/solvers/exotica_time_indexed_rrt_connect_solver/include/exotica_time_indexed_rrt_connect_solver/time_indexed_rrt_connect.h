@@ -224,7 +224,7 @@ protected:
 
     double forwardTimeDistance(const Motion *a, const Motion *b) const
     {
-        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits;
+        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetScene()->GetKinematicTree().GetVelocityLimits();
 
         double ta, tb;
         Eigen::VectorXd qa, qb;
@@ -240,7 +240,7 @@ protected:
 
     double reverseTimeDistance(const Motion *a, const Motion *b) const
     {
-        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits;
+        static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetScene()->GetKinematicTree().GetVelocityLimits();
 
         double ta, tb;
         Eigen::VectorXd qa, qb;
@@ -256,7 +256,7 @@ protected:
 
     bool correctTime(const Motion *a, Motion *b, bool reverse, bool &changed) const
     {
-        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->vel_limits;
+        Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetScene()->GetKinematicTree().GetVelocityLimits();
         double ta, tb;
         Eigen::VectorXd qa, qb;
         si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->OMPLToExoticaState(a->state, qa, ta);

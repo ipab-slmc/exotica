@@ -77,17 +77,30 @@ void TimeIndexedSamplingProblem::Instantiate(const TimeIndexedSamplingProblemIni
     if (t_goal_ <= t_start)
         ThrowNamed("Invalid goal time t_goal= " << t_goal_ << ", where t_start=" << t_start);
 
-    if (init.JointVelocityLimits.size() == N)  // TODO: Deprecate
+    // Deprecated signature, retained right now for backwards compatibility
+    if (init.JointVelocityLimits.size() != 0)
     {
-        vel_limits = init.JointVelocityLimits;
+        WARNING("The JointVelocityLimits initialiser is deprecated - use JointVelocityLimits in the Scene initialiser!");
+        Eigen::VectorXd velocity_limits(N);
+        if (init.JointVelocityLimits.size() == N)
+        {
+            velocity_limits = init.JointVelocityLimits;
+        }
+        else if (init.JointVelocityLimits.size() == 1)
+        {
+            velocity_limits = init.JointVelocityLimits(0) * Eigen::VectorXd::Ones(N);
+        }
+        else
+        {
+            ThrowNamed("Dimension mismatch: problem N=" << N << ", but joint velocity limits has dimension " << init.JointVelocityLimits.rows());
+        }
+        scene_->GetKinematicTree().SetJointVelocityLimits(velocity_limits);
     }
-    else if (init.JointVelocityLimits.size() == 1)
+
+    if (debug_)
     {
-        vel_limits = init.JointVelocityLimits(0) * Eigen::VectorXd::Ones(N);
-    }
-    else
-    {
-        ThrowNamed("Dimension mismatch: problem N=" << N << ", but joint velocity limits has dimension " << vel_limits.rows());
+        auto vel_limits = scene_->GetKinematicTree().GetVelocityLimits();
+        HIGHLIGHT_NAMED("TimeIndexedSamplingProblem::Instantiate", "Joint velocity limits: " << vel_limits.transpose());
     }
 
     num_tasks = tasks_.size();

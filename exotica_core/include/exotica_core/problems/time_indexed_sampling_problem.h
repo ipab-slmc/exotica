@@ -70,7 +70,6 @@ public:
     double GetGoalTime() const;
     void SetGoalTime(const double& t);
 
-    [[deprecated]] Eigen::VectorXd vel_limits;
     TaskSpaceVector Phi;
     SamplingTask inequality;
     SamplingTask equality;

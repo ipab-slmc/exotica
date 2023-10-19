@@ -809,6 +809,7 @@ void Scene::UpdateSceneFrames()
 
             std::string collision_element_name = links[i]->getName() + "_collision_" + std::to_string(j);
             std::shared_ptr<KinematicElement> element = kinematica_.AddElement(collision_element_name, trans, links[i]->getName(), links[i]->getShapes()[j]);
+            element->is_robot_link = true;
             model_link_to_collision_element_map_[links[i]->getName()].push_back(element);
 
             // Set up mappings

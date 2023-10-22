@@ -4,11 +4,7 @@
 name: ROS1-CI
 
 # This determines when this workflow is run
-on:
-  - pull_request
-  - push:
-      branches:
-        - master
+on: [push, pull_request]
 
 jobs:
   CI:

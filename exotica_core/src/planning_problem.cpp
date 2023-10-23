@@ -90,15 +90,26 @@ void PlanningProblem::PreUpdate()
 
 void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
 {
+    // NB: start_state_ has the size nq+nv
     const auto num_states = scene_->get_num_positions() + scene_->get_num_velocities();
+    // Case 1: The start state encapsulates the full state (nq+nv for dynamic, nq for kinematic)
     if (x.rows() == num_states)
     {
         start_state_ = x;
     }
+    // Case 2: The start state specifies the state only for the subset of the controlled joint group
     else if (x.rows() == scene_->GetKinematicTree().GetNumControlledJoints())
     {
-        std::vector<std::string> jointNames = scene_->GetControlledJointNames();
-        std::vector<std::string> modelNames = scene_->GetModelJointNames();
+        auto jointNames = scene_->GetControlledJointNames();
+        auto modelNames = scene_->GetModelJointNames();
+        if (modelNames.size() > start_state_.rows())
+        {
+            std::cout << "start_state_ size: " << start_state_.size() << "\n";
+            std::cout << "jointNames size: " << jointNames.size() << "\n";
+            std::cout << "modelNames size: " << modelNames.size() << "\n";
+            ThrowPretty("Ill-defined condition in PlanningProblem::SetStartState - throwing to avoid illegal memory access (broken logic)!");
+        }
+
         for (int i = 0; i < jointNames.size(); ++i)
         {
             for (int j = 0; j < modelNames.size(); ++j)
@@ -107,6 +118,7 @@ void PlanningProblem::SetStartState(Eigen::VectorXdRefConst x)
             }
         }
     }
+    // Case 3: The start state gives only the configuration (nq)
     else if (x.rows() == scene_->get_num_positions())
     {
         start_state_.head(scene_->get_num_positions()) = x;

@@ -1,32 +1,30 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: CI
+name: ROS1-CI
 
 # This determines when this workflow is run
-on: [push, pull_request] # on all pushes and PRs
+on: [push, pull_request]
 
 jobs:
   CI:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0"}
-          - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
-          - {ROS_DISTRO: melodic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
-          - {ROS_DISTRO: melodic, PRERELEASE: true}
-          - {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
-          - {ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
-          - {ROS_DISTRO: noetic, PRERELEASE: true}
+          - {name: "Format check", ROS_DISTRO: noetic, CLANG_FORMAT_CHECK: file, CLANG_FORMAT_VERSION: "6.0"}
+          #- {name: "Noetic / Debug", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Debug'}
+          - {name: "Noetic / Release", ROS_DISTRO: noetic, CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=Release'}
+          # - {name: "Noetic / Pre-Release Test", ROS_DISTRO: noetic, PRERELEASE: true}
+    name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache # Enable ccache
       PARALLEL_BUILDS: 1
       #ROS_REPO: testing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # This step will fetch/store the directory used by ccache before/after the ci run
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}

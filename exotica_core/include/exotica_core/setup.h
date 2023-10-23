@@ -49,6 +49,7 @@ class Setup : public Object, Uncopyable
 public:
     ~Setup() noexcept
     {
+        Destroy();
     }
 
     static std::shared_ptr<Setup> Instance()

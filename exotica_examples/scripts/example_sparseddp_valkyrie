@@ -68,7 +68,16 @@ if __name__ == "__main__":
 
 
     plt.figure()
+    plt.title('Accelerations')
     plt.plot(solution, '.-')
+
+    plt.figure()
+    plt.title('Positions')
+    plt.plot(problem.X[:38,:].T)
+
+    plt.figure()
+    plt.title('Velocities')
+    plt.plot(problem.X[38:,:].T)
     plt.show()
 
     while True:

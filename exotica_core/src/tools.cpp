@@ -82,8 +82,10 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
     int vn = 0, tn = 0;
     double v[3];
     int vv[9];
+    std::size_t line_no{1};
     while (std::getline(ss, line))
     {
+        // Vertex
         if (line.compare(0, 2, "v ") == 0)
         {
             vert.conservativeResize((vn + 1) * 3);
@@ -94,6 +96,7 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
             vert(vn * 3 + 2) = v[2];
             ++vn;
         }
+        // Face
         else if (line.compare(0, 2, "f ") == 0)
         {
             std::stringstream sss(line.substr(2));
@@ -105,7 +108,8 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
             }
             if (i < 8)
             {
-                ThrowPretty("Invalid format!");
+                auto vv_eigen = Eigen::Map<Eigen::Matrix<int, 1, 9>>(&vv[0]);
+                ThrowPretty("Invalid OBJ format when reading line " << line_no << ": '" << line << "', parsed vv: " << vv_eigen);
             }
             tri.conservativeResize((tn + 1) * 3);
             tri(tn * 3) = vv[0] - 1;
@@ -113,6 +117,7 @@ void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
             tri(tn * 3 + 2) = vv[6] - 1;
             ++tn;
         }
+        line_no++;
     }
 }
 

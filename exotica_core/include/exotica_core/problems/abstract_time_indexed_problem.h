@@ -69,67 +69,67 @@ public:
     /// \param task_name    Name of task
     /// \param goal         Goal
     /// \param t            Timestep
-    void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    [[deprecated]] void SetGoal(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
 
     /// \brief Returns the goal for a given task at a given timestep (cost task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
+    [[deprecated]] Eigen::VectorXd GetGoal(const std::string& task_name, int t = 0);
 
     /// \brief Sets Rho for a given task at a given timestep (cost task).
     /// \param task_name    Name of task
     /// \param rho          Rho (scaling/precision)
     /// \param t            Timestep
-    void SetRho(const std::string& task_name, const double rho, int t = 0);
+    [[deprecated]] void SetRho(const std::string& task_name, const double rho, int t = 0);
 
     /// \brief Returns the precision (Rho) for a given task at a given timestep (cost task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    double GetRho(const std::string& task_name, int t = 0);
+    [[deprecated]] double GetRho(const std::string& task_name, int t = 0);
 
     /// \brief Sets goal for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param goal         Goal
     /// \param t            Timestep
-    void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    [[deprecated]] void SetGoalEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
 
     /// \brief Returns the goal for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] Eigen::VectorXd GetGoalEQ(const std::string& task_name, int t = 0);
 
     /// \brief Sets Rho for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param rho          Rho (scaling/precision)
     /// \param t            Timestep
-    void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
+    [[deprecated]] void SetRhoEQ(const std::string& task_name, const double rho, int t = 0);
 
     /// \brief Returns the precision (Rho) for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    double GetRhoEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] double GetRhoEQ(const std::string& task_name, int t = 0);
 
     /// \brief Sets goal for a given task at a given timestep (inequality task).
     /// \param task_name    Name of task
     /// \param goal         Goal
     /// \param t            Timestep
-    void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
+    [[deprecated]] void SetGoalNEQ(const std::string& task_name, Eigen::VectorXdRefConst goal, int t = 0);
 
     /// \brief Returns the goal for a given task at a given timestep (goal task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] Eigen::VectorXd GetGoalNEQ(const std::string& task_name, int t = 0);
 
     /// \brief Sets Rho for a given task at a given timestep (inequality task).
     /// \param task_name    Name of task
     /// \param rho          Rho (scaling/precision)
     /// \param t            Timestep
-    void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
+    [[deprecated]] void SetRhoNEQ(const std::string& task_name, const double rho, int t = 0);
 
     /// \brief Returns the precision (Rho) for a given task at a given timestep (equality task).
     /// \param task_name    Name of task
     /// \param t            Timestep
-    double GetRhoNEQ(const std::string& task_name, int t = 0);
+    [[deprecated]] double GetRhoNEQ(const std::string& task_name, int t = 0);
 
     /// \brief Returns the joint bounds (first column lower, second column upper).
     Eigen::MatrixXd GetBounds() const;
@@ -216,10 +216,10 @@ public:
     std::vector<Eigen::Triplet<double>> GetJointVelocityConstraintJacobianTriplets() const;
 
     /// \brief Returns the per-DoF joint velocity limit vector.
-    Eigen::VectorXd GetJointVelocityLimits() const;
+    [[deprecated]] Eigen::VectorXd GetJointVelocityLimits() const;
 
     /// \brief Sets the joint velocity limits. Supports N- and 1-dimensional vectors.
-    void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in);
+    [[deprecated]] void SetJointVelocityLimits(const Eigen::VectorXd& qdot_max_in);
 
     TimeIndexedTask cost;        //!< Cost task
     TimeIndexedTask inequality;  //!< General inequality task
@@ -271,8 +271,8 @@ protected:
 
     double ct;  //!< Normalisation of scalar cost and Jacobian over trajectory length
 
-    Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
-    Eigen::VectorXd xdiff_max_;  //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetJointVelocityLimits or ReinitializeVariables.
+    [[deprecated]] Eigen::VectorXd q_dot_max_;  //!< Joint velocity limit (rad/s)
+    Eigen::VectorXd xdiff_max_;                 //!< Maximum change in the variables in a single timestep tau_. Gets set/updated via SetJointVelocityLimits or ReinitializeVariables.
 
     // The first element in the pair is the timestep (t) and the second element is the task.id (id).
     std::vector<std::pair<int, int>> active_nonlinear_equality_constraints_;

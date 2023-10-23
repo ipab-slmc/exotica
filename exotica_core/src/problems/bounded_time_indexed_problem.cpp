@@ -99,7 +99,7 @@ void BoundedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t)
     // Actually update the tasks' kinematics mappings.
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
-    scene_->Update(x_in, static_cast<double>(t) * tau_);
+    scene_->Update(x_in, t_start + static_cast<double>(t) * tau_);
 
     Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();

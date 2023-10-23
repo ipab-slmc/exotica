@@ -216,7 +216,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     {
         model_base_type_ = BaseType::FLOATING;
         model_tree_.resize(7);
-        KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotZ, KDL::Joint::RotY, KDL::Joint::RotX};
+        const KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY, KDL::Joint::TransZ, KDL::Joint::RotZ, KDL::Joint::RotY, KDL::Joint::RotX};
         const std::vector<std::string> floating_base_suffix = {
             "/trans_x", "/trans_y", "/trans_z",
             "/rot_z", "/rot_y", "/rot_x"};
@@ -242,8 +242,8 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     {
         model_base_type_ = BaseType::PLANAR;
         model_tree_.resize(4);
-        KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY,
-                                         KDL::Joint::RotZ};
+        const KDL::Joint::JointType types[] = {KDL::Joint::TransX, KDL::Joint::TransY,
+                                               KDL::Joint::RotZ};
         for (int i = 0; i < 3; ++i)
         {
             model_tree_[i + 1] = std::make_shared<KinematicElement>(
@@ -285,6 +285,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
         for (int i = 0; i < tree_.size() - 1; ++i)
             HIGHLIGHT_NAMED(
                 "Tree", "Joint: " << tree_[i].lock()->segment.getJoint().getName() << " - Link: " << tree_[i].lock()->segment.getName()
+                                  << ", parent: " << tree_[i].lock()->parent_name
                                   << ", mass: " << tree_[i].lock()->segment.getInertia().getMass()
                                   << ", CoM: " << tree_[i].lock()->segment.getInertia().getCOG());
     }
@@ -332,10 +333,29 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
     // Create random distributions for state sampling
     generator_ = std::mt19937(rd_());
 
-    // Add visual shapes
+    // Get URDF links to set up additional properties, e.g. mimic joints and visual shapes
     const urdf::ModelInterfaceSharedPtr& urdf = model_->getURDF();
     std::vector<urdf::LinkSharedPtr> urdf_links;
     urdf->getLinks(urdf_links);
+
+    // Set up mimic joints
+    for (urdf::LinkSharedPtr urdf_link : urdf_links)
+    {
+        if (urdf_link->parent_joint != nullptr && urdf_link->parent_joint->mimic != nullptr)
+        {
+            const auto& mimic = urdf_link->parent_joint->mimic;
+            if (debug) HIGHLIGHT(urdf_link->name << " is a mimic joint; mimicking " << mimic->joint_name << "; multiplier=" << mimic->multiplier << ", offset=" << mimic->offset);
+
+            std::shared_ptr<KinematicElement> mimicked_element = model_joints_map_[mimic->joint_name].lock();
+            std::shared_ptr<KinematicElement> element = tree_map_[urdf_link->name].lock();
+            element->is_mimic_joint = true;
+            element->mimic_multiplier = mimic->multiplier;
+            element->mimic_offset = mimic->offset;
+            element->mimic_joint_id = mimicked_element->id;
+        }
+    }
+
+    // Add visual shapes
     for (urdf::LinkSharedPtr urdf_link : urdf_links)
     {
         if (urdf_link->visual_array.size() > 0)
@@ -387,7 +407,7 @@ void KinematicTree::BuildTree(const KDL::Tree& robot_kinematics)
                         std::shared_ptr<urdf::Mesh> mesh = std::static_pointer_cast<urdf::Mesh>(ToStdPtr(urdf_visual->geometry));
                         visual.shape_resource_path = mesh->filename;
                         visual.scale = Eigen::Vector3d(mesh->scale.x, mesh->scale.y, mesh->scale.z);
-                        visual.shape = std::shared_ptr<shapes::Mesh>(shapes::createMeshFromResource(mesh->filename));
+                        visual.shape.reset(shapes::createMeshFromResource(mesh->filename));
                     }
                     break;
                     default:
@@ -687,7 +707,14 @@ void KinematicTree::UpdateTree()
         {
             if (element->segment.getJoint().getType() != KDL::Joint::JointType::None)
             {
-                element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->id));
+                if (!element->is_mimic_joint)
+                {
+                    element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->id));
+                }
+                else
+                {
+                    element->frame = element->parent.lock()->frame * element->GetPose(tree_state_(element->mimic_joint_id));
+                }
             }
             else
             {
@@ -1048,9 +1075,16 @@ void KinematicTree::SetJointVelocityLimits(Eigen::VectorXdRefConst velocity_in)
             controlled_joints_[i].lock()->velocity_limit = velocity_in(i);
         }
     }
+    else if (velocity_in.rows() == 1)
+    {
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+        {
+            controlled_joints_[i].lock()->velocity_limit = velocity_in(0);
+        }
+    }
     else
     {
-        ThrowPretty("Got " << velocity_in.rows() << " but " << num_controlled_joints_ << " expected.");
+        ThrowPretty("Got " << velocity_in.rows() << " but 1 or " << num_controlled_joints_ << " expected.");
     }
 
     UpdateJointLimits();
@@ -1067,9 +1101,18 @@ void KinematicTree::SetJointAccelerationLimits(Eigen::VectorXdRefConst accelerat
 
         has_acceleration_limit_ = true;
     }
+    else if (acceleration_in.rows() == 1)
+    {
+        for (unsigned int i = 0; i < num_controlled_joints_; ++i)
+        {
+            controlled_joints_[i].lock()->acceleration_limit = acceleration_in(0);
+        }
+
+        has_acceleration_limit_ = true;
+    }
     else
     {
-        ThrowPretty("Got " << acceleration_in.rows() << " but " << num_controlled_joints_ << " expected.");
+        ThrowPretty("Got " << acceleration_in.rows() << " but 1 or " << num_controlled_joints_ << " expected.");
     }
 
     UpdateJointLimits();
@@ -1345,14 +1388,16 @@ void KinematicTree::SetModelState(Eigen::VectorXdRefConst x)
     if (x.rows() == num_controlled_joints_)
     {
         Update(x);
-        return;
+    }
+    else
+    {
+        if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
+        for (int i = 0; i < model_joints_names_.size(); ++i)
+        {
+            tree_state_(model_joints_map_.at(model_joints_names_[i]).lock()->id) = x(i);
+        }
     }
 
-    if (x.rows() != model_joints_names_.size()) ThrowPretty("Model state vector has wrong size, expected " << model_joints_names_.size() << " got " << x.rows());
-    for (int i = 0; i < model_joints_names_.size(); ++i)
-    {
-        tree_state_(model_joints_map_.at(model_joints_names_[i]).lock()->id) = x(i);
-    }
     UpdateTree();
     UpdateFK();
     if (flags_ & KIN_J) UpdateJ();

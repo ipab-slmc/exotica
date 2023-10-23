@@ -18,9 +18,9 @@
     <DynamicTimeIndexedShootingProblem Name="valkyrie">
         <LossType>PseudoHuber</LossType>
         <ControlCostWeight>1000</ControlCostWeight>
-        <HuberRate>1e-3</HuberRate>       
-        <R_rate>0</R_rate>         
-        
+        <HuberRate>1e-3</HuberRate>
+        <R_rate>0</R_rate>
+
         <PlanningScene>
             <Scene>
                 <JointGroup>whole_body</JointGroup>

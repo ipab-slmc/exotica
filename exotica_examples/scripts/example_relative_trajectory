@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+import pyexotica as exo
+import numpy as np
+from pyexotica.publish_trajectory import *
+from time import perf_counter, sleep
+import signal
+
+if __name__ == "__main__":
+    '''
+    In this example, we show how to approach a target frame and carry out a pre-defined trajectory (approach, pause, retract) relative to that given target frame. This can for instance be used to push buttons or carry out drilling motions.
+    '''
+
+    # Initialise ROS node inside EXOTica in order to publish debug information and the final trajectory
+    exo.Setup.init_ros()
+
+    # Load the scene, problem and solver definitions
+    solver = exo.Setup.load_solver(
+        '{exotica_examples}/resources/configs/example_relative_trajectory.xml')
+    problem = solver.get_problem()
+    scene = problem.get_scene()
+
+    # Define target frame
+    T_approach = exo.KDLFrame([0.5, 0.5, 0.5, np.pi/2.0, 0.0, np.pi/2.0])
+    T_retract = exo.KDLFrame([0.2, 0.2, 0.2, np.pi/2.0, 0.0, np.pi/2.0])
+    T_button = exo.KDLFrame([0.55 + 0.01, 0.5, 0.5, np.pi/2.0, 0.0, np.pi/2.0]) # 5cm further away than T_approach
+    target_object = exo.Cylinder(radius=0.02, length=0.02)
+    scene.add_object_to_environment("Button", T_button, target_object, [0.8, 0.0, 0.0, 0.8])
+
+    # Define trajectory
+    trajectory = np.zeros((3,4))  # 3 data points: time,xyz
+    trajectory[0,:] = [0.0, 0.0, 0.0, 0.0]  # remains unchanged: no diff at t=0
+    trajectory[1,:] = [2.0, 0.0, 0.0, 0.05]  # at t=2.0, 5cm in z
+    trajectory[2,:] = [4.0, 0.0, 0.0, 0.0]  # at t=4.0, back to 0
+
+    # Attach target frame in absolute world frame
+    scene.attach_object_local("Target", "", T_approach)
+
+    # Step 1: Approach: (ideally collision-free) planning to approach frame
+    # Step 2: Manipulation: Relative trajectory motion
+    # Step 3: Retraction: (ideally collision-free) planning away from object
+
+    dt = 0.016  # approx 60 Hz
+    t = 0.0
+    q = np.array([0.0] * 7)
+    print('Publishing IK')
+    signal.signal(signal.SIGINT, sig_int_handler)
+    stage = 0  # 0 = approach, 1 = manipulate, 2 = retract
+    while True:
+        try:
+            t_s = perf_counter()
+            problem.start_state = q
+            problem.start_time = t
+            q = solver.solve()[0]
+            publish_pose(q, problem, t)
+            t_e = perf_counter()
+            time_taken = t_e - t_s
+            if dt > time_taken:
+                sleep(dt - time_taken)
+            
+            # If we terminated with FunctionTolerance, we reached the target frame
+            if stage == 0 and problem.termination_criterion == exo.TerminationCriterion.FunctionTolerance:
+                print("Approach complete, switching to MANIPULATE")
+                stage = 1
+                t = 0
+                scene.add_trajectory_from_array("TargetRelative", trajectory, 1.0)
+            # The manipulation action has a pre-defined time
+            elif stage == 1 and t > 4.0:
+                print("Manipulation complete, switching to RETRACT")
+                stage = 2
+                scene.remove_trajectory("TargetRelative")
+                scene.attach_object_local("Target", "", T_retract)
+            elif stage == 2 and problem.termination_criterion == exo.TerminationCriterion.FunctionTolerance:
+                print("Retract complete, switching to APPROACH")
+                stage = 0
+                scene.attach_object_local("Target", "", T_approach)
+            
+            t = (t + dt)
+        except KeyboardInterrupt:
+            break

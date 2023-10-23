@@ -109,7 +109,7 @@ void UnconstrainedTimeIndexedProblem::PreUpdate()
     cost.UpdateS();
 
     // Create a new set of kinematic solutions with the size of the trajectory
-    // based on the lastest KinematicResponse in order to reflect model state
+    // based on the latest KinematicResponse in order to reflect model state
     // updates etc.
     kinematic_solutions_.clear();
     kinematic_solutions_.resize(T_);
@@ -138,7 +138,7 @@ void UnconstrainedTimeIndexedProblem::Update(Eigen::VectorXdRefConst x_in, int t
     // Actually update the tasks' kinematics mappings.
     PlanningProblem::UpdateMultipleTaskKinematics(kinematics_solutions);
 
-    scene_->Update(x_in, static_cast<double>(t) * tau_);
+    scene_->Update(x_in, t_start + static_cast<double>(t) * tau_);
 
     Phi[t].SetZero(length_Phi);
     if (flags_ & KIN_J) jacobian[t].setZero();

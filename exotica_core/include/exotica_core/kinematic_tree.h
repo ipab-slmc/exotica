@@ -67,7 +67,7 @@ enum JointLimitType
     LIMIT_POSITION_UPPER = 1
 };
 
-constexpr double inf = std::numeric_limits<double>::infinity();
+constexpr double inf = 1e20;  //std::numeric_limits<double>::infinity();
 constexpr double pi = M_PI;
 
 inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)

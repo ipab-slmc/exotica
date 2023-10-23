@@ -102,7 +102,7 @@ public:
     virtual ~InstantiableBase() = default;
     virtual Initializer GetInitializerTemplate() = 0;
     virtual void InstantiateInternal(const Initializer& init) = 0;
-    virtual void InstantiateBase(const Initializer& init) {}
+    virtual void InstantiateBase(const Initializer& /*init*/) {}
     virtual std::vector<Initializer> GetAllTemplates() const = 0;
 };
 

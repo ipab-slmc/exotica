@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<IKConfig>
+  <IKSolver Name="IK">
+    <!-- <Debug>1</Debug> -->
+    <MaxIterations>1</MaxIterations>
+    <!-- 30 deg/s = 0.52rad/s, at ~60 Hz: .008rad -->
+    <!-- <MaxStep>0.008</MaxStep> -->
+    <MaxStep>0.016</MaxStep>
+  </IKSolver>
+
+  <UnconstrainedEndPoseProblem Name="FigureEightTracking">
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+        <Links>
+          <Link Name="Target"/>
+          <Link Name="TargetRelative" Parent="Target"/>
+        </Links>
+      </Scene>
+    </PlanningScene>
+
+    <Maps>
+      <EffFrame Name="Position">
+        <EndEffector>
+          <Frame Link="lwr_arm_7_link" LinkOffset="0 0 0.025" Base="TargetRelative"/>
+        </EndEffector>
+      </EffFrame>
+    </Maps>
+
+    <Cost>
+      <Task Task="Position" Rho="1e3"/>
+    </Cost>
+
+    <StartState>0 0 0 0 0 0 0</StartState>
+    <W> 7 6 5 4 3 2 1 </W>
+  </UnconstrainedEndPoseProblem>
+</IKConfig>

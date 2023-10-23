@@ -19,7 +19,7 @@
         <LossType>L2</LossType>
         <ControlCostWeight>1000</ControlCostWeight>
         <R_rate>1e-3</R_rate>        
-        
+
         <PlanningScene>
             <Scene>
                 <JointGroup>whole_body</JointGroup>
@@ -34,6 +34,8 @@
                         <ControlLimitsHigh>10</ControlLimitsHigh>
                     </DoubleIntegratorDynamicsSolver>
                 </DynamicsSolver>
+
+                <JointVelocityLimits>0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2</JointVelocityLimits>
             </Scene>
         </PlanningScene>
 

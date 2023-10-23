@@ -666,7 +666,7 @@ void DynamicTimeIndexedShootingProblem::UpdateTaskMaps(Eigen::VectorXdRefConst x
     // NB: The KinematicTree only understands a certain format for the configuration (RPY)
     // => As a result, we need to use GetPosition to potentially convert.
     const Eigen::VectorXd q = scene_->GetDynamicsSolver()->GetPosition(x);
-    scene_->Update(q, static_cast<double>(t) * tau_);
+    scene_->Update(q, t_start + static_cast<double>(t) * tau_);
 
     // Reset the task space vector and its derivatives for the current timestep
     Phi[t].SetZero(length_Phi);

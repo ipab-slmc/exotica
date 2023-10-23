@@ -5,10 +5,10 @@ import pyexotica as exo
 
 try:
     from pyassimp import pyassimp
-except:
+except ImportError:
     try:
         import pyassimp
-    except:
+    except ImportError:
         raise Exception("Failed to import pyassimp")
 
 

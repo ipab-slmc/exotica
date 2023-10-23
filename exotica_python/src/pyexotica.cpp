@@ -809,6 +809,7 @@ PYBIND11_MODULE(_pyexotica, module)
              py::arg("x") = 0,
              py::arg("y") = 0,
              py::arg("z") = 0)
+        .def("__repr__", [](KDL::Vector* me) { return "KDL::Vector [" + std::to_string(me->data[0]) + ", " + std::to_string(me->data[1]) + ", " + std::to_string(me->data[2]) + "]"; })
         .def("x", [](KDL::Vector& v) -> double& { return v[0]; })
         .def("y", [](KDL::Vector& v) -> double& { return v[1]; })
         .def("z", [](KDL::Vector& v) -> double& { return v[2]; })

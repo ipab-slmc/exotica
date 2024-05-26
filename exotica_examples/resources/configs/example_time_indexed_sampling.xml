@@ -8,8 +8,6 @@
   </TimeIndexedRRTConnectSolver>
 
   <TimeIndexedSamplingProblem Name="MyProblem">
-    <!-- <Debug>1</Debug> -->
-
     <GoalTime>3</GoalTime>
     <PlanningScene>
       <Scene>

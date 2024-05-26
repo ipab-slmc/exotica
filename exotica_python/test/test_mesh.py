@@ -1,23 +1,28 @@
 import unittest
 
 import pyexotica as exo
+
 try:
     import trimesh
 except ImportError:
-    import warnings
-    warnings.warn("trimesh not found, skipping test")
-    exit()
+    from nose.plugins.skip import SkipTest
+
+    raise SkipTest("trimesh is not available, skipping related tests.")
+
 
 def validate_mesh(mesh):
     print(mesh, mesh.vertex_count, mesh.triangle_count)
     assert mesh.vertex_count == 33
     assert mesh.triangle_count == 62
 
+
 class TestPythonMeshCreation(unittest.TestCase):
     def test_create_mesh_from_resource_package_path(self):
         # Load mesh from resource path
         print(">>> Loading STL directly from package-path")
-        mesh = exo.Mesh.createMeshFromResource("package://exotica_examples/resources/cone.stl")
+        mesh = exo.Mesh.createMeshFromResource(
+            "package://exotica_examples/resources/cone.stl"
+        )
         validate_mesh(mesh)
 
     def test_create_mesh_from_resource_exotica_resource_path(self):
@@ -46,6 +51,7 @@ class TestPythonMeshCreation(unittest.TestCase):
         m = trimesh.load(exo.Tools.parse_path("{exotica_examples}/resources/cone.stl"))
         mesh = exo.Mesh.createMeshFromVertices(m.vertices, m.faces.flatten())
         validate_mesh(mesh)
+
 
 if __name__ == "__main__":
     unittest.main()

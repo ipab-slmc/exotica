@@ -1,7 +1,12 @@
 import unittest
 
 import pyexotica as exo
-import trimesh
+try:
+    import trimesh
+except ImportError:
+    import warnings
+    warnings.warn("trimesh not found, skipping test")
+    exit()
 
 def validate_mesh(mesh):
     print(mesh, mesh.vertex_count, mesh.triangle_count)

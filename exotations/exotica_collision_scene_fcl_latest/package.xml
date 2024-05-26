@@ -3,7 +3,7 @@
   <name>exotica_collision_scene_fcl_latest</name>
   <version>6.2.0</version>
   <description>Collision checking and distance computation using the latest version of the FCL library.</description>
-  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
   <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
 
   <license>BSD</license>

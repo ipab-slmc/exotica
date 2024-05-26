@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
+// Copyright (c) 2018-2022, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <geometric_shapes/mesh_operations.h>
 
 #include <octomap/OcTree.h>
 #include <ros/package.h>
@@ -807,6 +809,7 @@ PYBIND11_MODULE(_pyexotica, module)
              py::arg("x") = 0,
              py::arg("y") = 0,
              py::arg("z") = 0)
+        .def("__repr__", [](KDL::Vector* me) { return "KDL::Vector [" + std::to_string(me->data[0]) + ", " + std::to_string(me->data[1]) + ", " + std::to_string(me->data[2]) + "]"; })
         .def("x", [](KDL::Vector& v) -> double& { return v[0]; })
         .def("y", [](KDL::Vector& v) -> double& { return v[1]; })
         .def("z", [](KDL::Vector& v) -> double& { return v[2]; })
@@ -992,7 +995,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_goal_neq", &TimeIndexedProblem::GetGoalNEQ);
     time_indexed_problem.def("get_rho_neq", &TimeIndexedProblem::GetRhoNEQ);
     time_indexed_problem.def_property("tau", &TimeIndexedProblem::GetTau, &TimeIndexedProblem::SetTau);
-    time_indexed_problem.def_property("q_dot_max", &TimeIndexedProblem::GetJointVelocityLimits, &TimeIndexedProblem::SetJointVelocityLimits);
+    time_indexed_problem.def_property("q_dot_max", &TimeIndexedProblem::GetJointVelocityLimits, &TimeIndexedProblem::SetJointVelocityLimits);  // deprecated
     time_indexed_problem.def_readwrite("W", &TimeIndexedProblem::W);
     time_indexed_problem.def_readwrite("use_bounds", &TimeIndexedProblem::use_bounds);
     time_indexed_problem.def_property("initial_trajectory", &TimeIndexedProblem::GetInitialTrajectory, &TimeIndexedProblem::SetInitialTrajectory);
@@ -1017,7 +1020,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_inequality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_inequality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::GetBounds);
-    time_indexed_problem.def("get_joint_velocity_limits", &TimeIndexedProblem::GetJointVelocityLimits);
+    time_indexed_problem.def("get_joint_velocity_limits", &TimeIndexedProblem::GetJointVelocityLimits);  // deprecated
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
     time_indexed_problem.def_readonly("inequality", &TimeIndexedProblem::inequality);
     time_indexed_problem.def_readonly("equality", &TimeIndexedProblem::equality);
@@ -1501,27 +1504,27 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<shapes::Sphere, shapes::Shape, std::shared_ptr<shapes::Sphere>>(module, "Sphere")
         .def(py::init())
-        .def(py::init<double>())
+        .def(py::init<double>(), py::arg("radius"))
         .def_readonly_static("name", &shapes::Sphere::STRING_NAME)
         .def_readwrite("radius", &shapes::Sphere::radius);
 
     py::class_<shapes::Cylinder, shapes::Shape, std::shared_ptr<shapes::Cylinder>>(module, "Cylinder")
         .def(py::init())
-        .def(py::init<double, double>())
+        .def(py::init<double, double>(), py::arg("radius"), py::arg("length"))
         .def_readonly_static("name", &shapes::Cylinder::STRING_NAME)
         .def_readwrite("radius", &shapes::Cylinder::radius)
         .def_readwrite("length", &shapes::Cylinder::length);
 
     py::class_<shapes::Cone, shapes::Shape, std::shared_ptr<shapes::Cone>>(module, "Cone")
         .def(py::init())
-        .def(py::init<double, double>())
+        .def(py::init<double, double>(), py::arg("radius"), py::arg("length"))
         .def_readonly_static("name", &shapes::Cone::STRING_NAME)
         .def_readwrite("radius", &shapes::Cone::radius)
         .def_readwrite("length", &shapes::Cone::length);
 
     py::class_<shapes::Box, shapes::Shape, std::shared_ptr<shapes::Box>>(module, "Box")
         .def(py::init())
-        .def(py::init<double, double, double>())
+        .def(py::init<double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"))
         .def_readonly_static("name", &shapes::Box::STRING_NAME);
 
     py::class_<shapes::Plane, shapes::Shape, std::shared_ptr<shapes::Plane>>(module, "Plane")
@@ -1541,7 +1544,23 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("computeVertexNormals", &shapes::Mesh::computeVertexNormals)
         .def("mergeVertices", &shapes::Mesh::mergeVertices)
         .def_readonly("vertex_count", &shapes::Mesh::vertex_count)
-        .def_readonly("triangle_count", &shapes::Mesh::triangle_count);
+        .def_readonly("triangle_count", &shapes::Mesh::triangle_count)
+        .def_property_readonly("vertices", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->vertices, instance->vertex_count); })
+        .def_property_readonly("triangles", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>>(instance->triangles, instance->triangle_count); })
+        .def_property_readonly("triangle_normals", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->triangle_normals, instance->triangle_count); })
+        .def_property_readonly("vertex_normals", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->vertex_normals, instance->vertex_count); })
+        .def_static("createMeshFromResource", [](const std::string& resource) {
+            return shapes::createMeshFromResource("file://" + ParsePath(resource));
+        },
+                    py::arg("resource_path"), py::return_value_policy::take_ownership)
+        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices) {
+            return shapes::createMeshFromVertices(vertices);
+        },
+                    py::arg("vertices"), py::return_value_policy::take_ownership)
+        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices, const std::vector<unsigned int>& triangles) {
+            return shapes::createMeshFromVertices(vertices, triangles);
+        },
+                    py::arg("vertices"), py::arg("triangles"), py::return_value_policy::take_ownership);
 
     py::class_<shapes::OcTree, shapes::Shape, std::shared_ptr<shapes::OcTree>>(module, "OcTree")
         .def(py::init())

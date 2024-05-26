@@ -64,9 +64,9 @@ void run()
             // This sets the precision of all time steps BUT the last one to zero
             // This means we only aim to minimize the task cost in the last time step
             // The rest of the trajectory minimizes the control cost
-            problem->SetRho("Frame", 0.0, t);
+            problem->cost.SetRho("Frame", 0.0, t);
         }
-        problem->SetRho("Frame", 1e3, -1);
+        problem->cost.SetRho("Frame", 1e3, -1);
     }
 
     // Create the initial configuration

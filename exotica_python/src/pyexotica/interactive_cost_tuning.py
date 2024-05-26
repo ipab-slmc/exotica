@@ -37,7 +37,7 @@ class InteractiveCostTuning(object):
                 self.rho[k] = r
                 self.original_rho[k] = r
                 self.cost_task_map_names.append(k)
-            except:
+            except Exception:
                 continue
 
         # Setup labels and entries

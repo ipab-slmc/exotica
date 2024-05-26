@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018-2020, University of Edinburgh, University of Oxford
+// Copyright (c) 2018-2023, University of Edinburgh, University of Oxford
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,17 @@ void JointLimit::AssignScene(ScenePtr scene)
 void JointLimit::Initialize()
 {
     safe_percentage_ = parameters_.SafePercentage;
-    N = scene_->GetKinematicTree().GetNumControlledJoints();
+
+    if (scene_->get_num_velocities() > 0)
+    {
+        // Position and velocity joint limits
+        N = scene_->get_num_state_derivative();
+    }
+    else
+    {
+        // Kinematic joint limits
+        N = scene_->GetKinematicTree().GetNumControlledJoints();
+    }
 }
 
 int JointLimit::TaskSpaceDim()
@@ -97,18 +107,65 @@ void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eigen
 
 void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi)
 {
-    Update(x.head(scene_->get_num_positions()), phi);
+    if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
+
+    // Build limits vector for state limits:
+    Eigen::VectorXd low_limits(N), high_limits(N);
+
+    const Eigen::MatrixXd& limits = scene_->GetKinematicTree().GetJointLimits();
+    low_limits.head(scene_->get_num_positions()) = limits.col(0);
+    high_limits.head(scene_->get_num_positions()) = limits.col(1);
+
+    low_limits.tail(scene_->get_num_velocities()) = -scene_->GetKinematicTree().GetVelocityLimits();
+    high_limits.tail(scene_->get_num_velocities()) = scene_->GetKinematicTree().GetVelocityLimits();
+
+    const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);
+
+    // apply lower bounds
+    phi = (x.array() < (low_limits + tau).array()).select(x - low_limits - tau, phi);
+    // apply higher bounds
+    phi = (x.array() > (high_limits - tau).array()).select(x - high_limits + tau, phi);
 }
 
 void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du)
 {
-    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(N, N));
+    if (dphi_dx.rows() != N || dphi_dx.cols() != N) ThrowNamed("Wrong size of dphi_dx! " << N);
+    if (phi.rows() != N) ThrowNamed("Wrong size of phi!");
+
+    // Build limits vector for state limits:
+    Eigen::VectorXd low_limits(N), high_limits(N);
+
+    const Eigen::MatrixXd& limits = scene_->GetKinematicTree().GetJointLimits();
+    low_limits.head(scene_->get_num_positions()) = limits.col(0);
+    high_limits.head(scene_->get_num_positions()) = limits.col(1);
+
+    low_limits.tail(scene_->get_num_velocities()) = -scene_->GetKinematicTree().GetVelocityLimits();
+    high_limits.tail(scene_->get_num_velocities()) = scene_->GetKinematicTree().GetVelocityLimits();
+
+    const Eigen::VectorXd tau = 0.5 * safe_percentage_ * (high_limits - low_limits);
+
+    // apply lower bounds
+    phi = (x.array() < (low_limits + tau).array()).select(x - low_limits - tau, phi);
+    // apply higher bounds
+    phi = (x.array() > (high_limits - tau).array()).select(x - high_limits + tau, phi);
+
+    for (int i = 0; i < N; i++)
+    {
+        if (x(i) >= low_limits(i) + tau(i) && x(i) <= high_limits(i) - tau(i))
+        {
+            dphi_dx(i, i) = 0;
+        }
+        else
+        {
+            dphi_dx(i, i) = 1;
+        }
+    }
 }
 
 void JointLimit::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, Eigen::VectorXdRef phi, Eigen::MatrixXdRef dphi_dx, Eigen::MatrixXdRef dphi_du, HessianRef ddphi_ddx, HessianRef ddphi_ddu, HessianRef ddphi_dxdu)
 {
     // Hessian is 0.
-    Update(x.head(scene_->get_num_positions()), phi, dphi_dx.topLeftCorner(N, N));
+    Update(x, u, phi, dphi_dx, dphi_du);
 }
 
 }  // namespace exotica

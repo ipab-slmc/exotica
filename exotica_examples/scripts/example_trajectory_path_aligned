@@ -1,0 +1,137 @@
+#!/usr/bin/env python
+import rospy
+import pyexotica as exo
+import numpy as np
+from math import ceil
+import matplotlib.pyplot as plt
+from time import sleep
+import exotica_core_task_maps_py
+from visualization_msgs.msg import Marker, MarkerArray
+from geometry_msgs.msg import Point
+
+if __name__ == "__main__":
+    rospy.init_node("align_to_surface")
+    exo.Setup.init_ros()
+
+    solver = exo.Setup.load_solver(
+        "{exotica_examples}/resources/configs/example_trajectory_path_aligned.xml"
+    )
+    problem = solver.get_problem()
+
+    # Time to approach
+    t_approach = 10.0
+    t_path = 20.0  # TODO: Set this based on end-effector distance from the coverage path planning
+    t_retract = 5.0
+
+    t_total = t_approach + t_path + t_retract
+    dt = problem.tau
+    T = ceil(t_total / dt)
+    T_approach = ceil(t_approach / dt)
+    T_path = ceil(t_path / dt)
+    T_retract = ceil(t_retract / dt)
+
+    print("dt = {0}, t_total = {1} => T = {2}".format(dt, t_total, T))
+
+    # Set up path to track
+    path_length = int(t_path / dt)
+
+    path_positions = np.zeros((3, path_length))
+    # Circle!
+    theta = np.linspace(0, 2 * np.pi, path_length)
+    radius = 0.2
+    y = radius * np.cos(theta)
+    z = radius * np.sin(theta)
+    z += 0.5
+    path_positions[0, :] = 0.8
+    path_positions[1, :] = y
+    path_positions[2, :] = z
+
+    path_normals = np.zeros((3, path_length))
+    path_normals[0, :] = -1.0
+
+    # Add environment collision
+    # Note: Self-collisions are currently deactivated (!)
+    scene = problem.get_scene()
+    scene.add_object_to_environment(
+        name="wall",
+        color=(0.5, 0.5, 0.0, 0.8),
+        shape=exo.Box(0.025, 2.0, 2.0),
+        transform=exo.KDLFrame([0.85, 0, 1.0]),
+    )
+
+    # Update optimisation problem
+    problem.T = T
+
+    # No path position or alignment cost during approach or retract
+    for t in range(0, T_approach, 1):
+        problem.cost.set_rho("Position", 0, t)
+        problem.cost.set_rho("Angle", 0, t)
+    for t in range(T_approach + T_path, T, 1):
+        problem.cost.set_rho("Position", 0, t)
+        problem.cost.set_rho("Angle", 0, t)
+
+    # During path, set targets for path:
+    for t in range(T_approach, T_approach + T_path, 1):
+        # problem.cost.set_goal('Position', [*path_positions[:,t-T_approach], 0,0,0], t)
+        problem.cost.set_goal("Position", path_positions[:, t - T_approach], t)
+        problem.get_task_maps()["Angle"].set_direction(
+            "j1n6s300_end_effector", [1, 0, 0]
+        )  # path_normals[:,t-T_approach])
+
+    # Visualise targets
+
+    pub = rospy.Publisher("target", MarkerArray, queue_size=1)
+    sleep(0.5)
+    msg = MarkerArray()
+    m = Marker()
+    m.header.frame_id = "exotica/world_frame"
+    m.type = Marker.LINE_LIST
+    m.pose.orientation.w = 0.0
+    m.color.a = 1.0
+    m.color.r = 1.0
+    m.scale.x = 0.01
+    for i in range(1, path_length):
+        m.points.append(Point(*path_positions[:, i - 1]))
+        m.points.append(Point(*path_positions[:, i]))
+    msg.markers.append(m)
+    pub.publish(msg)
+
+    sleep(1)
+
+    # Solve!
+    solver.max_iterations = 250
+    solver.debug_mode = True
+    solution = solver.solve()
+    print("Solved in {0:.2f}s".format(solver.get_planning_time()))
+
+    # Visualise
+    plt.figure()
+    plt.title("Solution (joint accelerations)")
+    plt.plot(solution, ".-")
+
+    plt.figure()
+    plt.subplot(1, 2, 1)
+    plt.title("Positions")
+    plt.plot(problem.X[:6, :].T)
+    plt.subplot(1, 2, 2)
+    plt.title("Velocities")
+    plt.plot(problem.X[6:, :].T)
+
+    plt.figure()
+    plt.title("Cost vs Iterations")
+    plt.plot(problem.get_cost_evolution()[1])
+    plt.yscale("log")
+
+    plt.show()
+
+    while True:
+        for t in range(problem.T - 1):
+            u = solution[t, :]
+
+            problem.update(u, t)
+            problem.get_scene().get_kinematic_tree().publish_frames("exotica")
+
+            # Play 5x faster
+            sleep(0.2 * problem.tau)
+
+        sleep(0.5)

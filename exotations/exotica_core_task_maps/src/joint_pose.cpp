@@ -73,6 +73,7 @@ void JointPose::Initialize()
         joint_map_.resize(parameters_.JointMap.rows());
         for (int i = 0; i < parameters_.JointMap.rows(); ++i)
         {
+            if (parameters_.JointMap(i) >= num_controlled_joints_) ThrowPretty("JointMap index (" << parameters_.JointMap(i) << ") is greater than number of controlled joints (" << num_controlled_joints_ << ")!");
             joint_map_[i] = parameters_.JointMap(i);
         }
     }

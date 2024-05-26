@@ -40,6 +40,7 @@
 #include <Eigen/Dense>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unsupported/Eigen/CXX11/Tensor>
 #pragma GCC diagnostic pop
 
@@ -232,7 +233,7 @@ inline std::string Trim(const std::string& s)
 }
 
 template <typename T>
-T ToNumber(const std::string& val)
+T ToNumber(const std::string& /*val*/)
 {
     throw std::runtime_error("conversion not implemented!");
 }
@@ -286,10 +287,25 @@ inline Eigen::Matrix<T, S, 1> ParseVector(const std::string value)
 
 inline bool ParseBool(const std::string value)
 {
-    bool ret;
-    std::istringstream text_parser(value);
-    text_parser >> ret;
-    return ret;
+    if (value == "0" || value == "false" || value == "False")
+    {
+        return false;
+    }
+    else if (value == "1" || value == "true" || value == "True")
+    {
+        return true;
+    }
+    else
+    {
+        bool ret;
+        std::istringstream text_parser(value);
+        text_parser >> ret;
+        if ((text_parser.fail() || text_parser.bad()))
+        {
+            ThrowPretty("Can't parse boolean value!");
+        }
+        return ret;
+    }
 }
 
 inline double ParseDouble(const std::string value)
@@ -358,13 +374,7 @@ inline std::vector<bool> ParseBoolList(const std::string value)
     std::vector<bool> ret;
     while (std::getline(ss, item, ' '))
     {
-        bool tmp;
-        std::istringstream text_parser(item);
-        text_parser >> tmp;
-        if ((text_parser.fail() || text_parser.bad()))
-        {
-            ThrowPretty("Can't parse value!");
-        }
+        bool tmp = ParseBool(item);
         ret.push_back(tmp);
     }
     if (ret.empty()) WARNING_NAMED("Parser", "Empty vector!")

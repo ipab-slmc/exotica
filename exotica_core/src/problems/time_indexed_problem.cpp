@@ -79,7 +79,7 @@ void TimeIndexedProblem::Instantiate(const TimeIndexedProblemInitializer& init)
 
     T_ = this->parameters_.T;
     tau_ = this->parameters_.tau;
-    SetJointVelocityLimits(this->parameters_.JointVelocityLimits);
+    SetJointVelocityLimits(this->parameters_.JointVelocityLimits);  // Deprecated TODO: Replace
     ApplyStartState(false);
     ReinitializeVariables();
 }

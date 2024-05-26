@@ -4,8 +4,8 @@
   <version>6.2.0</version>
   <description>Regularised and weighted pseudo-inverse unconstrained end-pose solver</description>
 
-  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
-  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
 
   <license>BSD</license>
 

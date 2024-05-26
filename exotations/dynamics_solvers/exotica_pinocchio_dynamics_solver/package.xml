@@ -4,7 +4,7 @@
   <version>6.2.0</version>
   <description>Dynamics solver plug-in using Pinocchio for Exotica</description>
 
-  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>

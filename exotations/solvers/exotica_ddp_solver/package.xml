@@ -4,8 +4,7 @@
   <version>6.2.0</version>
   <description>Various DDP Solvers</description>
 
-  <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
-  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
   <author>Traiko Dinev</author>
 
   <license>BSD</license>

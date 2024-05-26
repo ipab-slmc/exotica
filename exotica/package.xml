@@ -4,11 +4,11 @@
   <version>6.2.0</version>
   <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning. This package serves similar to a metapackage and contains dependencies onto all core-released exotica packages. It also builds the documentation.</description>
 
-  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
-  <maintainer email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</maintainer>
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
 
-  <author email="v.ivan@ed.ac.uk">Vladimir Ivan</author>
-  <author email="wolfgang@robots.ox.ac.uk">Wolfgang Merkt</author>
+  <author email="v.ivan.mail@gmail.com">Vladimir Ivan</author>
+  <author email="opensource@wolfgangmerkt.com">Wolfgang Merkt</author>
   <author>Christian Rauch</author>
   <author>Christopher E. Mower</author>
   <author>Yiming Yang</author>

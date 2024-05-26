@@ -4,7 +4,6 @@
   <version>6.2.0</version>
   <description>Kinodynamic Control Solvers from OMPL</description>
 
-  <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
   <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
   <author>Traiko Dinev</author>
 

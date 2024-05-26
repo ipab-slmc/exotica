@@ -4,7 +4,6 @@
   <version>6.2.0</version>
   <description>Cartpole dynamics solver plug-in for Exotica</description>
 
-  <maintainer email="traiko.dinev@ed.ac.uk">Traiko Dinev</maintainer>
   <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
   <author>Traiko Dinev</author>
   <license>BSD</license>

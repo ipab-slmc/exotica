@@ -4,7 +4,7 @@
   <version>6.2.0</version>
   <description>Implementation of the Approximate Inference Control algorithm (AICO)</description>
 
-  <maintainer email="v.ivan@ed.ac.uk">Vladimir Ivan</maintainer>
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
   <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
 
   <license>BSD</license>

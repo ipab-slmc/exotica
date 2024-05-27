@@ -20,6 +20,10 @@
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-pyassimp</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-tk</exec_depend>
   <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-rospkg</exec_depend>
-  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-trimesh-pip</test_depend>
-  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-trimesh-pip</test_depend>
+  <!--
+    pip keys cannot be used for releases on the buildfarm cf. 
+    https://github.com/ros/rosdistro/pull/39892#issuecomment-1985640859
+  -->
+  <!-- <test_depend condition="$ROS_PYTHON_VERSION == 2">python-trimesh-pip</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-trimesh-pip</test_depend> -->
 </package>

@@ -808,33 +808,6 @@ void KinematicTree::PublishFrames(const std::string& tf_prefix)
                         mrk.pose.orientation.w = 1.0;
                         marker_array_msg_.markers.push_back(mrk);
                     }
-                    // Octree
-                    else
-                    {
-                        // OcTree needs separate handling as it's not supported in constructMarkerFromShape
-                        // NB: This only supports a single OctoMap in the KinematicTree as we only have one publisher!
-                        octomap::OcTree my_octomap = *std::static_pointer_cast<const shapes::OcTree>(tree_[i].lock()->shape)->octree.get();
-                        octomap_msgs::Octomap octomap_msg;
-                        octomap_msgs::binaryMapToMsg(my_octomap, octomap_msg);
-                        octomap_msg.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
-                        octomap_pub_.publish(octomap_msg);
-                    }
-                }
-                else if(tree_[i].lock()->shape && !tree_[i].lock()->is_robot_link)
-                {
-                    if (tree_[i].lock()->shape->type != shapes::ShapeType::OCTREE)
-                    {
-                        visualization_msgs::Marker mrk;
-                        shapes::constructMarkerFromShape(tree_[i].lock()->shape.get(), mrk);
-                        mrk.action = visualization_msgs::Marker::ADD;
-                        mrk.frame_locked = true;
-                        mrk.id = i;
-                        mrk.ns = "CollisionObjects";
-                        mrk.color = GetColor(tree_[i].lock()->color);
-                        mrk.header.frame_id = tf_prefix + "/" + tree_[i].lock()->segment.getName();
-                        mrk.pose.orientation.w = 1.0;
-                        marker_array_msg_.markers.push_back(mrk);
-                    }
                     else
                     {
                         // OcTree needs separate handling as it's not supported in constructMarkerFromShape

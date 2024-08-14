@@ -29,7 +29,8 @@ class TargetMarker:
                  marker_color=[0.0, 0.5, 0.5, 1.0],
                  controls=[],
                  controls_rotate=True,
-                 controls_translate=True):
+                 controls_translate=True,
+                 controls_size=0.05):
         self.position = kdl.Frame()
         self.position_exo = exo.KDLFrame()
         self.server = InteractiveMarkerServer(server_name)
@@ -38,6 +39,7 @@ class TargetMarker:
         self.int_marker.name = server_name
         self.int_marker.description = description
         self.int_marker.pose = list_to_pose(pose)
+        self.int_marker.scale = controls_size
         self.position_exo = exo.KDLFrame(pose)
         self.position = kdl.Frame(
             kdl.Rotation.Quaternion(self.int_marker.pose.orientation.x, self.int_marker.pose.orientation.y, self.int_marker.pose.orientation.z, self.int_marker.pose.orientation.w),

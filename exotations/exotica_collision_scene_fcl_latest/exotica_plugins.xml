@@ -1,0 +1,9 @@
+<library path="exotica_collision_scene_fcl_latest">
+  <class name="exotica/CollisionSceneFCLLatest" type="exotica::CollisionSceneFCLLatest" base_class_type="exotica::CollisionScene">
+    <description>FCL collision scene</description>
+  </class>
+  <!-- Compatibility alias after removing CollisionSceneFCL -->
+  <class name="exotica/CollisionSceneFCL" type="exotica::CollisionSceneFCLLatest" base_class_type="exotica::CollisionScene">
+    <description>FCL collision scene compatibility alias - internally uses CollisionSceneFCLLatest</description>
+  </class>
+</library>

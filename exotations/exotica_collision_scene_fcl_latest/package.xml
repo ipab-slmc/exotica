@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_collision_scene_fcl_latest</name>
+  <version>6.2.0</version>
+  <description>Collision checking and distance computation using the FCL library.</description>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>exotica_core</depend>
+  <depend>geometric_shapes</depend>
+  <depend>libfcl-dev</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

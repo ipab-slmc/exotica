@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_aico_solver</name>
+  <version>6.2.0</version>
+  <description>Approximate Inference Control (AICO) solver for EXOTica</description>
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>exotica_core</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

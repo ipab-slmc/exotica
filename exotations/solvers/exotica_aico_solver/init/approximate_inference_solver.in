@@ -1,0 +1,13 @@
+class ApproximateInferenceSolver
+
+extend <exotica_core/motion_solver>
+
+Optional std::string SweepMode = "Symmetric";  // Forwardly, Symmetric, LocalGaussNewton, LocalGaussNewtonDamped
+Optional int MaxBacktrackIterations = 10;  // Patience on how many sweeps without improvement before terminating
+Optional double StepTolerance = 1e-5;  // Relative step tolerance
+Optional double FunctionTolerance = 1e-5;  // Relative function tolerance (first-order optimality)
+Optional double MinStep = 1e-5;  // Do not update task messages if the maximum coefficient changes less than the update tolerance
+Optional double Damping = 0.01;
+Optional bool UseBackwardMessage = false;
+Optional bool Verbose = false;  // More verbose output than debug
+

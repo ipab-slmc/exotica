@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_python</name>
+  <version>6.2.0</version>
+  <description>Python bindings for EXOTica</description>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <depend>exotica_core</depend>
+  <depend>geometry_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>rclcpp</depend>
+  <depend>ament_index_cpp</depend>
+
+  <build_depend>pybind11-dev</build_depend>
+
+  <exec_depend>python3-matplotlib</exec_depend>
+  <exec_depend>python3-pyassimp</exec_depend>
+  <exec_depend>python3-tk</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,6 @@
+class SphereShape
+
+extend <exotica_core/shape>
+
+Required double Radius;
+Optional std::string Type = "Sphere";  // DO NOT CHANGE

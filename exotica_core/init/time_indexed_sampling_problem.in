@@ -1,0 +1,6 @@
+class TimeIndexedSamplingProblem
+
+extend <exotica_core/sampling_problem>
+
+Required double GoalTime;
+Optional Eigen::VectorXd JointVelocityLimits = Eigen::VectorXd();  // DEPRECATED: Use JointVelocityLimits in the Scene initializer

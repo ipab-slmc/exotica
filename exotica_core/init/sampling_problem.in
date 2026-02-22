@@ -1,0 +1,10 @@
+class SamplingProblem
+
+extend <exotica_core/planning_problem>
+
+Optional Eigen::VectorXd Goal = Eigen::VectorXd();
+Optional Eigen::VectorXd FloatingBaseLowerLimits = Eigen::VectorXd();
+Optional Eigen::VectorXd FloatingBaseUpperLimits = Eigen::VectorXd();
+Optional std::vector<exotica::Initializer> Inequality = std::vector<exotica::Initializer>();
+Optional std::vector<exotica::Initializer> Equality = std::vector<exotica::Initializer>();
+Optional double ConstraintTolerance = 0.0;  // To avoid numerical issues, e.g., in sampling tasks, consider (and set) zero if below this threshold.

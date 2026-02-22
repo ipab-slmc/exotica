@@ -1,0 +1,11 @@
+class PlanningProblem
+
+include <exotica_core/scene_initializer>
+extend <exotica_core/object>
+
+Required exotica::Initializer PlanningScene; # SceneInitializer
+
+Optional std::vector<exotica::Initializer> Maps = std::vector<exotica::Initializer>();
+Optional Eigen::VectorXd StartState = Eigen::VectorXd();
+Optional double StartTime = 0;
+Optional int DerivativeOrder = -1;

@@ -1,0 +1,7 @@
+class UnconstrainedEndPoseProblem
+
+extend <exotica_core/planning_problem>
+
+Optional std::vector<exotica::Initializer> Cost = std::vector<exotica::Initializer>();
+Optional Eigen::VectorXd W = Eigen::VectorXd();
+Optional Eigen::VectorXd NominalState = Eigen::VectorXd();

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_core</name>
+  <version>6.2.0</version>
+  <description>EXOTica core library</description>
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>ament_index_cpp</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_kdl</depend>
+  <depend>tf2_eigen_kdl</depend>
+  <depend>tf2_eigen</depend>
+  <depend>orocos_kdl_vendor</depend>
+  <depend>kdl_parser</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>moveit_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>octomap_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>tinyxml2_vendor</depend>
+  <depend>geometric_shapes</depend>
+  <!-- System deps: libzmq3-dev, libeigen3-dev, libmsgpack-dev -->
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

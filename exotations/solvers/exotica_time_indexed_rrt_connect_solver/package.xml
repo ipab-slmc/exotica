@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_time_indexed_rrt_connect_solver</name>
+  <version>6.2.0</version>
+  <description>Time-Indexed RRT-Connect Solver for EXOTica</description>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>exotica_core</depend>
+  <depend>ros-humble-ompl</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

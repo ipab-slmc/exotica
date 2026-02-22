@@ -1,0 +1,29 @@
+<library path="exotica_ompl_solver">
+  <class name="exotica/RRTSolver" type="exotica::RRTSolver" base_class_type="exotica::MotionSolver">
+    <description>RRT Solver</description>
+  </class>
+  <class name="exotica/RRTConnectSolver" type="exotica::RRTConnectSolver" base_class_type="exotica::MotionSolver">
+    <description>RRTConnect Solver</description>
+  </class>
+  <class name="exotica/ESTSolver" type="exotica::ESTSolver" base_class_type="exotica::MotionSolver">
+    <description>EST Solver</description>
+  </class>
+  <class name="exotica/KPIECESolver" type="exotica::KPIECESolver" base_class_type="exotica::MotionSolver">
+    <description>KPIECE Solver</description>
+  </class>
+  <class name="exotica/BKPIECESolver" type="exotica::BKPIECESolver" base_class_type="exotica::MotionSolver">
+    <description>BKPIECE Solver</description>
+  </class>
+  <class name="exotica/PRMSolver" type="exotica::PRMSolver" base_class_type="exotica::MotionSolver">
+    <description>PRM Solver</description>
+  </class>
+  <class name="exotica/LazyPRMSolver" type="exotica::LazyPRMSolver" base_class_type="exotica::MotionSolver">
+    <description>LazyPRM Solver</description>
+  </class>
+  <class name="exotica/RRTStarSolver" type="exotica::RRTStarSolver" base_class_type="exotica::MotionSolver">
+    <description>RRTStar Solver</description>
+  </class>
+  <class name="exotica/LBTRRTSolver" type="exotica::LBTRRTSolver" base_class_type="exotica::MotionSolver">
+    <description>LBTRRT Solver</description>
+  </class>
+</library>

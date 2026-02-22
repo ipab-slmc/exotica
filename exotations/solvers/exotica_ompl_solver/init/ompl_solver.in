@@ -1,0 +1,26 @@
+class OMPLSolver
+
+extend <exotica_core/motion_solver>
+
+Optional bool Smooth = true;
+Optional bool ReduceVertices = true;
+Optional bool ShortcutPath = true;
+Optional int SimplifyTryCnt = 10; // [reduceVertices/shortcutPath] Number of attempts to reduce vertices and shortcut path. Both will be attempted the given number of tasks, and the latter only if it is a metric state space.
+Optional int SimplifyInterpolationLength = 20; // [reduceVertices/shortcutPath] Interpolation after the first attempt.
+Optional double RangeRatio = 0.33; // [reduceVertices/shortcutPath] Between 0.0-1.0, how far to attempt to connect vertices. Set to 1.0 for maximum simplification.
+Optional double SnapToVertex = 0.005; // [shortcutPath] Set to 1.0 will do maximum simplification.
+Optional double SmoothnessFactor = 1.0;
+Optional double Timeout = 60.0;
+Optional std::string Range = "1";
+Optional double LongestValidSegmentFraction = 0.01; // Fraction of the maximum extent of the state space for which a segment is considered valid in discrete motion validation. Be careful when changing!
+Optional bool UseGoalBias = false;
+Optional std::string GoalBias = "0.05";
+Optional int RandomSeed = -1;  // Only set if not -1
+Optional Eigen::VectorXd Projection = Eigen::VectorXd();
+Optional double Epsilon = 0.0;
+Optional int FinalInterpolationLength = 0;
+
+// Planar base / SE(2) StateSpace Options
+Optional bool IsDubinsStateSpace = false;
+Optional double DubinsStateSpaceTurningRadius = 1.0;
+Optional bool DubinsStateSpaceIsSymmetric = false;

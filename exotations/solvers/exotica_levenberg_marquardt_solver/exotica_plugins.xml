@@ -1,0 +1,5 @@
+<library path="exotica_levenberg_marquardt_solver">
+  <class name="exotica/LevenbergMarquardtSolver" type="exotica::LevenbergMarquardtSolver" base_class_type="exotica::MotionSolver">
+    <description>Levenberg-Marquardt Solver</description>
+  </class>
+</library>

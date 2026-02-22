@@ -1,0 +1,3 @@
+class RRTConnectSolver
+
+extend <exotica_ompl_solver/ompl_solver>

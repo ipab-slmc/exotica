@@ -1,0 +1,8 @@
+class OMPLControlSolver
+
+extend <exotica_core/motion_solver>
+Required Eigen::VectorXd StateLimits;
+Optional double MaxIterationTime = 10.0; // in seconds
+Optional double ConvergenceTolerance = 1e-3;
+Optional int Seed = -1;
+Optional bool ApproximateSolution = true;

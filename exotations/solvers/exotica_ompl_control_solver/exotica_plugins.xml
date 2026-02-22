@@ -1,0 +1,8 @@
+<library path="exotica_ompl_control_solver">
+  <class name="exotica/ControlRRTSolver" type="exotica::ControlRRTSolver" base_class_type="exotica::MotionSolver">
+    <description>Control RRT Solver</description>
+  </class>
+  <class name="exotica/ControlKPIECESolver" type="exotica::ControlKPIECESolver" base_class_type="exotica::MotionSolver">
+    <description>Control KPIECE Solver</description>
+  </class>
+</library>

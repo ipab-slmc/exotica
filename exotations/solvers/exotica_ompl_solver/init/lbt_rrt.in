@@ -1,0 +1,3 @@
+class LBTRRTSolver
+
+extend <exotica_ompl_solver/ompl_solver>

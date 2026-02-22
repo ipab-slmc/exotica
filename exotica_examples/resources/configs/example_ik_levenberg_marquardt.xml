@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<IKSolverDemoConfig>
+  <LevenbergMarquardtSolver Name="MySolver" Damping="0.01" />
+
+  <UnconstrainedEndPoseProblem Name="MyProblem">
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+      </Scene>
+    </PlanningScene>
+    
+    <Maps>
+      <EffFrame Name="Position">
+        <EndEffector>
+            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
+        </EndEffector>
+      </EffFrame>
+    </Maps>
+
+    <Cost>
+      <Task Task="Position"/>
+    </Cost>
+
+    <StartState>0 0 0 0 0 0 0</StartState>
+    <W> 7 6 5 4 3 2 1 </W>
+  </UnconstrainedEndPoseProblem>
+</IKSolverDemoConfig>

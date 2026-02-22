@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<robot name="A_vs_B">
+    <group name="group1">
+        <joint name="joint1"/>
+    </group>
+    <virtual_joint child_link="A" name="world_joint" parent_frame="world_frame" type="fixed"/>
+</robot>

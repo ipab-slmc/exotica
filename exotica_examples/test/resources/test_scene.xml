@@ -1,0 +1,217 @@
+<?xml version="1.0" ?>
+<SceneTestingConfig>
+
+    <IKSolver Name="DummySolver"/>
+
+    <UnconstrainedEndPoseProblem Name="FullProblem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <Trajectories>
+                    <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_static_obstacle.traj" />
+                </Trajectories>
+                <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
+                <Links>
+                    <Link Name="CustomLink1" Transform="0.1 0 0"/>
+                    <Link Name="CustomLink2" Parent="lwr_arm_6_link" Transform="0.1 0 0"/>
+                    <Link Name="CustomLink3" Parent="Obstacle" Transform="0.1 0 0"/>
+                </Links>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+    <UnconstrainedEndPoseProblem Name="MinimalProblem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+    <UnconstrainedEndPoseProblem Name="TrajectoryProblem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <Trajectories>
+                    <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_static_obstacle.traj" />
+                </Trajectories>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+    <UnconstrainedEndPoseProblem Name="CollisionProblem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <AlwaysUpdateCollisionScene>1</AlwaysUpdateCollisionScene>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+    <UnconstrainedEndPoseProblem Name="CustomLink1Problem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <Links>
+                    <Link Name="CustomLink1" Transform="0.1 0 0"/>
+                </Links>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+    <UnconstrainedEndPoseProblem Name="CustomLink2Problem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <Links>
+                    <Link Name="CustomLink2" Parent="lwr_arm_6_link" Transform="0.1 0 0"/>
+                </Links>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+    <UnconstrainedEndPoseProblem Name="CustomLink3Problem">
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+                <Links>
+                    <Link Name="CustomLink3" Parent="Obstacle" Transform="0.1 0 0"/>
+                </Links>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" Base="Obstacle" BaseOffset="0.5 0 0"/>
+                </EndEffector>
+            </EffPosition>
+        </Maps>
+
+        <Cost>
+            <Task Task="Position"/>
+        </Cost>
+
+        <StartState>0 0 0 0 0 0 0</StartState>
+        <W> 7 6 5 4 3 2 1 </W>
+    </UnconstrainedEndPoseProblem>
+
+</SceneTestingConfig>

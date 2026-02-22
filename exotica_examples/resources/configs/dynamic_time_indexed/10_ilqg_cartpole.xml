@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <ILQGSolver Name="ILQGSolver">
+        <Debug>1</Debug>
+        <MaxIterations>50</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+        <IncludeNoiseTerms>1</IncludeNoiseTerms>
+    </ILQGSolver>
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>actuated_joints</JointGroup>
+                <URDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.urdf</URDF>
+                <SRDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <CartpoleDynamicsSolver Name="solver">
+                        <ControlLimitsLow>-25</ControlLimitsLow>
+                        <ControlLimitsHigh>25</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                    </CartpoleDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>200</T>
+        <tau>0.01</tau>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>10</Qf_rate>
+        <R_rate>0.1</R_rate>
+
+        <!-- <C_rate>0.1</C_rate> -->
+        <C>
+            0
+            0
+            0
+            0.01
+        </C>
+
+        <CW>
+            0
+            0
+            0
+            0.01
+        </CW>
+        <!-- Noise applied to theta_dot -->
+
+        <!-- <C_rate>0.0</C_rate> -->
+        <StartState>2 0 0 0 </StartState>
+        <GoalState>1 3.14 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

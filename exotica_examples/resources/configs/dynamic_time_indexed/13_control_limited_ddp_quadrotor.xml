@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+    <ControlLimitedDDPSolver Name="ControlLimitedDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>300</MaxIterations>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <BoxQPUseCholeskyFactorization>1</BoxQPUseCholeskyFactorization>
+    </ControlLimitedDDPSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>base</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/quadrotor.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/quadrotor.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <QuadrotorDynamicsSolver Name="dsolver">
+                        <ControlLimitsLow>0</ControlLimitsLow>
+                        <ControlLimitsHigh>5</ControlLimitsHigh>
+                        <dt>0.005</dt>
+                    </QuadrotorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>300</T>
+        <tau>0.005</tau>
+        
+        <!-- Q rate penalizes large pitch/yaw maneuvers -->
+        <Q>0 0 0 1 1 0 0 0 0 0 0 0</Q>
+        <Q_rate>1</Q_rate>
+
+        <Qf_rate>5</Qf_rate>
+
+        <!-- Rate penalizes large control forces. -->
+        <R_rate>0.1</R_rate>
+
+
+        <StartState>0 0 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 4 4 4 0 0 0 0 0 0 0 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</PlannerDemoConfig>

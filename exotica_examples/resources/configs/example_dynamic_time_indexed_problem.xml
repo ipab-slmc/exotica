@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+  <DynamicTimeIndexedShootingProblem Name="MyProblem">
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+        <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+        <DynamicsSolver>
+          <PinocchioDynamicsSolver Name="PinocchioDynamicsSolver"/>
+        </DynamicsSolver>
+      </Scene>
+    </PlanningScene>
+   
+    <T>100</T>
+    <tau>0.01</tau>
+    <Q_rate>1000</Q_rate>
+    <R_rate>1</R_rate>
+    <!-- <Q>10 10 10 10 10 10 10 1 1 1 1 1 1 1</Q> -->
+  </DynamicTimeIndexedShootingProblem>
+</PlannerDemoConfig>

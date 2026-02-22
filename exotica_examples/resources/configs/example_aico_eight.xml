@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+
+  <AICOSolver Name="MySolver" />
+
+  <UnconstrainedTimeIndexedProblem Name="MyProblem">
+
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+      </Scene>
+    </PlanningScene>
+
+    <Maps>
+      <EffFrame Name="Frame">
+        <EndEffector>
+            <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071 0  0.7071 0" BaseOffset="0.6 -0.1 0.5" />
+        </EndEffector>
+      </EffFrame>
+    </Maps>
+
+    <Cost>
+      <Task Task="Frame"/>
+    </Cost>
+   
+    <T>400</T>
+    <tau>0.03</tau>
+    <Qrate>1e-10</Qrate>
+    <Hrate>1</Hrate>
+    <Wrate>1e4</Wrate>
+    <W> 7 6 5 4 3 2 1 </W>
+  </UnconstrainedTimeIndexedProblem>
+</PlannerDemoConfig>

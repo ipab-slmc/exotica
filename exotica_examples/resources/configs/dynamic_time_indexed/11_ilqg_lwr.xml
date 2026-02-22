@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <ILQGSolver Name="ILQGSolver">
+        <Debug>1</Debug>
+        <MaxIterations>50</MaxIterations>
+        <FunctionTolerance>-1</FunctionTolerance>
+        <FunctionTolerancePatience>50</FunctionTolerancePatience>
+        <IncludeNoiseTerms>1</IncludeNoiseTerms>
+    </ILQGSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver">
+                        <ControlLimitsLow>-5</ControlLimitsLow>
+                        <ControlLimitsHigh>-5</ControlLimitsHigh>
+                        <dt>0.02</dt>
+                    </DoubleIntegratorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+        
+        <T>100</T>
+        <tau>0.02</tau>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>10</Qf_rate>
+
+        <C_rate>0.1</C_rate>
+
+<!--         Example C if noise is applied to states
+        <C>
+            0.1 0   0   0   0   0     0
+            0   0.1 0   0   0   0     0
+            0   0   0.1 0   0   0     0
+            0   0   0   0.1 0   0     0
+            0   0   0   0   0.1 0     0
+            0   0   0   0   0   0.1   0
+            0   0   0   0   0   0   0.1 
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+            0   0   0   0   0   0     0
+        </C> -->
+
+        <StartState>0 0 0 -1.35 0 0 0 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  1.35 0 0 0 0 0 0 0 0 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<PlannerDemoConfig>
+  <AICOSolver Name="MySolver" Debug="1" Damping="100" MaxBacktrackIterations="500" />
+
+  <UnconstrainedTimeIndexedProblem Name="MyProblem">
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+      </Scene>
+    </PlanningScene>
+
+    <Maps>
+      <EffVelocity Name="EffVelocity">
+        <EndEffector>
+            <Frame Link="lwr_arm_7_link" />
+        </EndEffector>
+      </EffVelocity>
+      <JointPose Name="Identity" />
+    </Maps>
+
+    <Cost>
+      <Task Task="EffVelocity" Rho="1e2"/>
+      <Task Task="Identity" Rho="0"/>
+    </Cost>
+   
+    <T>100</T>
+    <tau>0.05</tau>
+    <Wrate>1e0</Wrate>
+  </UnconstrainedTimeIndexedProblem>
+</PlannerDemoConfig>

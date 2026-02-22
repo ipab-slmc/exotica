@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<IKSolverDemoConfig>
+    <!-- This is a problem-only config to demonstrate SciPy solvers -->
+    <TimeIndexedProblem Name="FigureEightTracking">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <LoadScene>{exotica_examples}/resources/scenes/example_box.scene</LoadScene>
+                <Links>
+                    <Link Name="TargetOffset" Transform="0.8 -0.1 0.5"/>
+                    <Link Name="Target" Parent="TargetOffset" />
+                </Links>
+                <Trajectories>
+                    <Trajectory Link="Target" File="{exotica_examples}/resources/scenes/figure_eight.traj" />
+                </Trajectories>
+                <AttachLinks>
+                    <AttachLink Name="Box" Parent="Target" Local="1"/>
+                </AttachLinks>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffFrame Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071 0  0.7071 0" Base="Target"/>
+                </EndEffector>
+            </EffFrame>
+            <EffPosition Name="LimitEff">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2" BaseOffset="2 0.1 2"/>
+                </EndEffector>
+            </EffPosition>
+            <!-- <JointPose Name="Pose" /> -->
+        </Maps>
+
+        <Cost>
+            <!-- <Task Task="Pose"/> -->
+        </Cost>
+
+        <Equality>
+            <Task Task="Position"/>
+        </Equality>
+        
+        <Inequality>
+            <!-- <Task Task="LimitEff"/> -->
+        </Inequality>
+
+        <UseBounds>0</UseBounds>
+        <T>200</T>
+        <tau>0.05</tau>
+        <W> 7 6 5 4 3 2 1 </W>
+    </TimeIndexedProblem>
+</IKSolverDemoConfig>

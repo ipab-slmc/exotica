@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This quadrotor URDF and its accompanying mesh files originate from hector_quadrotor_description (BSD-licensed).
+     The upstream repository is: https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor
+     The convex hull collision mesh has been created using MeshLab based on the upstream visualisation mesh.
+     -->
+<robot name="quadrotor" 
+  xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://exotica_examples/resources/robots/quadrotor/quadrotor_base.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://exotica_examples/resources/robots/quadrotor/quadrotor_base_convex_hull.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="base_inertial">
+    <inertial>
+      <mass value="1.477"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.01152" ixy="0.0" ixz="0.0" iyy="0.01152" iyz="0.0" izz="0.0218"/>
+    </inertial>
+  </link>
+  <joint name="base_to_inertia" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_inertial"/>
+  </joint>
+</robot>

@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>-->
+    <!-- <AnalyticDDPSolver Name="AnalyticDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>1000</MaxIterations>
+        <RegularizationRate>0.1</RegularizationRate>
+    </AnalyticDDPSolver> -->
+    <ControlLimitedFeasibilityDrivenDDPSolver Name="ControlLimitedFeasibilityDrivenDDPSolver">
+        <Debug>1</Debug>
+        <MaxIterations>1000</MaxIterations>
+        <FunctionTolerance>1e-4</FunctionTolerance>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+        <GradientTolerance>1e-5</GradientTolerance>
+        <GradientToleranceConvergenceThreshold>1e-5</GradientToleranceConvergenceThreshold>
+        <RegularizationRate>0.1</RegularizationRate>
+        <UseNewBoxQP>1</UseNewBoxQP>
+        <BoxQPUseCholeskyFactorization>0</BoxQPUseCholeskyFactorization>
+        <BoxQPUsePolynomialLinesearch>1</BoxQPUsePolynomialLinesearch>
+    </ControlLimitedFeasibilityDrivenDDPSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <!-- DerivativeOrder=2 required for unit tests -->
+        <DerivativeOrder>2</DerivativeOrder>
+
+        <!-- <LossType>PseudoHuber</LossType> -->
+        <R_rate>1e-5</R_rate>
+
+        <!-- <LossType>Huber</LossType>
+        <HuberRate>0.5</HuberRate>
+        <ControlCostWeight>1</ControlCostWeight>
+        <R_rate>0</R_rate> -->
+
+        <!-- <LossType>Huber</LossType>
+        <HuberRate>0.1</HuberRate>
+        <ControlCostWeight>1</ControlCostWeight>
+        <R_rate>0</R_rate> -->
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>arm</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <PinocchioDynamicsSolver Name="MyDynamicsSolver">
+                        <ControlLimitsLow>-156</ControlLimitsLow>
+                        <ControlLimitsHigh>156</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                    </PinocchioDynamicsSolver>
+
+                    <!-- <PinocchioDynamicsSolverWithGravityCompensation Name="MyDynamicsSolver">
+                        <ControlLimitsLow>-20</ControlLimitsLow>
+                        <ControlLimitsHigh>20</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                    </PinocchioDynamicsSolverWithGravityCompensation> -->
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0 0.7071067811865476 -4.3297802811774664e-17  0.7071067811865475 4.3297802811774664e-17"/>
+                </EndEffector>
+            </EffPosition>
+            <JointLimit Name="JL"/>
+        </Maps>
+
+        <Cost>
+            <Task Task="JL" Rho="0.01"/>
+
+            <Task Task="Position" Goal="0.0 0.5 0.5" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+                                                          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+                                                          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+                                                          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+                                                          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100"/>
+        </Cost>
+
+        <T>100</T>
+        <tau>0.01</tau>
+
+        <!-- Penalize large velocities/ stay within control limits. -->
+        <Q>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Q>
+        <Q_rate>1e-5</Q_rate>
+
+        <!-- End state should be with no velocities. -->
+        <Qf>0 0 0 0 0 0 0 1 1 1 1 1 1 1</Qf>
+        <Qf_rate>100</Qf_rate>
+
+        <StartState>1e-3 1e-3 1e-3  1e-3 1e-3 1e-3 1e-3 0 0 0 0 0 0 0</StartState>
+        <GoalState> 0 0 0  0 0 0 0 0 0 0 0 0 0 0</GoalState>
+
+        <!-- <WarmStartWithInverseDynamics>1</WarmStartWithInverseDynamics> -->
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

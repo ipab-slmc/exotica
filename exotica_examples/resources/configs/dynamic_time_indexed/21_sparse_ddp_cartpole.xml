@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <AnalyticDDPSolver Name="ADDP">
+        <Debug>0</Debug>
+        <MaxIterations>500</MaxIterations>
+        <FunctionTolerance>1e-5</FunctionTolerance>
+        <GradientTolerance>1e-5</GradientTolerance>
+        <GradientToleranceConvergenceThreshold>1e-5</GradientToleranceConvergenceThreshold>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+        <RegularizationRate>1e-1</RegularizationRate>
+    </AnalyticDDPSolver>
+    
+    <DynamicTimeIndexedShootingProblem Name="cartpole">
+        <LossType>Huber</LossType>
+        <HuberRate>1e-3</HuberRate>
+        <ControlCostWeight>25</ControlCostWeight>
+        <R_rate>0</R_rate>
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>actuated_joints</JointGroup>
+                <!-- Noetic compatibility changes: -->
+                <URDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.urdf</URDF>
+                <SRDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <CartpoleDynamicsSolver Name="solver">
+                        <ControlLimitsLow>  -30.0</ControlLimitsLow>
+                        <ControlLimitsHigh>  30.0</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                    </CartpoleDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>200</T>
+        <tau>0.01</tau>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>1e3</Qf_rate>
+        <StartState>0 0 0 0</StartState>
+        <GoalState>0 3.1415 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

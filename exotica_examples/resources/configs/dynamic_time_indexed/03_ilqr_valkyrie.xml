@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <!-- 2020-01-08, wxm: This example makes no sense. It has taskmaps when iLQR cannot solve taskmaps. Start and goal state are the same. The Qf is set up incorrectly. As thus, it should do nothing. -->
+
+    <ILQRSolver Name="ILQRSolver">
+        <Debug>1</Debug>
+        <MaxIterations>10</MaxIterations>
+    </ILQRSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <DerivativeOrder>2</DerivativeOrder>
+        <PlanningScene>
+            <Scene>
+                <JointGroup>whole_body</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver">
+                        <dt>0.01</dt>
+                        <ControlLimitsLow>-5</ControlLimitsLow>
+                        <ControlLimitsHigh>5</ControlLimitsHigh>
+                    </DoubleIntegratorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="CoM">
+                <EndEffector>
+                    <Frame Link="pelvis"/>
+                </EndEffector>
+            </EffPosition>
+
+            <EffOrientation Name="StraightBack">
+                <EndEffector>
+                    <Frame Link="pelvis"/>
+                    <Frame Link="torso"/>
+                </EndEffector>
+            </EffOrientation>
+
+            <EffFrame Name="FootPosition">
+                <EndEffector>
+                    <Frame Link="leftFoot" LinkOffset="0.052 0.0 -0.09" BaseOffset="0 0.1 0"/>
+                    <Frame Link="rightFoot" LinkOffset="0.052 0.0 -0.09" BaseOffset="0 -0.1 0"/>
+                </EndEffector>
+            </EffFrame>
+
+            <EffPosition Name="Position">
+                <EndEffector>
+                    <Frame Link="leftPalm"/>
+                </EndEffector>
+            </EffPosition>
+
+            <!-- <QuasiStatic Name="Stability" PositiveOnly="1" Debug="1">
+                <EndEffector>
+                    <Frame Link="leftFoot_collision_5"/>
+                    <Frame Link="leftFoot_collision_6"/>
+                    <Frame Link="leftFoot_collision_7"/>
+                    <Frame Link="leftFoot_collision_8"/>
+                    <Frame Link="rightFoot_collision_5"/>
+                    <Frame Link="rightFoot_collision_6"/>
+                    <Frame Link="rightFoot_collision_7"/>
+                    <Frame Link="rightFoot_collision_8"/>
+                </EndEffector>
+            </QuasiStatic> -->
+        </Maps>
+
+        <Cost>
+            <!-- <Task Task="CoM" Rho="10"/> -->
+            <!-- <Task Task="Stability" Rho="1e1"/> -->
+            <Task Task="FootPosition" Rho="40"/>
+            <Task Task="StraightBack" Rho="1"/>
+            <!-- <Task Task="Pose" Rho="1e3"/> -->
+
+            <Task Task="Position" Goal="0.5 0 1" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10.0"/>
+        </Cost>
+
+        <T>200</T>
+        <tau>0.01</tau>
+
+        <!-- Penalize large velocities/ stay within control limits. -->
+        <Q>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Q>
+        <Q_rate>1e-5</Q_rate>
+
+        <!-- End state should be with no velocities. -->
+        <Qf>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Qf>
+        <Qf_rate>10</Qf_rate>
+
+        <R_rate>1e-5</R_rate>
+
+        <!-- <StartState>0.000031 -3e-06 0.9 0.009 0.00133 -0.000621 0.0067 -0.04594 -0.6825 1.62 -0.9363 0.0374 0.0026 0.0241 -0.66641 1.6231 -0.9524 -0.0344 0.00062 -0.00027 -0.00872 0.3002 -1.25 0 -0.7854 1.571 0 0 0 0 0 0.3002 1.25 0 0.7854 1.571 0 0</StartState> -->
+        <StartState>0.000031 -3e-06 0.9 0.009 0.00133 -0.000621 0.0067 -0.04594 -0.6825 1.62 -0.9363 0.0374 0.0026 0.0241 -0.66641 1.6231 -0.9524 -0.0344 0.00062 -0.00027 -0.00872 0.3002 -1.25 0 -0.7854 1.571 0 0 0 0 0 0.3002 1.25 0 0.7854 1.571 0 0</StartState>
+        <GoalState>0.000031 -3e-06 0.9 0.009 0.00133 -0.000621 0.0067 -0.04594 -0.6825 1.62 -0.9363 0.0374 0.0026 0.0241 -0.66641 1.6231 -0.9524 -0.0344 0.00062 -0.00027 -0.00872 0.3002 -1.25 0 -0.7854 1.571 0 0 0 0 0 0.3002 1.25 0 0.7854 1.571 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

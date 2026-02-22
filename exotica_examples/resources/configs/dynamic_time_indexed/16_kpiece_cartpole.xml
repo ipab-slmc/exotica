@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <!-- This one does not converge within the 60s iteration time. -->
+    <ControlKPIECESolver Name="ControlKPIECESolver">
+        <Debug>1</Debug>
+        <StateLimits>2 3.14 5 5</StateLimits>
+        <MaxIterationTime>60</MaxIterationTime>
+        <ConvergenceTolerance>1e-3</ConvergenceTolerance>
+        <ApproximateSolution>1</ApproximateSolution>
+        <Seed>1</Seed>
+    </ControlKPIECESolver>
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>actuated_joints</JointGroup>
+                <URDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.urdf</URDF>
+                <SRDF>{exotica_cartpole_dynamics_solver}/resources/cartpole.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <CartpoleDynamicsSolver Name="solver">
+                        <ControlLimitsLow>-25</ControlLimitsLow>
+                        <ControlLimitsHigh>25</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                    </CartpoleDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>200</T>
+        <tau>0.01</tau>
+        <Q_rate>0</Q_rate>
+        <Qf_rate>10</Qf_rate>
+        <R_rate>0.1</R_rate>
+        <StartState>0 0 0 0 </StartState>
+        <GoalState>0 3.14 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<IKConfig>
+
+  <IKSolver Name="IK"/>
+
+  <UnconstrainedEndPoseProblem Name="FigureEightTracking">
+
+    <PlanningScene>
+      	<Scene>
+            <JointGroup>arm</JointGroup>
+	    <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+	    <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+            <LoadScene>{exotica_examples}/resources/scenes/example_box.scene</LoadScene>
+            <Links>
+                <Link Name="TargetOffset" Transform="0.8 -0.1 0.5"/>
+                <Link Name="Target" Parent="TargetOffset" />
+            </Links>
+            <Trajectories>
+                <Trajectory Link="Target" File="{exotica_examples}/resources/scenes/figure_eight.traj" />
+            </Trajectories>
+            <AttachLinks>
+                <AttachLink Name="Box" Parent="Target" Local="1"/>
+            </AttachLinks>
+      	</Scene>
+    </PlanningScene>
+    
+    <Maps>
+        <EffFrame Name="Position">
+            <EndEffector>
+                <Frame Link="lwr_arm_6_link" LinkOffset="0 0 0.2 0.7071 0  0.7071 0" Base="Target"/>
+            </EndEffector>
+        </EffFrame>
+    </Maps>
+
+    <Cost>
+      <Task Task="Position" Rho="1e4"/>
+    </Cost>
+
+    <StartState>0 0 0 0 0 0 0</StartState>
+    <NominalState>0 0 0 0 0 0 0</NominalState>
+    <W> 7 6 5 4 3 2 1 </W>
+  </UnconstrainedEndPoseProblem>
+
+</IKConfig>

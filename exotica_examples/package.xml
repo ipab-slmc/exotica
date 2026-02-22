@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_examples</name>
+  <version>6.2.0</version>
+  <description>Package containing examples and system tests for EXOTica.</description>
+
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+
+  <license>BSD</license>
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_gtest</buildtool_depend>
+
+  <depend>exotica_aico_solver</depend>
+  <depend>exotica_core</depend>
+  <depend>exotica_core_task_maps</depend>
+  <depend>exotica_ik_solver</depend>
+  <depend>rclcpp</depend>
+
+  <exec_depend>exotica_cartpole_dynamics_solver</exec_depend>
+  <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>
+  <exec_depend>exotica_ddp_solver</exec_depend>
+  <exec_depend>exotica_double_integrator_dynamics_solver</exec_depend>
+  <exec_depend>exotica_ilqg_solver</exec_depend>
+  <exec_depend>exotica_ilqr_solver</exec_depend>
+  <exec_depend>exotica_levenberg_marquardt_solver</exec_depend>
+  <exec_depend>exotica_ompl_control_solver</exec_depend>
+  <exec_depend>exotica_ompl_solver</exec_depend>
+  <exec_depend>exotica_pendulum_dynamics_solver</exec_depend>
+  <exec_depend>exotica_pinocchio_dynamics_solver</exec_depend>
+  <exec_depend>exotica_python</exec_depend>
+  <exec_depend>exotica_quadrotor_dynamics_solver</exec_depend>
+  <exec_depend>exotica_scipy_solver</exec_depend>
+  <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>interactive_markers</exec_depend>
+  <exec_depend>python3-pykdl</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

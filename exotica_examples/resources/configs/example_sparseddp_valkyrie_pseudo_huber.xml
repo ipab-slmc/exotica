@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<ExoticaConfig>
+    <FeasibilityDrivenDDPSolver Name="DDP">
+    <!-- <ControlLimitedFeasibilityDrivenDDPSolver Name="DDP"> -->
+    <!-- <AnalyticDDPSolver Name="DDP"> -->
+        <Debug>1</Debug>
+        <MaxIterations>500</MaxIterations>
+        <GradientTolerance>1e-4</GradientTolerance>
+        <RegularizationRate>1e-3</RegularizationRate>
+        <UseNewBoxQP>1</UseNewBoxQP>
+        <BoxQPUseCholeskyFactorization>1</BoxQPUseCholeskyFactorization>
+        <BoxQPUsePolynomialLinesearch>1</BoxQPUsePolynomialLinesearch>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+    <!-- </AnalyticDDPSolver> -->
+    <!-- </ControlLimitedFeasibilityDrivenDDPSolver> -->
+    </FeasibilityDrivenDDPSolver>
+
+    <DynamicTimeIndexedShootingProblem Name="valkyrie">
+        <LossType>PseudoHuber</LossType>
+        <ControlCostWeight>1000</ControlCostWeight>
+        <HuberRate>1e-3</HuberRate>
+        <R_rate>0</R_rate>
+
+        <PlanningScene>
+            <Scene>
+                <JointGroup>whole_body</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/valkyrie_sim.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/valkyrie_sim.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+
+                <DynamicsSolver>
+                    <DoubleIntegratorDynamicsSolver Name="solver">
+                        <dt>0.1</dt>
+                        <ControlLimitsLow>-10</ControlLimitsLow>
+                        <ControlLimitsHigh>10</ControlLimitsHigh>
+                    </DoubleIntegratorDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <Maps>
+            <EffPosition Name="PalmPosition">
+                <EndEffector>
+                    <Frame Link="rightPalm"/>
+                </EndEffector>
+            </EffPosition>
+            <JointLimit Name="JointLimit">
+                <SafePercentage>0.01</SafePercentage>
+            </JointLimit>
+            <EffOrientation Name="StraightBack">
+                <EndEffector>
+                    <Frame Link="pelvis"/>
+                    <Frame Link="torso"/>
+                </EndEffector>
+            </EffOrientation>
+            <EffFrame Name="FootPosition">
+                <EndEffector>
+                    <Frame Link="leftFoot" BaseOffset="-0.071169 0.137705 0.098544"/>
+                    <Frame Link="rightFoot" BaseOffset="-0.071169 -0.137705 0.098544"/>
+                </EndEffector>
+            </EffFrame>
+            <QuasiStatic Name="Stability" PositiveOnly="1" Debug="0">
+                <EndEffector>
+                    <Frame Link="leftFoot_collision_5"/>
+                    <Frame Link="leftFoot_collision_6"/>
+                    <Frame Link="leftFoot_collision_7"/>
+                    <Frame Link="leftFoot_collision_8"/>
+                    <Frame Link="rightFoot_collision_5"/>
+                    <Frame Link="rightFoot_collision_6"/>
+                    <Frame Link="rightFoot_collision_7"/>
+                    <Frame Link="rightFoot_collision_8"/>
+                </EndEffector>
+            </QuasiStatic>
+        </Maps>
+        <Cost>
+            <Task Task="PalmPosition" Rho="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1e3" Goal="0.5 0.2 0.9"/>
+
+            <Task Task="JointLimit" Rho="1e3"/>
+            <Task Task="FootPosition" Rho="1e3"/>
+        </Cost>
+
+        <T>21</T>
+        <tau>0.1</tau>
+        <Q_rate>0</Q_rate>
+
+        <Qf>
+          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+          0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+          1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+          1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        </Qf>
+        <Qf_rate>1e3</Qf_rate>
+
+        <StartState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </StartState>
+        <GoalState>0.0 0.0 1.025 0.0 0.0 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 -0.49 1.205 -0.71 0.0 0.0 0.0 0.0 0.300196631343 -1.25 0.0 -0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.300196631343 1.25 0.0 0.785398163397 1.571 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 </GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</ExoticaConfig>

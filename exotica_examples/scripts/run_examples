@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+# This is a workaround for liburdf.so throwing an exception and killing
+# the process on exit in ROS Indigo.
+
+import subprocess
+import os
+import sys
+import signal
+
+exit_on_failure = True
+
+roslaunch = ['cpp_core',
+             'cpp_init_generic',
+             'cpp_init_xml',
+             'cpp_aico',
+             'cpp_ik_minimal',
+             'cpp_ik_freebase',
+             'cpp_ompl',
+             'cpp_ompl_freebase',
+             'python_attach',
+             'python_collision_distance',
+             'python_aico',
+             'python_aico_eff_velocity',
+             'python_aico_joint_velocity_limit',
+             'python_aico_trajectory',
+             'python_bayesian_ik',
+             'python_ik',
+             'python_ik_eff_axis_alignment',
+             'python_ik_levenberg_marquardt',
+             'python_ik_look_at',
+             'python_ik_point_to_line',
+             'python_ik_trajectory',
+             'python_ik_valkyrie',
+             'python_ik_with_jnt_smoothing',
+             'python_lazy_prm',
+             'python_ompl',
+             'python_ompl_projections',
+             'python_prm',
+             'python_shapes',
+             'python_sphere_collision',
+             'python_time_indexed_sampling',
+             'python_time_indexed_sampling_freebase',
+             ]
+
+rosrun = ['example_minimal',
+          'example_fk',
+          'example_aico_noros',
+          'example_ik_noros',
+          'example_ompl_noros',
+          'example_ompl_freebase_noros',
+          'example_cpp_ik_minimal',
+          ]
+
+process = None
+is_stopping = False
+results = {}
+
+
+def sig_int_handler(sig, frame):
+    global is_stopping
+    global process
+    if not is_stopping and process is not None:
+        is_stopping = True
+        process.send_signal(sig)
+    else:
+        raise KeyboardInterrupt
+
+
+signal.signal(signal.SIGINT, sig_int_handler)
+
+for example in rosrun:
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\nRunning '+example+'\n')
+    is_stopping = False
+    process = subprocess.Popen(
+        ['rosrun', 'exotica_examples', example], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while process.poll() == None:
+        print(process.stdout.readline())
+        sys.stdout.flush()
+    print(process.stderr.read())
+    results[example] = process.poll()
+    if exit_on_failure and not is_stopping and results[example] != 0:
+        exit(1)
+
+for example in roslaunch:
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\nRunning '+example+'\n')
+    is_stopping = False
+    process = subprocess.Popen(['roslaunch', 'exotica_examples', example +
+                                '.launch'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while process.poll() == None:
+        print(process.stdout.readline())
+        sys.stdout.flush()
+    print(process.stderr.read())
+    results[example] = process.poll()
+    if exit_on_failure and not is_stopping and results[example] != 0:
+        exit(1)
+
+print('All examples have been executed:')
+print(results)

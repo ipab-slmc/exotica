@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import rospy
+import pyexotica as exo
+import numpy as np
+import signal
+from pyexotica.publish_trajectory import publish_pose, sig_int_handler
+from time import sleep
+from interactive_markers.menu_handler import *
+from interactive_markers.interactive_marker_server import *
+from visualization_msgs.msg import *
+from exotica_examples_py import *
+import exotica_core_task_maps_py
+import PyKDL as kdl
+
+DT = 1.0 / 100.0  # 100 HZ
+
+SMOOTHING_TASK_MAPS = ['JointVel', 'JointAcc', 'JointJerk']
+SMOOTHING_RHO = [1e2, 1e1, 1]
+
+def make_box():
+    marker = Marker()
+    marker.type = Marker.CUBE
+    marker.scale.x = 0.2
+    marker.scale.y = 0.1
+    marker.scale.z = 0.1
+    marker.color.r = 0.5
+    marker.color.g = 0.5
+    marker.color.b = 0.5
+    marker.color.a = 0.1
+    marker.pose.position.x = 0.1
+    return marker
+
+class Example(object):
+
+    def __init__(self):
+        
+        # Setup interactive marker
+        control = InteractiveMarkerControl()
+        control.interaction_mode = InteractiveMarkerControl.BUTTON
+        control.always_visible = True
+        control.markers.append(make_box())
+        self.target_marker = TargetMarker(pose=[0.6, -0.1, 0.5], controls=[control], description='Right click on the arrow to disable smoothing')
+        self.menu_handler = MenuHandler()
+        self.menu_handler.insert( 'Smoothing' )
+        self.menu_handler.setCheckState( self.menu_handler.insert( 'Enable', callback=self.smoothing_enabled_callback ), MenuHandler.CHECKED )
+        self.menu_handler.apply( self.target_marker.server, 'target_marker' )
+        self.target_marker.server.applyChanges()
+        
+
+        # Setup exotica
+        self.solver = exo.Setup.load_solver(
+            '{exotica_examples}/resources/configs/example_ik_with_jnt_smoothing.xml')
+        self.problem = self.solver.get_problem()
+        self.task_maps = self.problem.get_task_maps()
+        self.smoothing = 1.0
+
+        # Set init variables
+        self.q = self.problem.get_scene().get_model_state()
+
+
+    def smoothing_enabled_callback(self, feedback):
+        handle = feedback.menu_entry_id
+        state = self.menu_handler.getCheckState( handle )
+        if state == MenuHandler.CHECKED:
+            self.menu_handler.setCheckState( handle, MenuHandler.UNCHECKED )
+            self.smoothing = 0.0
+        else:
+            self.menu_handler.setCheckState( handle, MenuHandler.CHECKED )
+            self.smoothing = 1.0
+
+        self.menu_handler.reApply( self.target_marker.server )
+        self.target_marker.server.applyChanges()
+
+    def update(self, event):
+        # Set eff goal
+        self.problem.get_scene().attach_object_local('Goal', '', self.target_marker.position_exo)
+
+        # Set start state, rho, and previous joint states
+        self.problem.start_state = self.q
+        for i, name in enumerate(SMOOTHING_TASK_MAPS):
+            self.problem.set_rho(name, self.smoothing * SMOOTHING_RHO[i])
+            self.task_maps[name].set_previous_joint_state(self.q)
+
+        # Solve and publish
+        self.q = self.solver.solve()[0]
+        publish_pose(self.q, self.problem)
+
+if __name__ == '__main__':
+    rospy.init_node('example_ik_with_jnt_smoothing_node')
+    exo.Setup.init_ros()
+    signal.signal(signal.SIGINT, sig_int_handler)
+    rospy.Timer(rospy.Duration(DT), Example().update)
+    rospy.spin()

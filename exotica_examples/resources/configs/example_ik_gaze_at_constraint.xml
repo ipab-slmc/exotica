@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<IKSolverDemoConfig>
+
+  <!--Example uses SciPy solver.-->
+
+  <EndPoseProblem Name="My Problem">
+
+    <PlanningScene>
+      <Scene>
+        <JointGroup>arm</JointGroup>
+        <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+        <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+        <Links>
+          <Link Name="GazeAtTarget" Transform="1 1 2"/>
+        </Links>
+      </Scene>
+    </PlanningScene>
+    
+    <Maps>
+      <GazeAtConstraint Name="Gaze" Theta = "0.523599"> <!--Theta = 30 degs-->
+        <EndEffector>
+          <Frame Link="GazeAtTarget" Base="lwr_arm_6_link"/>
+        </EndEffector>
+      </GazeAtConstraint>
+    </Maps>
+
+    <Cost>
+    </Cost>
+
+    <Equality>
+    </Equality>
+    
+    <Inequality>
+      <Task Task="Gaze"/>
+    </Inequality>
+
+    <StartState>0 0 0 0 0 0 0</StartState>
+  </EndPoseProblem>
+  
+</IKSolverDemoConfig>

@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<PRMConfig>
+
+  <BKPIECESolver Name="ProjectionSolver" Projection="0 3"/>
+
+  <SamplingProblem Name="ReachingProblem">
+
+    <PlanningScene>
+        <Scene>
+            <JointGroup>arm</JointGroup>
+            <URDF>{exotica_examples}/resources/robots/lwr_simplified.urdf</URDF>
+            <SRDF>{exotica_examples}/resources/robots/lwr_simplified.srdf</SRDF>
+            <LoadScene>{exotica_examples}/resources/scenes/example_moving_obstacle.scene</LoadScene>
+            <Trajectories>
+                <Trajectory Link="Obstacle" File="{exotica_examples}/resources/scenes/example_static_obstacle.traj" />
+            </Trajectories>
+        </Scene>
+    </PlanningScene>
+
+    <Maps>
+        <CollisionCheck Name="Collision" SelfCollision="1" />
+    </Maps>
+
+    <Equality>
+        <Task Task="Collision"/>
+    </Equality>
+
+    <Goal>2.16939  1.313509   -2.2954   1.94413 -0.276843  0.567194         0</Goal>
+  </SamplingProblem>
+
+</PRMConfig>

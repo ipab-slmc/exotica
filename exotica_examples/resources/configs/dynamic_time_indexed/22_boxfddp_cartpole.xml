@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<DynamicTimeIndexedProblemConfig>
+    <ControlLimitedFeasibilityDrivenDDPSolver Name="BoxFDDP">
+        <Debug>1</Debug>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <UseNewBoxQP>1</UseNewBoxQP>
+        <BoxQPUsePolynomialLinesearch>1</BoxQPUsePolynomialLinesearch>
+        <BoxQPUseCholeskyFactorization>1</BoxQPUseCholeskyFactorization>
+        <ClampControlsInForwardPass>1</ClampControlsInForwardPass>
+    </ControlLimitedFeasibilityDrivenDDPSolver>
+
+    <!-- <FeasibilityDrivenDDPSolver Name="FDDP">
+        <Debug>1</Debug>
+        <UseSecondOrderDynamics>0</UseSecondOrderDynamics>
+        <UseNewBoxQP>1</UseNewBoxQP>
+    </FeasibilityDrivenDDPSolver> -->
+
+    <DynamicTimeIndexedShootingProblem Name="MyProblem">
+        <PlanningScene>
+            <Scene>
+                <JointGroup>actuated_joints</JointGroup>
+                <URDF>{exotica_examples}/resources/robots/cartpole.urdf</URDF>
+                <SRDF>{exotica_examples}/resources/robots/cartpole.srdf</SRDF>
+                <SetRobotDescriptionRosParams>1</SetRobotDescriptionRosParams>
+                <DynamicsSolver>
+                    <CartpoleDynamicsSolver Name="solver">
+                        <ControlLimitsLow>-10</ControlLimitsLow>
+                        <ControlLimitsHigh>10</ControlLimitsHigh>
+                        <dt>0.01</dt>
+                    </CartpoleDynamicsSolver>
+                </DynamicsSolver>
+            </Scene>
+        </PlanningScene>
+
+        <T>300</T>
+        <tau>0.01</tau>
+        <Q_rate>0</Q_rate>
+        <Qf>1 1 1 1</Qf>
+
+        <Qf_rate>100</Qf_rate>
+        <R_rate>1e-3</R_rate>
+        <StartState>0 0 0 0</StartState>
+        <GoalState>0 3.14159 0 0</GoalState>
+    </DynamicTimeIndexedShootingProblem>
+</DynamicTimeIndexedProblemConfig>

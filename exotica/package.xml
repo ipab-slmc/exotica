@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica</name>
+  <version>6.2.0</version>
+  <description>The Extensible Optimization Toolset (EXOTica) is a library for defining problems for robot motion planning. This metapackage depends on all core EXOTica packages.</description>
+
+  <maintainer email="v.ivan.mail@gmail.com">Vladimir Ivan</maintainer>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+
+  <author email="v.ivan.mail@gmail.com">Vladimir Ivan</author>
+  <author email="opensource@wolfgangmerkt.com">Wolfgang Merkt</author>
+  <author>Christian Rauch</author>
+  <author>Christopher E. Mower</author>
+  <author>Yiming Yang</author>
+  <author>Michael Camilleri</author>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/ipab-slmc/exotica</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>exotica_core</exec_depend>
+  <exec_depend>exotica_python</exec_depend>
+  <exec_depend>exotica_core_task_maps</exec_depend>
+  <exec_depend>exotica_ik_solver</exec_depend>
+  <exec_depend>exotica_aico_solver</exec_depend>
+  <exec_depend>exotica_collision_scene_fcl_latest</exec_depend>
+  <exec_depend>exotica_levenberg_marquardt_solver</exec_depend>
+  <exec_depend>exotica_ompl_solver</exec_depend>
+  <exec_depend>exotica_time_indexed_rrt_connect_solver</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

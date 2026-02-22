@@ -1,0 +1,3 @@
+class QuadrotorDynamicsSolver
+
+extend <exotica_core/dynamics_solver>

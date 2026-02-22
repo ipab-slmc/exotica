@@ -1,0 +1,3 @@
+class DoubleIntegratorDynamicsSolver
+
+extend <exotica_core/dynamics_solver>

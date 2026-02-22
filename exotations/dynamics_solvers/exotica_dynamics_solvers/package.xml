@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_dynamics_solvers</name>
+  <version>6.2.0</version>
+  <description>Metapackage for all dynamics solvers bundled with core EXOTica.</description>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>exotica_cartpole_dynamics_solver</exec_depend>
+  <exec_depend>exotica_double_integrator_dynamics_solver</exec_depend>
+  <exec_depend>exotica_pendulum_dynamics_solver</exec_depend>
+  <exec_depend>exotica_pinocchio_dynamics_solver</exec_depend>
+  <exec_depend>exotica_quadrotor_dynamics_solver</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

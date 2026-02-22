@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_pinocchio_dynamics_solver</name>
+  <version>6.2.0</version>
+  <description>Dynamics solver plug-in using Pinocchio for Exotica</description>
+
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>exotica_core</depend>
+  <depend>pluginlib</depend>
+  <depend>pinocchio</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

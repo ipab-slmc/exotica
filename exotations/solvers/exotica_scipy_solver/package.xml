@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_scipy_solver</name>
+  <version>6.2.0</version>
+  <description>SciPy-based Python solvers for Exotica</description>
+
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <author>Wolfgang Merkt</author>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <exec_depend>exotica_core</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

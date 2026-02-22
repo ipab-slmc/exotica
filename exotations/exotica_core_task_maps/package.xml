@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>exotica_core_task_maps</name>
+  <version>6.2.0</version>
+  <description>Core task maps for EXOTica</description>
+  <maintainer email="opensource@wolfgangmerkt.com">Wolfgang Merkt</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>exotica_core</depend>
+  <depend>exotica_python</depend>
+  <depend>tf2_kdl</depend>
+  <depend>tf2_eigen</depend>
+  <depend>visualization_msgs</depend>
+  <depend>geometry_msgs</depend>
+
+  <build_depend>pybind11-dev</build_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,8 @@
+class SphereCollision
+
+extend <exotica_core/task_map>
+
+Required double Precision;
+
+Optional std::string ReferenceFrame = "/world";
+Optional double Alpha = 1.0;

@@ -1,0 +1,5 @@
+class JointTorqueMinimizationProxy
+
+extend <exotica_core/task_map>
+
+Optional Eigen::VectorXd h = Eigen::VectorXd::Ones(6);

@@ -1,0 +1,5 @@
+class CenterOfMass
+
+extend <exotica_core/task_map>
+
+Optional bool EnableZ = true;

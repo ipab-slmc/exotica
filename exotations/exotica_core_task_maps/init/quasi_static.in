@@ -1,0 +1,5 @@
+class QuasiStatic
+
+extend <exotica_core/task_map>
+
+Optional bool PositiveOnly = true;

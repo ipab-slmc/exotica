@@ -1,0 +1,7 @@
+class FrameWithBoxLimits
+
+extend <exotica_core/frame>
+
+Required Eigen::Vector2d XLim;
+Required Eigen::Vector2d YLim;
+Required Eigen::Vector2d ZLim;

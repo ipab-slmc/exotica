@@ -1,0 +1,14 @@
+class IKSolver
+
+extend <exotica_core/motion_solver>
+Optional double Tolerance = 1e-5;  // Absolute cost tolerance
+
+Optional double MaxStep = 0.0; // Only used if MaxIterations == 1, to set the maximum step.
+
+Optional double RegularizationRate = 1e-9;                     // Initial regularization value (C). Will be adapted.
+Optional double MinimumRegularization = 1e-12;                 // Minimum regularization below which it won't be decreased.
+Optional double MaximumRegularization = 1e9;                   // Maximum regularization above which it won't be decreased.
+Optional double ThresholdRegularizationIncrease = 0.1;         // Regularization will be increased if step-length is smaller or equal to this value.
+Optional double ThresholdRegularizationDecrease = 0.5;         // Regularization will be decreased if step-length is greater than this value.
+Optional double GradientToleranceConvergenceThreshold = 1e-9;  // Gradient tolerance.
+Optional double StepToleranceConvergenceThreshold = 1e-5;      // Step tolerance: Squared norm of the change.

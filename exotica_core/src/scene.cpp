@@ -27,7 +27,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 
@@ -46,6 +45,8 @@
 #include <exotica_core/shape_initializer.h>
 #include <exotica_core/sphere_shape_initializer.h>
 #include <exotica_core/trajectory_initializer.h>
+
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 
 namespace exotica
 {

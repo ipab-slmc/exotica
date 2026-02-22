@@ -1,0 +1,7 @@
+class ControlLimitedDDPSolver
+
+extend <exotica_ddp_solver/abstract_ddp_solver>
+Optional bool ClampControlsInForwardPass = true;
+Optional bool UseNewBoxQP = false;                   // If true: uses new BoxQP as in Crocoddyl. If false: uses original Exotica BoxQP.
+Optional bool BoxQPUsePolynomialLinesearch = false;  // If false: linear line-search. If true: polynomial line-search.
+Optional bool BoxQPUseCholeskyFactorization = false; // If true: uses LLT. If false: uses general inverse.

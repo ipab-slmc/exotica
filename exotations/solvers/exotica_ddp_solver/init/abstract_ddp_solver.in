@@ -1,0 +1,12 @@
+class AbstractDDPSolver
+
+extend <exotica_core/motion_solver>
+Optional int FunctionTolerancePatience = 10; // early stopping or patience
+Optional double FunctionTolerance = 1e-3;
+Optional bool UseSecondOrderDynamics = false;
+Optional double RegularizationRate = 1e-5;
+Optional double MinimumRegularization = 1e-12;           // Minimum regularisation below which it won't be decreased.
+Optional double MaximumRegularization = 1e3;             // Maximum regularisation above which it won't be decreased.
+Optional double ThresholdRegularizationIncrease = 0.01;  // Threshold for accepted line-search step below which regularization will be increased
+Optional double ThresholdRegularizationDecrease = 0.5;   // Threshold for accepted line-search step above which regularization will be decreased
+Optional bool ClampControlsInForwardPass = false;

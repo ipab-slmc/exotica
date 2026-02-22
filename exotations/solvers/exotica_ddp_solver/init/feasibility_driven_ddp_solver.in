@@ -1,0 +1,7 @@
+class FeasibilityDrivenDDPSolver
+
+extend <exotica_ddp_solver/abstract_ddp_solver>
+Optional double GradientTolerance = 0.0;                       // Threshold for "grad" (LQ approximation of the expected improvement)
+Optional double GradientToleranceConvergenceThreshold = 1e-9;  // Gradient tolerance (sum of squared norms of Qu)
+Optional double DescentStepAcceptanceThreshold = 0.1;          // Tolerance for accepting a step during descent (minimum cost reduction)
+Optional double AscentStepAcceptanceThreshold = 2.0;           // Threshold for accepting a step during ascent (maximum cost increase)

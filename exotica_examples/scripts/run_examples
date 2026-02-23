@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # This is a workaround for liburdf.so throwing an exception and killing
 # the process on exit in ROS Indigo.
 

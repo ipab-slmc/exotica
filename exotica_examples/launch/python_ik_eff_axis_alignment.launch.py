@@ -2,6 +2,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from pyexotica.launch_helpers import shutdown_on_exit
 
 
 def generate_launch_description():
@@ -28,4 +29,4 @@ def generate_launch_description():
         name='rviz2',
         arguments=['-d', os.path.join(pkg, 'resources/rviz_eff_axis_alignment.rviz')]))
 
-    return LaunchDescription(actions)
+    return LaunchDescription(actions + shutdown_on_exit(actions))

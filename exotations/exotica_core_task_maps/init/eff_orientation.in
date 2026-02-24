@@ -1,5 +1,0 @@
-class EffOrientation
-
-extend <exotica_core/task_map>
-
-Optional std::string Type = "RPY";

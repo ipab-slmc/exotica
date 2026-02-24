@@ -1,8 +1,0 @@
-class JointVelocityLimit
-
-extend <exotica_core/task_map>
-
-Required Eigen::VectorXd MaximumJointVelocity;
-Required double dt;
-
-Optional double SafePercentage = 0.0;

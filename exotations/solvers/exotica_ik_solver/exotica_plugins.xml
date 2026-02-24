@@ -1,5 +1,0 @@
-<library path="lib/libexotica_ik_solver">
-  <class name="exotica/IKSolver" type="exotica::IKSolver" base_class_type="exotica::MotionSolver">
-    <description>Regularized and weighted pseudo-inverse inverse kinematics solver</description>
-  </class>
-</library>

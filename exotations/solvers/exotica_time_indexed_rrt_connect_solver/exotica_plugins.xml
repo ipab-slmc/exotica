@@ -1,5 +1,0 @@
-<library path="lib/libexotica_time_indexed_rrt_connect_solver">
-  <class name="exotica/TimeIndexedRRTConnectSolver" type="exotica::TimeIndexedRRTConnectSolver" base_class_type="exotica::MotionSolver">
-    <description>Time-Indexed RRT-Connect solver (Humanoids 2018)</description>
-  </class>
-</library>

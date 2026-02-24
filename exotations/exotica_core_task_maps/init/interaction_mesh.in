@@ -1,6 +1,0 @@
-class InteractionMesh
-
-extend <exotica_core/task_map>
-
-Optional std::string ReferenceFrame = "/world";
-Optional Eigen::VectorXd Weights = Eigen::VectorXd();

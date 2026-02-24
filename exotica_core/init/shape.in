@@ -1,4 +1,0 @@
-class Shape
-
-Optional std::string Type = "";  // Box, Sphere, Cylinder, Octree - will be set in specific types.
-Optional Eigen::Vector4d Color = Eigen::Vector4d::Zero();

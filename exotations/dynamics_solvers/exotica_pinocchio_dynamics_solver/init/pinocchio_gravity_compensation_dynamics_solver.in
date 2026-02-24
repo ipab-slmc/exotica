@@ -1,3 +1,0 @@
-class PinocchioDynamicsSolverWithGravityCompensation
-
-extend <exotica_core/dynamics_solver>

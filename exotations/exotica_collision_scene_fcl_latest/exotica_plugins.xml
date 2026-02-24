@@ -1,9 +1,0 @@
-<library path="lib/libexotica_collision_scene_fcl_latest">
-  <class name="exotica/CollisionSceneFCLLatest" type="exotica::CollisionSceneFCLLatest" base_class_type="exotica::CollisionScene">
-    <description>FCL 0.6 collision scene</description>
-  </class>
-  <!-- Compatibility hack after removing CollisionSceneFCL -->
-  <class name="exotica/CollisionSceneFCL" type="exotica::CollisionSceneFCLLatest" base_class_type="exotica::CollisionScene">
-    <description>FCL collision scene for compatibility - but internally uses the CollisionSceneFCLLatest</description>
-  </class>
-</library>

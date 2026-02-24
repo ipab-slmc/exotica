@@ -1,5 +1,0 @@
-<library path="lib/libexotica_double_integrator_dynamics_solver">
-  <class name="exotica/DoubleIntegratorDynamicsSolver" type="exotica::DoubleIntegratorDynamicsSolver" base_class_type="exotica::DynamicsSolver">
-    <description>Linear pseudo dynamics system</description>
-  </class>
-</library>

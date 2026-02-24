@@ -1,8 +1,0 @@
-<library path="lib/libexotica_pinocchio_dynamics_solver">
-  <class name="exotica/PinocchioDynamicsSolver" type="exotica::PinocchioDynamicsSolver" base_class_type="exotica::DynamicsSolver">
-    <description>Pinocchio dynamics system. Only works on fixed-base systems.</description>
-  </class>
-  <class name="exotica/PinocchioDynamicsSolverWithGravityCompensation" type="exotica::PinocchioDynamicsSolverWithGravityCompensation" base_class_type="exotica::DynamicsSolver">
-    <description>Pinocchio dynamics solver with gravity compensation. Only works on fixed-base systems.</description>
-  </class>
-</library>

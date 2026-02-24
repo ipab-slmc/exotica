@@ -1,5 +1,0 @@
-class RRTSolver
-
-extend <exotica_ompl_solver/ompl_solver>
-
-Optional double Epsilon = 0.01;

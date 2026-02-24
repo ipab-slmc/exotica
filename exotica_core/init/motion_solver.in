@@ -1,5 +1,0 @@
-class MotionSolver
-
-extend <exotica_core/object>
-
-Optional int MaxIterations = 100;

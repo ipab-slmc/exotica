@@ -1,7 +1,0 @@
-class CylinderShape
-
-extend <exotica_core/shape>
-
-Required double Radius;
-Required double Length;
-Optional std::string Type = "Cylinder";  // DO NOT CHANGE

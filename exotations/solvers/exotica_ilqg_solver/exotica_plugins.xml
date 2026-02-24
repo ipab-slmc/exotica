@@ -1,5 +1,0 @@
-<library path="lib/libexotica_ilqg_solver">
-  <class name="exotica/ILQGSolver" type="exotica::ILQGSolver" base_class_type="exotica::MotionSolver">
-    <description>ILQG Solver (Todorov and Li, 2004)</description>
-  </class>
-</library>

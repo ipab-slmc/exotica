@@ -1,6 +1,0 @@
-class ILQRSolver
-
-extend <exotica_core/motion_solver>
-Optional int FunctionTolerancePatience = 10; // early stopping or patience
-Optional double FunctionTolerance = 1e-3;
-Optional double RegularizationRate = 1e-5;

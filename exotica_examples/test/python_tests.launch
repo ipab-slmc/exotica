@@ -1,9 +1,0 @@
-<launch>
-  <test test-name="core" pkg="exotica_examples" type="test_core" />
-  <test test-name="scene_creation" pkg="exotica_examples" type="test_scene_creation" />
-  <test test-name="collision_scene_distances" pkg="exotica_examples" type="test_collision_scene_distances" />
-  <test test-name="valkyrie_com" pkg="exotica_examples" type="test_valkyrie_com" />
-  <test test-name="valkyrie_link_maps" pkg="exotica_examples" type="test_valkyrie_link_maps" />
-  <test test-name="valkyrie_collision_check_fcl_latest" pkg="exotica_examples" type="test_valkyrie_collision_check_fcl_latest" />
-  <test test-name="test_continuous_collision_check" pkg="exotica_examples" type="test_continuous_collision_check" />
-</launch>

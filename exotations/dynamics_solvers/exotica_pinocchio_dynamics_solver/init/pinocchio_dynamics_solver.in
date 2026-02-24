@@ -1,3 +1,0 @@
-class PinocchioDynamicsSolver
-
-extend <exotica_core/dynamics_solver>

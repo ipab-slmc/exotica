@@ -1,6 +1,0 @@
-class SumOfPenetrations
-
-extend <exotica_core/task_map>
-Optional double WorldMargin = 0.1;
-Optional double RobotMargin = 0.1;
-Optional bool CheckSelfCollision = true;

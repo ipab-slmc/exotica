@@ -1,5 +1,0 @@
-class JointLimit
-
-extend <exotica_core/task_map>
-
-Optional double SafePercentage = 0.0;

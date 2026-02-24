@@ -1,9 +1,0 @@
-class Link
-
-Required std::string Name;
-
-Optional Eigen::VectorXd Transform = Eigen::IdentityTransform();
-Optional std::string Parent = "";
-Optional Eigen::VectorXd CenterOfMass = Eigen::IdentityTransform();
-Optional double Mass = 0.0;
-Optional std::vector<exotica::Initializer> Shape = std::vector<exotica::Initializer>();

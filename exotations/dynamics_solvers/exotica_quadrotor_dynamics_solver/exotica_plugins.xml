@@ -1,5 +1,0 @@
-<library path="lib/libexotica_quadrotor_dynamics_solver">
-  <class name="exotica/QuadrotorDynamicsSolver" type="exotica::QuadrotorDynamicsSolver" base_class_type="exotica::DynamicsSolver">
-    <description>Quadrotor dynamics system</description>
-  </class>
-</library>

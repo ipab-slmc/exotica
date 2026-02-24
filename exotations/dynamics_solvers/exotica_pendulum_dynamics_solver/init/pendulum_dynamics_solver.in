@@ -1,4 +1,0 @@
-class PendulumDynamicsSolver
-
-extend <exotica_core/dynamics_solver>
-Optional double FrictionCoefficient = 0.0;

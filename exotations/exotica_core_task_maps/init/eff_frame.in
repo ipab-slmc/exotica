@@ -1,5 +1,0 @@
-class EffFrame
-
-extend <exotica_core/task_map>
-
-Optional std::string Type = "RPY";

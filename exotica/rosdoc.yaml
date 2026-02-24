@@ -1,8 +1,0 @@
-- builder: sphinx
-  name: Python
-  sphinx_root_dir: doc
-- builder: doxygen
-  name: C++ API
-  output_dir: c++
-  doxygen_root_dir: "./../exotica_core"
-  file_patterns: '*.c *.cpp *.h *.dox'

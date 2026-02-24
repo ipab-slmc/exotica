@@ -1,2 +1,0 @@
-class BayesianIKSolver
-extend <exotica_aico_solver/approximate_inference_solver>

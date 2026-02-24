@@ -1,3 +1,0 @@
-class CartpoleDynamicsSolver
-
-extend <exotica_core/dynamics_solver>

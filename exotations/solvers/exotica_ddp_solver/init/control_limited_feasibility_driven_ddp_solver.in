@@ -1,7 +1,0 @@
-class ControlLimitedFeasibilityDrivenDDPSolver
-
-extend <exotica_ddp_solver/feasibility_driven_ddp_solver>
-extend <exotica_ddp_solver/control_limited_ddp_solver>
-Optional bool UseNewBoxQP = true;
-Optional bool BoxQPUsePolynomialLinesearch = true;
-Optional bool BoxQPUseCholeskyFactorization = true;

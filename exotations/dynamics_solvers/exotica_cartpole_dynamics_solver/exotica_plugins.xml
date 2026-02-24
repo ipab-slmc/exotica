@@ -1,5 +1,0 @@
-<library path="lib/libexotica_cartpole_dynamics_solver">
-  <class name="exotica/CartpoleDynamicsSolver" type="exotica::CartpoleDynamicsSolver" base_class_type="exotica::DynamicsSolver">
-    <description>Cartpole dynamics system</description>
-  </class>
-</library>

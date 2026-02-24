@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1
       Splitter Ratio: 0.5
     Tree Height: 621
   - Class: rviz_common/Selection
@@ -119,6 +118,18 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: MarkerArray
+      Namespaces:
+        CollisionObjects: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /CollisionShapes
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -172,18 +183,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.07509872317314148
-        Y: -0.06121749430894852
-        Z: 0.03197071701288223
+        X: -0.1386607438325882
+        Y: -0.15958552062511444
+        Z: 0.24632656574249268
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.48539823293685913
+      Pitch: 0.4753982424736023
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.6753981113433838
+      Yaw: 0.6553981304168701
     Saved: ~
 Window Geometry:
   Displays:

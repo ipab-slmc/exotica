@@ -1,33 +1,43 @@
 #!/usr/bin/env python3
-import rospy
+import rclpy
 import pyexotica as exo
 import numpy as np
 import signal
 from pyexotica.publish_trajectory import publish_pose, sig_int_handler
 import exotica_core_task_maps_py
-from exotica_examples_py import *
-import PyKDL as kdl
+from exotica_examples_py import TargetMarker
 
 DT = 1.0 / 100.0  # 100 HZ
 
+
+def quat_rotate(qxyzw, v):
+    """Rotate vector v by quaternion [qx, qy, qz, qw]."""
+    qx, qy, qz, qw = qxyzw
+    R = np.array([
+        [1 - 2*(qy**2 + qz**2), 2*(qx*qy - qz*qw), 2*(qx*qz + qy*qw)],
+        [2*(qx*qy + qz*qw),     1 - 2*(qx**2 + qz**2), 2*(qy*qz - qx*qw)],
+        [2*(qx*qz - qy*qw),     2*(qy*qz + qx*qw), 1 - 2*(qx**2 + qy**2)],
+    ])
+    return (R @ np.array(v)).tolist()
+
+
 class Example(object):
 
-    def __init__(self):
+    def __init__(self, node):
 
         # Initialize general class attributes
         self.q = np.array([0.0] * 7)
-        self.eff = kdl.Frame()
 
-        self.target_marker = TargetMarker(pose=[0.6, 0, 0.8])
+        self.target_marker = TargetMarker(node, pose=[0.6, 0.0, 0.8])
 
         # Setup EXOtica
         self.solver = exo.Setup.load_solver(
             '{exotica_examples}/resources/configs/example_eff_axis_alignment.xml')
         self.problem = self.solver.get_problem()
 
-    def update(self, event):
-        eff = self.target_marker.position
-        direction = list((eff.M * kdl.Vector(1, 0, 0)))
+    def update(self):
+        # Rotate unit x-axis by marker orientation to get the direction vector
+        direction = quat_rotate(self.target_marker.position_exo.get_quaternion(), [1, 0, 0])
 
         # Setup problem
         self.problem.get_scene().attach_object_local("Target", "", self.target_marker.position_exo)
@@ -41,8 +51,15 @@ class Example(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('example_ik_eff_axis_alignment_node')
+    rclpy.init()
     exo.Setup.init_ros()
-    rospy.Timer(rospy.Duration(DT), Example().update)
     signal.signal(signal.SIGINT, sig_int_handler)
-    rospy.spin()
+    node = rclpy.create_node('example_ik_eff_axis_alignment_node')
+    node.create_timer(DT, Example(node).update)
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()

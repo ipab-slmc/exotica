@@ -4,7 +4,7 @@ from __future__ import print_function
 import math
 from time import time, sleep
 
-import rospy
+import rclpy
 from visualization_msgs.msg import Marker, MarkerArray
 
 import numpy as np
@@ -21,20 +21,21 @@ if __name__ == "__main__":
         print('Invalid number of input arguments.')
         print('Usage: ./example_sparseddp_valkyrie l2|pseudo_huber')
         exit(0)
-    
+
     loss = sys.argv[1]
     if loss not in ['l2', 'pseudo_huber']:
         print('Unknown loss {0}.'.format(loss))
         print('Usage: ./example_sparseddp_valkyrie l2|pseudo_huber')
         exit(0)
 
+    rclpy.init()
     exo.Setup.init_ros()
 
     if loss == 'l2':
         solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie_l2.xml')
     else:
         solver = exo.Setup.load_solver('{exotica_examples}/resources/configs/example_sparseddp_valkyrie_pseudo_huber.xml')
-    
+
     problem = solver.get_problem()
     scene = problem.get_scene()
     vis = exo.VisualizationMoveIt(scene)
@@ -43,9 +44,9 @@ if __name__ == "__main__":
     # This is now set in the XML
     palm_target = problem.cost.get_goal('PalmPosition', -1)
 
-    rospy.init_node('my_vis')
+    node = rclpy.create_node('my_vis')
     sleep(0.5)
-    pub = rospy.Publisher('/exotica/CollisionShapes', MarkerArray, queue_size=1)
+    pub = node.create_publisher(MarkerArray, '/exotica/CollisionShapes', 1)
     sleep(0.5)
 
     m = Marker()
@@ -62,10 +63,9 @@ if __name__ == "__main__":
     m.id = 1
     ma = MarkerArray()
     ma.markers = [m]
-        
-    joint_used = [not np.allclose(problem.X[i + 38,:], 0, atol=1e-3) for i in range(problem.num_controls)]
-    print('{0} joints used'.format(np.sum(joint_used)))
 
+    joint_used = [not np.allclose(problem.X[i + 38, :], 0, atol=1e-3) for i in range(problem.num_controls)]
+    print('{0} joints used'.format(np.sum(joint_used)))
 
     plt.figure()
     plt.title('Accelerations')
@@ -73,21 +73,24 @@ if __name__ == "__main__":
 
     plt.figure()
     plt.title('Positions')
-    plt.plot(problem.X[:38,:].T)
+    plt.plot(problem.X[:38, :].T)
 
     plt.figure()
     plt.title('Velocities')
-    plt.plot(problem.X[38:,:].T)
+    plt.plot(problem.X[38:, :].T)
     plt.show()
 
-    while True:
-        for t in range(problem.T - 1):
-            u = solution[t,:]
-
-            problem.update(u, t)
-            problem.get_scene().get_kinematic_tree().publish_frames('exotica')
-
-            pub.publish(ma)
-            sleep(0.05)
-
-        sleep(0.5)
+    try:
+        while True:
+            for t in range(problem.T - 1):
+                u = solution[t, :]
+                problem.update(u, t)
+                problem.get_scene().get_kinematic_tree().publish_frames('exotica')
+                pub.publish(ma)
+                sleep(0.05)
+            sleep(0.5)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()

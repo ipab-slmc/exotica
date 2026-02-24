@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 project(exotica_examples)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(exotica_core REQUIRED)
 find_package(exotica_aico_solver REQUIRED)
 find_package(exotica_core_task_maps REQUIRED)
@@ -21,6 +22,9 @@ add_example(example_cpp_init_generic  src/generic.cpp)
 add_example(example_cpp_init_xml      src/xml.cpp)
 add_example(example_cpp_planner       src/planner.cpp)
 add_example(example_cpp_xml_load_and_solve src/xml_load_and_solve.cpp)
+
+ament_python_install_package(exotica_examples_py
+  PACKAGE_DIR src/exotica_examples_py)
 
 install(DIRECTORY launch/    DESTINATION share/${PROJECT_NAME}/launch)
 install(DIRECTORY resources/ DESTINATION share/${PROJECT_NAME}/resources)

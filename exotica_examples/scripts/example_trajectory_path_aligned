@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import rospy
+import rclpy
 import pyexotica as exo
 import numpy as np
 from math import ceil
@@ -10,8 +10,9 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point
 
 if __name__ == "__main__":
-    rospy.init_node("align_to_surface")
+    rclpy.init()
     exo.Setup.init_ros()
+    node = rclpy.create_node("align_to_surface")
 
     solver = exo.Setup.load_solver(
         "{exotica_examples}/resources/configs/example_trajectory_path_aligned.xml"
@@ -20,7 +21,7 @@ if __name__ == "__main__":
 
     # Time to approach
     t_approach = 10.0
-    t_path = 20.0  # TODO: Set this based on end-effector distance from the coverage path planning
+    t_path = 20.0
     t_retract = 5.0
 
     t_total = t_approach + t_path + t_retract
@@ -50,7 +51,6 @@ if __name__ == "__main__":
     path_normals[0, :] = -1.0
 
     # Add environment collision
-    # Note: Self-collisions are currently deactivated (!)
     scene = problem.get_scene()
     scene.add_object_to_environment(
         name="wall",
@@ -72,15 +72,13 @@ if __name__ == "__main__":
 
     # During path, set targets for path:
     for t in range(T_approach, T_approach + T_path, 1):
-        # problem.cost.set_goal('Position', [*path_positions[:,t-T_approach], 0,0,0], t)
         problem.cost.set_goal("Position", path_positions[:, t - T_approach], t)
         problem.get_task_maps()["Angle"].set_direction(
             "j1n6s300_end_effector", [1, 0, 0]
-        )  # path_normals[:,t-T_approach])
+        )
 
     # Visualise targets
-
-    pub = rospy.Publisher("target", MarkerArray, queue_size=1)
+    pub = node.create_publisher(MarkerArray, "target", 1)
     sleep(0.5)
     msg = MarkerArray()
     m = Marker()
@@ -124,14 +122,17 @@ if __name__ == "__main__":
 
     plt.show()
 
-    while True:
-        for t in range(problem.T - 1):
-            u = solution[t, :]
-
-            problem.update(u, t)
-            problem.get_scene().get_kinematic_tree().publish_frames("exotica")
-
-            # Play 5x faster
-            sleep(0.2 * problem.tau)
-
-        sleep(0.5)
+    try:
+        while True:
+            for t in range(problem.T - 1):
+                u = solution[t, :]
+                problem.update(u, t)
+                problem.get_scene().get_kinematic_tree().publish_frames("exotica")
+                # Play 5x faster
+                sleep(0.2 * problem.tau)
+            sleep(0.5)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()

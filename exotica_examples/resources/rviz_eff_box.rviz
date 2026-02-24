@@ -122,13 +122,25 @@ Visualization Manager:
       Enabled: true
       Name: MarkerArray
       Namespaces:
-        CollisionObjects: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /CollisionShapes
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /eff_box_objects
       Value: true
   Enabled: true
   Global Options:

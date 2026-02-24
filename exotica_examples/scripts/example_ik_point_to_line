@@ -1,30 +1,26 @@
 #!/usr/bin/env python3
-import rospy
+import rclpy
 import numpy as np
 import pyexotica as exo
 import signal
 from pyexotica.publish_trajectory import publish_pose, sig_int_handler
 import exotica_core_task_maps_py
-from exotica_examples_py import *
-import PyKDL as kdl
-
+from exotica_examples_py import TargetMarker
 DT = 1.0 / 100.0  # 100 HZ
+
 
 class Example(object):
 
-    def __init__(self):
+    def __init__(self, node):
 
         self.solver = exo.Setup.load_solver(
             '{exotica_examples}/resources/configs/example_ik_point_to_line.xml')
         self.problem = self.solver.get_problem()
         self.q = np.array([0.0] * 7)
 
-        self.target_marker = TargetMarker(pose=[0.75, 0, 0.5], marker_shape=2, marker_size=[0.1, 0.1, 0.1])
+        self.target_marker = TargetMarker(node, pose=[0.75, 0.0, 0.5], marker_shape=2, marker_size=[0.1, 0.1, 0.1])
 
-    def callback(self, msg):
-        self.joy = msg
-
-    def update(self, event):
+    def update(self):
         self.problem.get_task_maps()['p2l'].end_point = self.target_marker.position_exo.get_translation()
         self.problem.start_state = self.q
 
@@ -32,9 +28,17 @@ class Example(object):
         self.q = self.solver.solve()[0]
         publish_pose(self.q, self.problem)
 
+
 if __name__ == '__main__':
-    rospy.init_node('example_point_to_line_node')
+    rclpy.init()
     exo.Setup.init_ros()
-    rospy.Timer(rospy.Duration(DT), Example().update)
     signal.signal(signal.SIGINT, sig_int_handler)
-    rospy.spin()
+    node = rclpy.create_node('example_point_to_line_node')
+    node.create_timer(DT, Example(node).update)
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()

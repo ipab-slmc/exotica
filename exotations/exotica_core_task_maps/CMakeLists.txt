@@ -76,9 +76,9 @@ ament_target_dependencies(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 # Python bindings module
-pybind11_add_module(task_map_py MODULE src/task_map_py.cpp)
-ament_target_dependencies(task_map_py PUBLIC exotica_core exotica_python)
-target_link_libraries(task_map_py PUBLIC ${PROJECT_NAME})
+pybind11_add_module(exotica_core_task_maps_py MODULE src/task_map_py.cpp)
+ament_target_dependencies(exotica_core_task_maps_py PUBLIC exotica_core exotica_python)
+target_link_libraries(exotica_core_task_maps_py PUBLIC ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
   EXPORT export_${PROJECT_NAME}
@@ -86,9 +86,13 @@ install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
-install(TARGETS task_map_py
-  DESTINATION "${PYTHON_INSTALL_DIR}/pyexotica"
+install(TARGETS exotica_core_task_maps_py
+  DESTINATION "${PYTHON_INSTALL_DIR}/exotica_core_task_maps_py"
 )
+
+ament_python_install_package(exotica_core_task_maps_py
+  PACKAGE_DIR src/exotica_core_task_maps_py)
+
 install(DIRECTORY include/ DESTINATION include)
 install(FILES exotica_plugins.xml DESTINATION share/${PROJECT_NAME})
 

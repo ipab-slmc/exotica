@@ -54,8 +54,12 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
 )
 install(TARGETS ${PROJECT_NAME}_py
-  LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}
+  LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}_py
 )
+
+ament_python_install_package(${PROJECT_NAME}_py
+  PACKAGE_DIR src/${PROJECT_NAME}_py)
+
 install(DIRECTORY include/ DESTINATION include)
 install(FILES exotica_plugins.xml DESTINATION share/${PROJECT_NAME})
 

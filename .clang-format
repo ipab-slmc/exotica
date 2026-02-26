@@ -1,0 +1,7 @@
+# -*- yaml -*-
+BasedOnStyle: Google
+Language: Cpp
+IndentWidth: 4
+ColumnLimit: 0 # do not enforce a column limit, users are advised to make breaks as they see fit to ensure readability/logic
+BreakBeforeBraces: Allman
+AccessModifierOffset: -4

@@ -1,5 +1,102 @@
-*.pyc
-__pycache__/
+# Python stuff
+*.py[cod]
+
+# C extensions
+*.o
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+
+# Binary files / colcon build outputs
+bin/
 build/
 install/
 log/
+lib/
+lib64/
+
+# Python cache
+__pycache__/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Emacs
+\#*\#
+.\#*
+*~
+
+# ROS2 generated
+**/srv/
+**/msg/
+
+# CMake
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+CTestTestfile.cmake
+
+# Netbeans Files
+nbproject
+
+# Qt Creator File
+*.pro.user
+
+# Qt Generated
+moc_*.cxx
+
+# Dynamic Reconfigure files
+*.cfgc
+**/cfg/cpp/
+
+# libRVIZ stuff
+Ogre.log
+
+# Git Merge Files
+*.orig
+
+# Eclipse Files
+*.cproject
+
+# Moveit
+**/default_warehouse_mongo_db/
+
+# ??
+.merge_file_*
+
+# Documentation from Latex
+**/doc/*.aux
+**/doc/*.dvi
+**/doc/*.log
+**/doc/*.synctex.gz
+**/doc/*.toc
+*.out
+
+# IDE configs
+.vscode/
+cmake-build-debug/
+.idea/

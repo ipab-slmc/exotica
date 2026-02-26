@@ -1,0 +1,70 @@
+# ROS2 CI for EXOTica using ros-tooling/action-ros-ci
+# See https://github.com/ros-tooling/action-ros-ci for documentation.
+
+name: ROS2-CI
+
+on: [push, pull_request]
+
+jobs:
+  format-check:
+    name: Format check (clang-format-14)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format-14
+        run: sudo apt-get install -y clang-format-14
+      - name: Check C++ formatting
+        run: |
+          find . \( -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) \
+            ! -path './build/*' ! -path './install/*' ! -path './log/*' \
+            | xargs clang-format-14 --style=file --dry-run --Werror
+
+  build-test:
+    name: Humble / ${{ matrix.cmake_build_type }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        cmake_build_type: [Release]
+        # Uncomment to add Debug builds:
+        # cmake_build_type: [Release, Debug]
+    env:
+      CCACHE_DIR: /github/home/.ccache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-humble-${{ matrix.cmake_build_type }}-${{ github.sha }}
+          restore-keys: |
+            ccache-humble-${{ matrix.cmake_build_type }}-
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+      - uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: |
+            exotica
+            exotica_core
+            exotica_python
+            exotica_examples
+            exotica_core_task_maps
+            exotica_collision_scene_fcl_latest
+            exotica_aico_solver
+            exotica_ik_solver
+            exotica_ompl_solver
+            exotica_ompl_control_solver
+            exotica_ddp_solver
+            exotica_ilqg_solver
+            exotica_ilqr_solver
+            exotica_levenberg_marquardt_solver
+            exotica_scipy_solver
+            exotica_time_indexed_rrt_connect_solver
+            exotica_cartpole_dynamics_solver
+            exotica_pendulum_dynamics_solver
+            exotica_double_integrator_dynamics_solver
+            exotica_quadrotor_dynamics_solver
+            exotica_pinocchio_dynamics_solver
+          ros-distro: humble
+          extra-cmake-args: -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
+          colcon-mixin-name: release
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml

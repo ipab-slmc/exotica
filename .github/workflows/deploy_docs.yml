@@ -1,0 +1,35 @@
+# Deploy EXOTica documentation to GitHub Pages
+# Triggers on push to the ros2 branch.
+# Builds Doxygen docs and deploys via peaceiris/actions-gh-pages.
+
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - ros2
+
+jobs:
+  deploy-docs:
+    name: Build and deploy documentation
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install documentation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Build documentation
+        run: bash .ci/build_documentation.sh
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: exotica/doc/_build/html
+          publish_branch: gh-pages
+          commit_message: "Deploy docs for ${{ github.sha }}"

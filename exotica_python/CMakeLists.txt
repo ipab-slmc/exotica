@@ -24,6 +24,7 @@ ament_target_dependencies(_pyexotica PUBLIC
 )
 target_compile_options(_pyexotica PRIVATE -Wno-deprecated-declarations)
 
+ament_get_python_install_dir(PYTHON_INSTALL_DIR)
 install(TARGETS _pyexotica
   DESTINATION "${PYTHON_INSTALL_DIR}/pyexotica"
 )

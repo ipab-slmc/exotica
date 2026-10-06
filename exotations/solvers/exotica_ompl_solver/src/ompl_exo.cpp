@@ -155,7 +155,7 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
     }
     else
     {
-        ERROR("State space bounds were not specified!\n"
+        EXOTICA_ERROR("State space bounds were not specified!\n"
               << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
@@ -240,7 +240,7 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
     }
     else
     {
-        ERROR("State space bounds were not specified!" << std::endl
+        EXOTICA_ERROR("State space bounds were not specified!" << std::endl
                                                        << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
@@ -321,7 +321,7 @@ void OMPLDubinsRNStateSpace::SetBounds(SamplingProblemPtr &prob)
     }
     else
     {
-        ERROR("State space bounds were not specified!" << std::endl
+        EXOTICA_ERROR("State space bounds were not specified!" << std::endl
                                                        << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);

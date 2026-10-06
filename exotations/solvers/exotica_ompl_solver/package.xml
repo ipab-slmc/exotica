@@ -8,9 +8,11 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <build_depend>pybind11-dev</build_depend>
+  <build_depend>python3-dev</build_depend>
   <depend>exotica_core</depend>
   <depend>exotica_python</depend>
-  <depend>ros-humble-ompl</depend>
+  <depend>ompl</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

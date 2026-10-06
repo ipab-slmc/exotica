@@ -30,6 +30,9 @@
   <depend>pluginlib</depend>
   <depend>tinyxml2_vendor</depend>
   <depend>geometric_shapes</depend>
+  <depend>eigen</depend>
+  <depend>libzmq3-dev</depend>
+  <depend>msgpack</depend>
   <!-- System deps: libzmq3-dev, libeigen3-dev, libmsgpack-dev -->
 
   <test_depend>ament_cmake_gtest</test_depend>

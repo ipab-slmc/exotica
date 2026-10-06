@@ -17,6 +17,7 @@
   <depend>ament_index_cpp</depend>
 
   <build_depend>pybind11-dev</build_depend>
+  <build_depend>python3-dev</build_depend>
 
   <exec_depend>python3-matplotlib</exec_depend>
   <exec_depend>python3-pyassimp</exec_depend>

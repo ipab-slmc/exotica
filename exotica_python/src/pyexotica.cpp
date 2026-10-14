@@ -946,7 +946,10 @@ PYBIND11_MODULE(_pyexotica, module)
             sol->Solve(ret);
             return ret;
         },
-        "Solve the problem");
+        "Solve the problem",
+        // Pure C++: release the GIL so other Python threads keep running while
+        // this solves (the return value is converted after it's re-acquired).
+        py::call_guard<py::gil_scoped_release>());
     motion_solver.def("get_problem", &MotionSolver::GetProblem);
 
     py::class_<FeedbackMotionSolver, std::shared_ptr<FeedbackMotionSolver>, MotionSolver> feedback_motion_solver(module, "FeedbackMotionSolver");
@@ -1395,7 +1398,10 @@ PYBIND11_MODULE(_pyexotica, module)
     py::module kin = module.def_submodule("Kinematics", "Kinematics submodule.");
     py::class_<KinematicTree, std::shared_ptr<KinematicTree>> kinematic_tree(kin, "KinematicTree");
     kinematic_tree.def_readwrite("debug_mode", &KinematicTree::debug);
-    kinematic_tree.def("publish_frames", &KinematicTree::PublishFrames, py::arg("tf_prefix") = "exotica");
+    // Release the GIL: publishing the TF tree can block for a long time while
+    // DDS delivers it to (remote) subscribers, which would otherwise stall
+    // every other Python thread in the process.
+    kinematic_tree.def("publish_frames", &KinematicTree::PublishFrames, py::arg("tf_prefix") = "exotica", py::call_guard<py::gil_scoped_release>());
     kinematic_tree.def("get_root_frame_name", &KinematicTree::GetRootFrameName);
     kinematic_tree.def("get_root_joint_name", &KinematicTree::GetRootJointName);
     kinematic_tree.def("get_kinematic_chain", &KinematicTree::GetKinematicChain);

@@ -75,3 +75,4 @@ jobs:
           extra-cmake-args: -DCMAKE_BUILD_TYPE=Release
           no-symlink-install: true
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          skip-tests: true

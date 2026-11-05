@@ -72,5 +72,4 @@ jobs:
             exotica_pinocchio_dynamics_solver
           target-ros2-distro: ${{ matrix.ros }}
           extra-cmake-args: -DCMAKE_BUILD_TYPE=Release
-          colcon-mixin-name: release
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml

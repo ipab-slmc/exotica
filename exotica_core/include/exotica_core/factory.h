@@ -110,7 +110,7 @@ public:
 
 private:
     /// \brief Private Constructor
-    inline explicit Factory<BaseClass>()
+    inline explicit Factory()
     {
     }
 

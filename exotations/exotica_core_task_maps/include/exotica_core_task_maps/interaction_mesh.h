@@ -32,7 +32,6 @@
 
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/interaction_mesh_initializer.h>
 
 #include <visualization_msgs/msg/marker.hpp>

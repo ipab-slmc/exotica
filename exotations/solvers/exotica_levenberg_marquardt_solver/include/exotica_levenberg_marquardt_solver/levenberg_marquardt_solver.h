@@ -25,7 +25,6 @@
 
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
-
 #include <exotica_levenberg_marquardt_solver/levenberg_marquardt_solver_initializer.h>
 
 namespace exotica

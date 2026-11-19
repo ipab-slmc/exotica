@@ -30,25 +30,23 @@
 #ifndef EXOTICA_CORE_SCENE_H_
 #define EXOTICA_CORE_SCENE_H_
 
-#include <fstream>
-#include <functional>
-#include <iostream>
-#include <string>
-
-#include <geometric_shapes/shapes.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit_msgs/msg/planning_scene.hpp>
-#include <visualization_msgs/msg/marker.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
-
 #include <exotica_core/collision_scene.h>
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/object.h>
 #include <exotica_core/property.h>
+#include <exotica_core/scene_initializer.h>
 #include <exotica_core/tools/conversions.h>
 #include <exotica_core/trajectory.h>
+#include <geometric_shapes/shapes.h>
+#include <moveit/planning_scene/planning_scene.h>
 
-#include <exotica_core/scene_initializer.h>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <moveit_msgs/msg/planning_scene.hpp>
+#include <string>
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 namespace exotica
 {

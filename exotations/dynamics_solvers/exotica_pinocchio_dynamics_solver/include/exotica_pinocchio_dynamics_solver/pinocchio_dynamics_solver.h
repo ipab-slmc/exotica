@@ -37,13 +37,11 @@
 
 /// fwd.hpp needs to be included first (before Boost, which comes with ROS),
 /// else everything breaks for Pinocchio >=2.1.5
-#include <pinocchio/fwd.hpp>
-
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
-
 #include <exotica_pinocchio_dynamics_solver/pinocchio_dynamics_solver_initializer.h>
 
+#include <pinocchio/fwd.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
 

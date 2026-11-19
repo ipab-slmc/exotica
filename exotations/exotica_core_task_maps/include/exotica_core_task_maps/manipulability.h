@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_MANIPULABILITY_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/manipulability_initializer.h>
 
 namespace exotica

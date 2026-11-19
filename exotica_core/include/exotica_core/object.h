@@ -30,11 +30,11 @@
 #ifndef EXOTICA_CORE_OBJECT_H_
 #define EXOTICA_CORE_OBJECT_H_
 
-#include <exotica_core/tools.h>
-#include <string>  // C++ type strings
-
 #include <exotica_core/object_initializer.h>
 #include <exotica_core/property.h>
+#include <exotica_core/tools.h>
+
+#include <string>  // C++ type strings
 
 namespace exotica
 {

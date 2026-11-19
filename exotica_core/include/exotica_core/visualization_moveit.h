@@ -33,8 +33,8 @@
 #include <exotica_core/scene.h>
 #include <exotica_core/tools/uncopyable.h>
 
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace exotica
 {

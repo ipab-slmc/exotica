@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_POINT_TO_PLANE_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/point_to_plane_initializer.h>
 
 #include <visualization_msgs/msg/marker_array.hpp>
@@ -47,7 +46,7 @@ namespace exotica
 class PointToPlane : public TaskMap, public Instantiable<PointToPlaneInitializer>
 {
 public:
-    void Instantiate(const PointToPlaneInitializer &init) override;
+    void Instantiate(const PointToPlaneInitializer& init) override;
 
     void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi) override;
     void Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi, Eigen::MatrixXdRef jacobian) override;

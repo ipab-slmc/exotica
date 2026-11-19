@@ -30,14 +30,12 @@
 #ifndef EXOTICA_CORE_CONVERSIONS_H_
 #define EXOTICA_CORE_CONVERSIONS_H_
 
+#include <Eigen/Dense>
+#include <kdl/frames.hpp>
+#include <kdl/jacobian.hpp>
 #include <map>
 #include <memory>
 #include <vector>
-
-#include <kdl/frames.hpp>
-#include <kdl/jacobian.hpp>
-
-#include <Eigen/Dense>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -183,7 +181,8 @@ inline bool IsVectorContainerType(std::string type)
 }
 
 template <class Key, class Val>
-[[deprecated("Replaced by GetKeysFromMap and GetValuesFromMap")]] std::vector<Val> MapToVec(const std::map<Key, Val>& map) {
+[[deprecated("Replaced by GetKeysFromMap and GetValuesFromMap")]] std::vector<Val> MapToVec(const std::map<Key, Val>& map)
+{
     std::vector<Val> ret;
     for (auto& it : map)
     {
@@ -228,8 +227,11 @@ void AppendVector(std::vector<Val>& orig, const std::vector<Val>& extra)
 
 inline std::string Trim(const std::string& s)
 {
-    auto wsfront = std::find_if_not(s.begin(), s.end(), [](int c) { return std::isspace(c); });
-    return std::string(wsfront, std::find_if_not(s.rbegin(), std::string::const_reverse_iterator(wsfront), [](int c) { return std::isspace(c); }).base());
+    auto wsfront = std::find_if_not(s.begin(), s.end(), [](int c)
+                                    { return std::isspace(c); });
+    return std::string(wsfront, std::find_if_not(s.rbegin(), std::string::const_reverse_iterator(wsfront), [](int c)
+                                                 { return std::isspace(c); })
+                                    .base());
 }
 
 template <typename T>

@@ -30,16 +30,16 @@
 #ifndef EXOTICA_CORE_TASKS_H_
 #define EXOTICA_CORE_TASKS_H_
 
+#include <exotica_core/planning_problem.h>
+#include <exotica_core/property.h>
+#include <exotica_core/task_space_vector.h>
+#include <exotica_core/tools/conversions.h>
+
 #include <Eigen/Dense>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/property.h>
-#include <exotica_core/task_space_vector.h>
-#include <exotica_core/tools/conversions.h>
 
 namespace exotica
 {

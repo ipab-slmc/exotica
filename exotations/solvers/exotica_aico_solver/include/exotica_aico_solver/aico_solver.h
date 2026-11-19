@@ -55,15 +55,13 @@
 #ifndef EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
 #define EXOTICA_AICO_SOLVER_AICO_SOLVER_H_
 
-#include <iostream>
-
+#include <exotica_aico_solver/aico_solver_initializer.h>
+#include <exotica_aico_solver/incremental_gaussian.h>
+#include <exotica_aico_solver/math_operations.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/unconstrained_time_indexed_problem.h>
 
-#include <exotica_aico_solver/incremental_gaussian.h>
-#include <exotica_aico_solver/math_operations.h>
-
-#include <exotica_aico_solver/aico_solver_initializer.h>
+#include <iostream>
 
 namespace exotica
 {

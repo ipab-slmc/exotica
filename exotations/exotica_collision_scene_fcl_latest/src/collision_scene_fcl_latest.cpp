@@ -30,7 +30,6 @@
 #include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest.h>
 #include <exotica_core/factory.h>
 #include <exotica_core/scene.h>
-
 #include <geometric_shapes/mesh_operations.h>
 #include <geometric_shapes/shape_operations.h>
 

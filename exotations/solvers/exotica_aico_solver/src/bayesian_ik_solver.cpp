@@ -320,7 +320,7 @@ void BayesianIKSolver::UpdateTimestep(bool update_fwd, bool update_bwd,
 
         UpdateTaskMessage(b, 0., max_step_size);
 
-        //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
+        // optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
         if (update_fwd) UpdateFwdMessage();
         if (update_bwd) UpdateBwdMessage();
 
@@ -366,13 +366,13 @@ double BayesianIKSolver::Step()
     RememberOldState();
     switch (sweep_mode_)
     {
-        //NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
+        // NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
         case FORWARD:
-            UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd Sweep
+            UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  // relocate once on fwd Sweep
             UpdateTimestep(false, true, 0, minimum_step_tolerance_, false, 1.);              //...not on bwd Sweep
             break;
         case SYMMETRIC:
-            UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd & bwd Sweep
+            UpdateTimestep(true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  // relocate once on fwd & bwd Sweep
             UpdateTimestep(false, true, (iteration_count_ ? 1 : 0), minimum_step_tolerance_, false, 1.);
             break;
         case LOCAL_GAUSS_NEWTON:

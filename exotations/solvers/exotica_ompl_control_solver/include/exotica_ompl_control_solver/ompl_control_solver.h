@@ -33,7 +33,6 @@
 // #include <exotica_core/feedback_motion_solver.h>
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/dynamic_time_indexed_shooting_problem.h>
-
 #include <exotica_ompl_control_solver/ompl_control_solver_initializer.h>
 
 // TODO: Remove unused includes
@@ -46,7 +45,7 @@
 namespace ob = ompl::base;
 namespace oc = ompl::control;
 
-typedef std::function<ob::PlannerPtr(const oc::SpaceInformationPtr &si)> ConfiguredPlannerAllocator;
+typedef std::function<ob::PlannerPtr(const oc::SpaceInformationPtr& si)> ConfiguredPlannerAllocator;
 
 namespace exotica
 {
@@ -57,10 +56,10 @@ public:
         oc::SpaceInformationPtr si,
         DynamicsSolverPtr dynamics_solver_) : oc::StatePropagator(si), space_(si), dynamics_solver_(dynamics_solver_) {}
     void propagate(
-        const ob::State *state,
-        const oc::Control *control,
+        const ob::State* state,
+        const oc::Control* control,
         const double duration,
-        ob::State *result) const override
+        ob::State* result) const override
     {
         double t = 0;
         space_->copyState(result, state);
@@ -87,13 +86,13 @@ private:
     oc::SpaceInformationPtr space_;
     DynamicsSolverPtr dynamics_solver_;
 
-    void Integrate(ob::State *ob_x, const oc::Control *oc_u, double dt) const
+    void Integrate(ob::State* ob_x, const oc::Control* oc_u, double dt) const
     {
         const int NU = dynamics_solver_->get_num_controls();
         const int NX = dynamics_solver_->get_num_positions() + dynamics_solver_->get_num_velocities();
 
-        double *x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
-        double *u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
+        double* x = ob_x->as<ob::RealVectorStateSpace::StateType>()->values;
+        double* u = oc_u->as<oc::RealVectorControlSpace::ControlType>()->values;
 
         Eigen::VectorXd eig_x = Eigen::Map<Eigen::VectorXd>(x, NX);
         Eigen::VectorXd eig_u = Eigen::Map<Eigen::VectorXd>(u, NU);
@@ -108,7 +107,7 @@ class OMPLControlSolver : public MotionSolver
 public:
     ///\brief Solves the problem
     ///@param solution Returned solution trajectory as a vector of joint configurations.
-    void Solve(Eigen::MatrixXd &solution) override;
+    void Solve(Eigen::MatrixXd& solution) override;
 
     ///\brief Binds the solver to a specific problem which must be pre-initalised
     ///@param pointer Shared pointer to the motion planning problem
@@ -117,7 +116,7 @@ public:
 
 protected:
     template <typename PlannerType>
-    static ob::PlannerPtr AllocatePlanner(const oc::SpaceInformationPtr &si)
+    static ob::PlannerPtr AllocatePlanner(const oc::SpaceInformationPtr& si)
     {
         ob::PlannerPtr planner(new PlannerType(si));
         return planner;
@@ -134,7 +133,7 @@ protected:
 
     void Setup();
 
-    bool isStateValid(const oc::SpaceInformationPtr si, const ob::State *state)
+    bool isStateValid(const oc::SpaceInformationPtr si, const ob::State* state)
     {
         return true;
     }

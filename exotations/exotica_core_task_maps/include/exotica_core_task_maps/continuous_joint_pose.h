@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_CONTINUOUS_JOINT_POSE_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/continuous_joint_pose_initializer.h>
 
 namespace exotica

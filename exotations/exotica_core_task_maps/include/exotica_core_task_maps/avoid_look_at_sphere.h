@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_AVOID_LOOK_AT_SPHERE_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/avoid_look_at_sphere_initializer.h>
 
 #include <visualization_msgs/msg/marker_array.hpp>
@@ -79,9 +78,9 @@ private:
 
     void (AvoidLookAtSphere::*UpdateTaskMapWithoutJacobian)(Eigen::VectorXdRefConst, Eigen::VectorXdRef);
     void (AvoidLookAtSphere::*UpdateTaskMapWithJacobian)(Eigen::VectorXdRefConst, Eigen::VectorXdRef, Eigen::MatrixXdRef);
-    int n_objects_;                  ///< Number of spherical objects.
-    Eigen::VectorXd diameter_;       ///< The diameter of each object.
-    Eigen::VectorXd radii_squared_;  ///< The square of each object radii.
+    int n_objects_;                                                                   ///< Number of spherical objects.
+    Eigen::VectorXd diameter_;                                                        ///< The diameter of each object.
+    Eigen::VectorXd radii_squared_;                                                   ///< The square of each object radii.
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pub_markers_;  ///< publish marker for RViz
 };
 }  // namespace exotica

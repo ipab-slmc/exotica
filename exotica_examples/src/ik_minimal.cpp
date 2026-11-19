@@ -31,7 +31,7 @@
 
 using namespace exotica;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     {
         MotionSolverPtr solver = XMLLoader::LoadSolver("{exotica_examples}/resources/configs/example_ik.xml");

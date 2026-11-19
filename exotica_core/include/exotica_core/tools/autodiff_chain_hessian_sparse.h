@@ -20,24 +20,24 @@ class AutoDiffChainHessianSparse : public Functor
 {
 public:
     AutoDiffChainHessianSparse() : Functor() {}
-    AutoDiffChainHessianSparse(const Functor &f) : Functor(f) {}
+    AutoDiffChainHessianSparse(const Functor& f) : Functor(f) {}
 // forward constructors
 #if EIGEN_HAS_VARIADIC_TEMPLATES
     template <typename... T>
-    AutoDiffChainHessianSparse(const T &... Values) : Functor(Values...)
+    AutoDiffChainHessianSparse(const T&... Values) : Functor(Values...)
     {
     }
 #else
     template <typename T0>
-    AutoDiffChainHessianSparse(const T0 &a0) : Functor(a0)
+    AutoDiffChainHessianSparse(const T0& a0) : Functor(a0)
     {
     }
     template <typename T0, typename T1>
-    AutoDiffChainHessianSparse(const T0 &a0, const T1 &a1) : Functor(a0, a1)
+    AutoDiffChainHessianSparse(const T0& a0, const T1& a1) : Functor(a0, a1)
     {
     }
     template <typename T0, typename T1, typename T2>
-    AutoDiffChainHessianSparse(const T0 &a0, const T1 &a1, const T2 &a2) : Functor(a0, a1, a2)
+    AutoDiffChainHessianSparse(const T0& a0, const T1& a1, const T2& a2) : Functor(a0, a1, a2)
     {
     }
 #endif
@@ -75,79 +75,79 @@ public:
     // Some compilers don't accept variadic parameters after a default parameter,
     // i.e., we can't just write _jac=0 but we need to overload operator():
     EIGEN_STRONG_INLINE
-    void operator()(const InputType &x, ValueType &v) const
+    void operator()(const InputType& x, ValueType& v) const
     {
         this->operator()(x, v);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, const ParamsType&... Params) const
     {
         this->operator()(x, v, Params...);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const ParamsType&... Params) const
     {
-        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor *>(this));
+        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor*>(this));
         autoj(x, v, jac, Params...);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const InputJacobianType &ijac,
-                    const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const InputJacobianType& ijac,
+                    const ParamsType&... Params) const
     {
-        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor *>(this));
+        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor*>(this));
         autoj(x, v, jac, ijac, Params...);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, HessianType &hess, const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, HessianType& hess, const ParamsType&... Params) const
     {
         this->operator()(x, v, jac, hess, nullptr, nullptr, Params...);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, HessianType &hess, const InputJacobianType &ijac, const InputHessianType &ihess,
-                    const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, HessianType& hess, const InputJacobianType& ijac, const InputHessianType& ihess,
+                    const ParamsType&... Params) const
     {
         this->operator()(x, v, jac, hess, &ijac, &ihess, Params...);
     }
 
     // Optional parameter InputJacobian (_ijac)
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, HessianType &hess, const InputJacobianType *_ijac = 0, const InputHessianType *_ihess = 0,
-                    const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, HessianType& hess, const InputJacobianType* _ijac = 0, const InputHessianType* _ihess = 0,
+                    const ParamsType&... Params) const
 #else
     EIGEN_STRONG_INLINE
-    void operator()(const InputType &x, ValueType &v) const
+    void operator()(const InputType& x, ValueType& v) const
     {
         this->operator()(x, v);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac) const
     {
-        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor *>(this));
+        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor*>(this));
         autoj(x, v, jac);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const InputJacobianType &ijac) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const InputJacobianType& ijac) const
     {
-        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor *>(this));
+        AutoDiffChainJacobianSparse<Functor> autoj(*static_cast<const Functor*>(this));
         autoj(x, v, jac, ijac);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, HessianType &hess) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, HessianType& hess) const
     {
         this->operator()(x, v, jac, hess, nullptr, nullptr);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, HessianType &hess, const InputJacobianType &ijac, const InputHessianType &ihess) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, HessianType& hess, const InputJacobianType& ijac, const InputHessianType& ihess) const
     {
         this->operator()(x, v, jac, hess, &ijac, &ihess);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac = 0, HessianType &hess, const InputJacobianType *_ijac = 0, const InputHessianType *_ihess = 0) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac = 0, HessianType& hess, const InputJacobianType* _ijac = 0, const InputHessianType* _ihess = 0) const
 #endif
     {
         ActiveInput ax = x.template cast<OuterActiveScalar>();
@@ -180,8 +180,8 @@ public:
         else
         {
             // If specified, copy derivatives from InputJacobian
-            const InputJacobianType &ijac = *_ijac;
-            const InputHessianType &ihess = *_ihess;
+            const InputJacobianType& ijac = *_ijac;
+            const InputHessianType& ihess = *_ihess;
 
             eigen_assert(x.rows() == ihess.rows());
             eigen_assert(ijac.cols() == ihess[0].rows() && ijac.cols() == ihess[0].cols());

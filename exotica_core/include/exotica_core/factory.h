@@ -30,14 +30,13 @@
 #ifndef EXOTICA_CORE_FACTORY_H_
 #define EXOTICA_CORE_FACTORY_H_
 
-#include <map>
-#include <memory>
-#include <typeinfo>
-
 #include <exotica_core/object.h>
 #include <exotica_core/tools.h>
 
+#include <map>
+#include <memory>
 #include <pluginlib/class_list_macros.hpp>
+#include <typeinfo>
 
 /// \brief Generic Factory Macro definition: to be specialised by each new base type which wishes to make use of a factory for instantiation of derived classes
 /// @param IDENT   Identifier Type : should be specialised by redefining a macro
@@ -111,7 +110,7 @@ public:
 
 private:
     /// \brief Private Constructor
-    inline explicit Factory<BaseClass>()
+    inline explicit Factory()
     {
     }
 

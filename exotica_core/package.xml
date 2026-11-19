@@ -16,7 +16,7 @@
   <depend>tf2_kdl</depend>
   <depend>tf2_eigen_kdl</depend>
   <depend>tf2_eigen</depend>
-  <depend>orocos_kdl_vendor</depend>
+  <depend>liborocos-kdl-dev</depend>
   <depend>kdl_parser</depend>
   <depend>moveit_core</depend>
   <depend>moveit_ros_planning</depend>
@@ -28,12 +28,11 @@
   <depend>shape_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>pluginlib</depend>
-  <depend>tinyxml2_vendor</depend>
   <depend>geometric_shapes</depend>
   <depend>eigen</depend>
   <depend>libzmq3-dev</depend>
-  <depend>msgpack</depend>
-  <!-- System deps: libzmq3-dev, libeigen3-dev, libmsgpack-dev -->
+  <depend condition="$ROS_DISTRO == 'humble'">msgpack</depend>
+  <depend condition="$ROS_DISTRO != 'humble'">libmsgpack-cxx-dev</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
 

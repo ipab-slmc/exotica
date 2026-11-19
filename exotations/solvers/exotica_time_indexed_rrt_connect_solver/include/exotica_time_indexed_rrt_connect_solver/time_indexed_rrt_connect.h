@@ -30,12 +30,9 @@
 #ifndef TIME_INDEXED_RRT_CONNECT_SOLVER_TIME_INDEXED_RRT_CONNECT_H_
 #define TIME_INDEXED_RRT_CONNECT_SOLVER_TIME_INDEXED_RRT_CONNECT_H_
 
-#include <functional>
-#include <memory>
-
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/time_indexed_sampling_problem.h>
-
+#include <exotica_time_indexed_rrt_connect_solver/time_indexed_rrt_connect_initializer.h>
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>
 #include <ompl/base/StateValidityChecker.h>
@@ -45,7 +42,8 @@
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/tools/config/SelfConfig.h>
 
-#include <exotica_time_indexed_rrt_connect_solver/time_indexed_rrt_connect_initializer.h>
+#include <functional>
+#include <memory>
 
 namespace exotica
 {
@@ -59,32 +57,32 @@ public:
         {
         }
 
-        const ompl::base::RealVectorStateSpace::StateType &getRNSpace() const
+        const ompl::base::RealVectorStateSpace::StateType& getRNSpace() const
         {
             return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
 
-        ompl::base::RealVectorStateSpace::StateType &getRNSpace()
+        ompl::base::RealVectorStateSpace::StateType& getRNSpace()
         {
             return *as<ompl::base::RealVectorStateSpace::StateType>(0);
         }
 
-        const ompl::base::TimeStateSpace::StateType &getTime() const
+        const ompl::base::TimeStateSpace::StateType& getTime() const
         {
             return *as<ompl::base::TimeStateSpace::StateType>(1);
         }
 
-        ompl::base::TimeStateSpace::StateType &getTime()
+        ompl::base::TimeStateSpace::StateType& getTime()
         {
             return *as<ompl::base::TimeStateSpace::StateType>(1);
         }
     };
-    OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblemPtr &prob, TimeIndexedRRTConnectSolverInitializer init);
+    OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblemPtr& prob, TimeIndexedRRTConnectSolverInitializer init);
 
     ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
-    void ExoticaToOMPLState(const Eigen::VectorXd &q, const double &t, ompl::base::State *state) const;
-    void OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q, double &t) const;
-    void StateDebug(const Eigen::VectorXd &q) const;
+    void ExoticaToOMPLState(const Eigen::VectorXd& q, const double& t, ompl::base::State* state) const;
+    void OMPLToExoticaState(const ompl::base::State* state, Eigen::VectorXd& q, double& t) const;
+    void StateDebug(const Eigen::VectorXd& q) const;
 
     TimeIndexedSamplingProblemPtr prob_;
 };
@@ -92,39 +90,39 @@ public:
 class OMPLTimeIndexedStateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
-    OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblemPtr &prob);
+    OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr& si, const TimeIndexedSamplingProblemPtr& prob);
 
-    bool isValid(const ompl::base::State *state) const override;
+    bool isValid(const ompl::base::State* state) const override;
 
-    bool isValid(const ompl::base::State *state, double &dist) const override;
+    bool isValid(const ompl::base::State* state, double& dist) const override;
 
 protected:
     TimeIndexedSamplingProblemPtr prob_;
 };
 
-typedef std::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
+typedef std::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr& si, const std::string& name)> ConfiguredPlannerAllocator;
 
 class TimeIndexedRRTConnectSolver : public MotionSolver, Instantiable<TimeIndexedRRTConnectSolverInitializer>
 {
 public:
-    void Instantiate(const TimeIndexedRRTConnectSolverInitializer &init) override;
-    void Solve(Eigen::MatrixXd &solution) override;
+    void Instantiate(const TimeIndexedRRTConnectSolverInitializer& init) override;
+    void Solve(Eigen::MatrixXd& solution) override;
     void SpecifyProblem(PlanningProblemPtr pointer) override;
-    void SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc);
+    void SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition>& ptc);
 
 protected:
     template <typename T>
-    static ompl::base::PlannerPtr allocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)
+    static ompl::base::PlannerPtr allocatePlanner(const ompl::base::SpaceInformationPtr& si, const std::string& new_name)
     {
         ompl::base::PlannerPtr planner(new T(si));
         if (!new_name.empty()) planner->setName(new_name);
         return planner;
     }
 
-    void SetGoalState(const Eigen::VectorXd &qT, const double t, const double eps = 0);
+    void SetGoalState(const Eigen::VectorXd& qT, const double t, const double eps = 0);
     void PreSolve();
     void PostSolve();
-    void GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
+    void GetPath(Eigen::MatrixXd& traj, ompl::base::PlannerTerminationCondition& ptc);
 
     TimeIndexedSamplingProblemPtr prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;
@@ -138,13 +136,13 @@ using namespace ompl;
 class OMPLTimeIndexedRRTConnect : public base::Planner
 {
 public:
-    OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr &si);
+    OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr& si);
 
     virtual ~OMPLTimeIndexedRRTConnect();
 
-    void getPlannerData(base::PlannerData &data) const override;
+    void getPlannerData(base::PlannerData& data) const override;
 
-    base::PlannerStatus solve(const base::PlannerTerminationCondition &ptc) override;
+    base::PlannerStatus solve(const base::PlannerTerminationCondition& ptc) override;
 
     void clear() override;
 
@@ -167,8 +165,8 @@ public:
     template <template <typename T> class NN>
     void setNearestNeighbors()
     {
-        tStart_.reset(new NN<Motion *>());
-        tGoal_.reset(new NN<Motion *>());
+        tStart_.reset(new NN<Motion*>());
+        tGoal_.reset(new NN<Motion*>());
     }
 
     void setup() override;
@@ -180,25 +178,25 @@ protected:
     public:
         Motion() = default;
 
-        Motion(const base::SpaceInformationPtr &si) : state(si->allocState())
+        Motion(const base::SpaceInformationPtr& si) : state(si->allocState())
         {
         }
 
         ~Motion() = default;
 
-        const base::State *root = nullptr;
-        base::State *state = nullptr;
-        Motion *parent = nullptr;
+        const base::State* root = nullptr;
+        base::State* state = nullptr;
+        Motion* parent = nullptr;
     };
 
     /// \brief A nearest-neighbor datastructure representing a tree of motions
-    typedef std::shared_ptr<NearestNeighbors<Motion *> > TreeData;
+    typedef std::shared_ptr<NearestNeighbors<Motion*> > TreeData;
 
     /// \brief Information attached to growing a tree of motions (used internally)
     struct TreeGrowingInfo
     {
-        base::State *xstate;
-        Motion *xmotion;
+        base::State* xstate;
+        Motion* xmotion;
         bool start;
         bool correct_time;
     };
@@ -218,12 +216,12 @@ protected:
     void freeMemory();
 
     /// \brief Compute distance between motions (actually distance between contained states)
-    double distanceFunction(const Motion *a, const Motion *b) const
+    double distanceFunction(const Motion* a, const Motion* b) const
     {
         return si_->distance(a->state, b->state);
     }
 
-    double forwardTimeDistance(const Motion *a, const Motion *b) const
+    double forwardTimeDistance(const Motion* a, const Motion* b) const
     {
         static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetScene()->GetKinematicTree().GetVelocityLimits();
 
@@ -239,7 +237,7 @@ protected:
         return si_->distance(a->state, b->state);
     }
 
-    double reverseTimeDistance(const Motion *a, const Motion *b) const
+    double reverseTimeDistance(const Motion* a, const Motion* b) const
     {
         static const Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetScene()->GetKinematicTree().GetVelocityLimits();
 
@@ -255,7 +253,7 @@ protected:
         return si_->distance(a->state, b->state);
     }
 
-    bool correctTime(const Motion *a, Motion *b, bool reverse, bool &changed) const
+    bool correctTime(const Motion* a, Motion* b, bool reverse, bool& changed) const
     {
         Eigen::VectorXd max_vel = si_->getStateSpace()->as<OMPLTimeIndexedRNStateSpace>()->prob_->GetScene()->GetKinematicTree().GetVelocityLimits();
         double ta, tb;
@@ -278,7 +276,7 @@ protected:
     }
 
     /// \brief Grow a tree towards a random state
-    GrowState growTree(TreeData &tree, TreeGrowingInfo &tgi, Motion *rmotion);
+    GrowState growTree(TreeData& tree, TreeGrowingInfo& tgi, Motion* rmotion);
 
     /// \brief State sampler
     base::StateSamplerPtr sampler_;
@@ -296,7 +294,7 @@ protected:
     RNG rng_;
 
     /// \brief The pair of states in each tree connected during planning.  Used for PlannerData computation
-    std::pair<base::State *, base::State *> connectionPoint_;
+    std::pair<base::State*, base::State*> connectionPoint_;
 
     bool reverse_check_;
 };

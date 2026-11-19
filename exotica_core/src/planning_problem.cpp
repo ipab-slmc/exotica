@@ -27,16 +27,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <exotica_core/planning_problem.h>
+#include <exotica_core/planning_problem_initializer.h>
+#include <exotica_core/server.h>
+#include <exotica_core/setup.h>
+#include <exotica_core/task_map_initializer.h>
+
 #include <algorithm>
 #include <limits>
 #include <utility>
-
-#include <exotica_core/planning_problem.h>
-#include <exotica_core/server.h>
-#include <exotica_core/setup.h>
-
-#include <exotica_core/planning_problem_initializer.h>
-#include <exotica_core/task_map_initializer.h>
 
 namespace exotica
 {

@@ -31,6 +31,7 @@
 #include <exotica_core/setup.h>
 #include <exotica_core/tools/conversions.h>
 #include <exotica_core/tools/sparse_costs.h>
+
 #include <cmath>
 
 REGISTER_PROBLEM_TYPE("DynamicTimeIndexedShootingProblem", exotica::DynamicTimeIndexedShootingProblem)

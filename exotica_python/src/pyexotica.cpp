@@ -36,19 +36,17 @@
 #endif
 #include <exotica_core/visualization_moveit.h>
 #undef NDEBUG
+#include <geometric_shapes/mesh_operations.h>
+#include <octomap/OcTree.h>
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <geometric_shapes/mesh_operations.h>
-
-#include <octomap/OcTree.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/serialization.hpp>
 #include <rclcpp/serialized_message.hpp>
-
 #include <unsupported/Eigen/CXX11/Tensor>
 
 #if PY_MAJOR_VERSION < 3
@@ -116,37 +114,37 @@ PyObject* CreateStringIOObject()
 }
 
 #include <cstring>
-#define ROS_MESSAGE_WRAPPER(MessageType)                                              \
-    namespace pybind11                                                                \
-    {                                                                                 \
-    namespace detail                                                                  \
-    {                                                                                 \
-    template <>                                                                       \
-    struct type_caster<MessageType>                                                   \
-    {                                                                                 \
-    public:                                                                           \
-        PYBIND11_TYPE_CASTER(MessageType, _("rclpy.msg"));                            \
-                                                                                      \
-        bool load(handle src, bool)                                                   \
-        {                                                                             \
-            py::object rclpy_ser = py::module_::import("rclpy.serialization");        \
-            py::bytes serialized = rclpy_ser.attr("serialize_message")(src);          \
-            std::string buf = serialized.cast<std::string>();                         \
-            rclcpp::SerializedMessage smsg(buf.size());                               \
-            auto& rcl_msg = smsg.get_rcl_serialized_message();                        \
-            std::memcpy(rcl_msg.buffer, buf.data(), buf.size());                      \
-            rcl_msg.buffer_length = buf.size();                                       \
-            rclcpp::Serialization<MessageType> ser;                                   \
-            ser.deserialize_message(&smsg, &value);                                   \
-            return !PyErr_Occurred();                                                  \
-        }                                                                             \
-                                                                                      \
-        static handle cast(MessageType, return_value_policy, handle)                  \
-        {                                                                             \
-            ThrowPretty("C++ to Python message conversion not supported");            \
-        }                                                                             \
-    };                                                                                \
-    }                                                                                 \
+#define ROS_MESSAGE_WRAPPER(MessageType)                                       \
+    namespace pybind11                                                         \
+    {                                                                          \
+    namespace detail                                                           \
+    {                                                                          \
+    template <>                                                                \
+    struct type_caster<MessageType>                                            \
+    {                                                                          \
+    public:                                                                    \
+        PYBIND11_TYPE_CASTER(MessageType, _("rclpy.msg"));                     \
+                                                                               \
+        bool load(handle src, bool)                                            \
+        {                                                                      \
+            py::object rclpy_ser = py::module_::import("rclpy.serialization"); \
+            py::bytes serialized = rclpy_ser.attr("serialize_message")(src);   \
+            std::string buf = serialized.cast<std::string>();                  \
+            rclcpp::SerializedMessage smsg(buf.size());                        \
+            auto& rcl_msg = smsg.get_rcl_serialized_message();                 \
+            std::memcpy(rcl_msg.buffer, buf.data(), buf.size());               \
+            rcl_msg.buffer_length = buf.size();                                \
+            rclcpp::Serialization<MessageType> ser;                            \
+            ser.deserialize_message(&smsg, &value);                            \
+            return !PyErr_Occurred();                                          \
+        }                                                                      \
+                                                                               \
+        static handle cast(MessageType, return_value_policy, handle)           \
+        {                                                                      \
+            ThrowPretty("C++ to Python message conversion not supported");     \
+        }                                                                      \
+    };                                                                         \
+    }                                                                          \
     }
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/msg/planning_scene_world.hpp>
@@ -175,10 +173,11 @@ void AddInitializers(py::module& module)
         const std::string full_name = i.GetName();
         const std::string name = full_name.substr(8);  // This removes the prefix "exotica/"
         known_initializers[full_name] = CreateInitializer(i);
-        inits.def((name + "Initializer").c_str(), [full_name]() { return CreateInitializer(known_initializers[full_name]); }, (name + "Initializer constructor.").c_str());
+        inits.def((name + "Initializer").c_str(), [full_name]()
+                  { return CreateInitializer(known_initializers[full_name]); }, (name + "Initializer constructor.").c_str());
     }
 
-    inits.def("load_xml", (Initializer(*)(std::string, bool)) & XMLLoader::Load, "Loads initializer from XML", py::arg("xml"), py::arg("parseAsXMLString") = false);
+    inits.def("load_xml", (Initializer (*)(std::string, bool))&XMLLoader::Load, "Loads initializer from XML", py::arg("xml"), py::arg("parseAsXMLString") = false);
     inits.def("load_xml_full", &LoadFromXML, "Loads initializer from XML", py::arg("xml"), py::arg("solver_name") = std::string(""), py::arg("problem_name") = std::string(""), py::arg("parseAsXMLString") = false);
 }
 
@@ -646,17 +645,17 @@ struct type_caster<Hessian>
 {
 public:
     /**
-         * This macro establishes the name 'inty' in
-         * function signatures and declares a local variable
-         * 'value' of type inty
-         */
+     * This macro establishes the name 'inty' in
+     * function signatures and declares a local variable
+     * 'value' of type inty
+     */
     PYBIND11_TYPE_CASTER(Hessian, _("Hessian"));
 
     /**
-         * Conversion part 1 (Python->C++): convert a PyObject into a inty
-         * instance or return false upon failure. The second argument
-         * indicates whether implicit conversions should be applied.
-         */
+     * Conversion part 1 (Python->C++): convert a PyObject into a inty
+     * instance or return false upon failure. The second argument
+     * indicates whether implicit conversions should be applied.
+     */
     bool load(handle src, bool)
     {
         value = array_hessian(py::cast<pybind11::array_t<Hessian::Scalar::Scalar>>(src.ptr()));
@@ -664,12 +663,12 @@ public:
     }
 
     /**
-         * Conversion part 2 (C++ -> Python): convert an inty instance into
-         * a Python object. The second and third arguments are used to
-         * indicate the return value policy and parent object (for
-         * ``return_value_policy::reference_internal``) and are generally
-         * ignored by implicit casters.
-         */
+     * Conversion part 2 (C++ -> Python): convert an inty instance into
+     * a Python object. The second and third arguments are used to
+     * indicate the return value policy and parent object (for
+     * ``return_value_policy::reference_internal``) and are generally
+     * ignored by implicit casters.
+     */
     static handle cast(Hessian src, return_value_policy /* policy */, handle /* parent */)
     {
         return hessian_array<Hessian::Scalar::Scalar>(src);
@@ -683,25 +682,27 @@ PYBIND11_MODULE(_pyexotica, module)
     module.doc() = "Exotica Python wrapper";
 
     py::class_<Setup, std::unique_ptr<Setup, py::nodelete>> setup(module, "Setup");
-    setup.def(py::init([]() { return Setup::Instance().get(); }));
+    setup.def(py::init([]()
+                       { return Setup::Instance().get(); }));
     setup.def_static("get_solvers", &Setup::GetSolvers, "Returns a list of available solvers.");
     setup.def_static("get_problems", &Setup::GetProblems, "Returns a list of available problems.");
     setup.def_static("get_maps", &Setup::GetMaps, "Returns a list of available task maps.");
     setup.def_static("get_collision_scenes", &Setup::GetCollisionScenes, "Returns a list of available collision scene plug-ins.");
     setup.def_static("get_dynamics_solvers", &Setup::GetDynamicsSolvers, "Returns a list of available dynamics solvers plug-ins.");
-    setup.def_static("create_solver", [](const Initializer& init) { return Setup::CreateSolver(init); }, py::return_value_policy::take_ownership);    // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
-    setup.def_static("create_problem", [](const Initializer& init) { return Setup::CreateProblem(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
-    setup.def_static("create_scene", [](const Initializer& init) { return Setup::CreateScene(init); }, py::return_value_policy::take_ownership);
-    setup.def_static("create_dynamics_solver", [](const Initializer& init) { return Setup::CreateDynamicsSolver(init); }, py::return_value_policy::take_ownership);
+    setup.def_static("create_solver", [](const Initializer& init)
+                     { return Setup::CreateSolver(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the solver identified by name parameter.", py::arg("solverType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("create_problem", [](const Initializer& init)
+                     { return Setup::CreateProblem(init); }, py::return_value_policy::take_ownership);  // "Creates an instance of the problem identified by name parameter.", py::arg("problemType"), py::arg("prependExoticaNamespace"));
+    setup.def_static("create_scene", [](const Initializer& init)
+                     { return Setup::CreateScene(init); }, py::return_value_policy::take_ownership);
+    setup.def_static("create_dynamics_solver", [](const Initializer& init)
+                     { return Setup::CreateDynamicsSolver(init); }, py::return_value_policy::take_ownership);
     setup.def_static("print_supported_classes", &Setup::PrintSupportedClasses, "Print a list of available plug-ins sorted by class.");
     setup.def_static("get_initializers", &Setup::GetInitializers, py::return_value_policy::copy, "Returns a list of available initializers with all available parameters/arguments.");
-    setup.def_static("get_package_path",
-                     [](const std::string& package_name) {
-                         return ament_index_cpp::get_package_share_directory(package_name);
-                     },
-                     "ROS package share directory resolution.");
-    setup.def_static("init_ros",
-                     [](const std::string& name, const bool& anonymous) {
+    setup.def_static("get_package_path", [](const std::string& package_name)
+                     { return ament_index_cpp::get_package_share_directory(package_name); }, "ROS package share directory resolution.");
+    setup.def_static("init_ros", [](const std::string& name, const bool& anonymous)
+                     {
                          if (!rclcpp::ok())
                          {
                              int argc = 0;
@@ -718,10 +719,7 @@ PYBIND11_MODULE(_pyexotica, module)
                                                          .count())});
                          }
                          auto node = std::make_shared<rclcpp::Node>(name, node_options);
-                         Server::InitRos(node);
-                     },
-                     "Initializes an internal ROS node for publishing debug information from Exotica (i.e., activates ROS features). Options are setting the name and whether to spawn an anonymous node.",
-                     py::arg("name") = "exotica", py::arg("anonymous") = false);
+                         Server::InitRos(node); }, "Initializes an internal ROS node for publishing debug information from Exotica (i.e., activates ROS features). Options are setting the name and whether to spawn an anonymous node.", py::arg("name") = "exotica", py::arg("anonymous") = false);
     setup.def_static("load_solver", &XMLLoader::LoadSolver, "Instantiate solver and problem from an XML file containing both a solver and problem initializer.", py::arg("filepath"));
     setup.def_static("load_solver_standalone", &XMLLoader::LoadSolverStandalone, "Instantiate only a solver from an XML file containing solely a solver initializer.", py::arg("filepath"));
     setup.def_static("load_problem", &XMLLoader::LoadProblem, "Instantiate only a problem from an XML file containing solely a problem initializer.", py::arg("filepath"));
@@ -734,7 +732,8 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("parse_list", &ParseList);
     tools.def("parse_int", &ParseInt);
     tools.def("parse_int_list", &ParseIntList);
-    tools.def("load_obj", [](const std::string& path) { Eigen::VectorXi tri; Eigen::VectorXd vert; LoadOBJ(LoadFile(path), tri, vert); return py::make_tuple(tri, vert); });
+    tools.def("load_obj", [](const std::string& path)
+              { Eigen::VectorXi tri; Eigen::VectorXd vert; LoadOBJ(LoadFile(path), tri, vert); return py::make_tuple(tri, vert); });
     tools.def("load_octree", &LoadOctree);
     tools.def("load_octree_as_shape", &LoadOctreeAsShape);
     tools.def("save_matrix", &SaveMatrix);
@@ -742,10 +741,8 @@ PYBIND11_MODULE(_pyexotica, module)
     tools.def("IdentityTransform", &Eigen::IdentityTransform);
     tools.def("load_file", &LoadFile);
     tools.def("path_exists", &PathExists);
-    tools.def("create_composite_trajectory", [](Eigen::MatrixXdRefConst data, double radius) {
-        return Trajectory(data, radius).ToString();
-    },
-              py::arg("data"), py::arg("max_radius") = 1.0);
+    tools.def("create_composite_trajectory", [](Eigen::MatrixXdRefConst data, double radius)
+              { return Trajectory(data, radius).ToString(); }, py::arg("data"), py::arg("max_radius") = 1.0);
 
     py::module sparse_costs = tools.def_submodule("SparseCosts")
                                   .def("huber_cost", &huber_cost)
@@ -799,27 +796,46 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<KDL::Frame> kdl_frame(module, "KDLFrame");
     kdl_frame.def(py::init());
-    kdl_frame.def(py::init([](Eigen::MatrixXd other) { return GetFrameFromMatrix(other); }));
-    kdl_frame.def(py::init([](Eigen::VectorXd other) { return GetFrame(other); }));
-    kdl_frame.def(py::init([](const KDL::Frame& other) { return KDL::Frame(other); }));
-    kdl_frame.def("__repr__", [](KDL::Frame* me) { return "KDL::Frame " + ToString(*me); });
-    kdl_frame.def("get_rpy", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::RPY); });
-    kdl_frame.def("get_zyz", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::ZYZ); });
-    kdl_frame.def("get_zyx", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::ZYX); });
-    kdl_frame.def("get_angle_axis", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::ANGLE_AXIS); });
-    kdl_frame.def("get_quaternion", [](KDL::Frame* me) { return GetRotationAsVector(*me, RotationType::QUATERNION); });
-    kdl_frame.def("get_translation", [](KDL::Frame* me) { Eigen::Vector3d tmp; for (int i = 0; i < 3; ++i) { tmp[i] = me->p.data[i]; } return tmp; });
-    kdl_frame.def("get_translation_and_rpy", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::RPY); });
-    kdl_frame.def("get_translation_and_zyz", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::ZYZ); });
-    kdl_frame.def("get_translation_and_zyx", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::ZYX); });
-    kdl_frame.def("get_translation_and_angle_axis", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::ANGLE_AXIS); });
-    kdl_frame.def("get_translation_and_quaternion", [](KDL::Frame* me) { return GetFrameAsVector(*me, RotationType::QUATERNION); });
-    kdl_frame.def("get_frame", [](KDL::Frame* me) { return GetFrame(*me); });
-    kdl_frame.def("inverse", (KDL::Frame(KDL::Frame::*)() const) & KDL::Frame::Inverse);
-    kdl_frame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B) { return A * B; }, py::is_operator());
+    kdl_frame.def(py::init([](Eigen::MatrixXd other)
+                           { return GetFrameFromMatrix(other); }));
+    kdl_frame.def(py::init([](Eigen::VectorXd other)
+                           { return GetFrame(other); }));
+    kdl_frame.def(py::init([](const KDL::Frame& other)
+                           { return KDL::Frame(other); }));
+    kdl_frame.def("__repr__", [](KDL::Frame* me)
+                  { return "KDL::Frame " + ToString(*me); });
+    kdl_frame.def("get_rpy", [](KDL::Frame* me)
+                  { return GetRotationAsVector(*me, RotationType::RPY); });
+    kdl_frame.def("get_zyz", [](KDL::Frame* me)
+                  { return GetRotationAsVector(*me, RotationType::ZYZ); });
+    kdl_frame.def("get_zyx", [](KDL::Frame* me)
+                  { return GetRotationAsVector(*me, RotationType::ZYX); });
+    kdl_frame.def("get_angle_axis", [](KDL::Frame* me)
+                  { return GetRotationAsVector(*me, RotationType::ANGLE_AXIS); });
+    kdl_frame.def("get_quaternion", [](KDL::Frame* me)
+                  { return GetRotationAsVector(*me, RotationType::QUATERNION); });
+    kdl_frame.def("get_translation", [](KDL::Frame* me)
+                  { Eigen::Vector3d tmp; for (int i = 0; i < 3; ++i) { tmp[i] = me->p.data[i]; } return tmp; });
+    kdl_frame.def("get_translation_and_rpy", [](KDL::Frame* me)
+                  { return GetFrameAsVector(*me, RotationType::RPY); });
+    kdl_frame.def("get_translation_and_zyz", [](KDL::Frame* me)
+                  { return GetFrameAsVector(*me, RotationType::ZYZ); });
+    kdl_frame.def("get_translation_and_zyx", [](KDL::Frame* me)
+                  { return GetFrameAsVector(*me, RotationType::ZYX); });
+    kdl_frame.def("get_translation_and_angle_axis", [](KDL::Frame* me)
+                  { return GetFrameAsVector(*me, RotationType::ANGLE_AXIS); });
+    kdl_frame.def("get_translation_and_quaternion", [](KDL::Frame* me)
+                  { return GetFrameAsVector(*me, RotationType::QUATERNION); });
+    kdl_frame.def("get_frame", [](KDL::Frame* me)
+                  { return GetFrame(*me); });
+    kdl_frame.def("inverse", (KDL::Frame (KDL::Frame::*)() const) & KDL::Frame::Inverse);
+    kdl_frame.def("__mul__", [](const KDL::Frame& A, const KDL::Frame& B)
+                  { return A * B; }, py::is_operator());
     kdl_frame.def_readwrite("p", &KDL::Frame::p);
-    kdl_frame.def_static("interpolate", [](KDL::Frame* A, KDL::Frame* B, double alpha) { return KDL::addDelta(*A, KDL::diff(*A, *B) * alpha); });
-    kdl_frame.def_static("diff", [](KDL::Frame* A, KDL::Frame* B) { Eigen::VectorXd ret(6); KDL::Twist t = KDL::diff(*A, *B); for(int i=0; i<6; ++i) ret(i) = t[i]; return ret; });
+    kdl_frame.def_static("interpolate", [](KDL::Frame* A, KDL::Frame* B, double alpha)
+                         { return KDL::addDelta(*A, KDL::diff(*A, *B) * alpha); });
+    kdl_frame.def_static("diff", [](KDL::Frame* A, KDL::Frame* B)
+                         { Eigen::VectorXd ret(6); KDL::Twist t = KDL::diff(*A, *B); for(int i=0; i<6; ++i) ret(i) = t[i]; return ret; });
     py::implicitly_convertible<Eigen::MatrixXd, KDL::Frame>();
     py::implicitly_convertible<Eigen::VectorXd, KDL::Frame>();
 
@@ -829,10 +845,14 @@ PYBIND11_MODULE(_pyexotica, module)
              py::arg("x") = 0,
              py::arg("y") = 0,
              py::arg("z") = 0)
-        .def("__repr__", [](KDL::Vector* me) { return "KDL::Vector [" + std::to_string(me->data[0]) + ", " + std::to_string(me->data[1]) + ", " + std::to_string(me->data[2]) + "]"; })
-        .def("x", [](KDL::Vector& v) -> double& { return v[0]; })
-        .def("y", [](KDL::Vector& v) -> double& { return v[1]; })
-        .def("z", [](KDL::Vector& v) -> double& { return v[2]; })
+        .def("__repr__", [](KDL::Vector* me)
+             { return "KDL::Vector [" + std::to_string(me->data[0]) + ", " + std::to_string(me->data[1]) + ", " + std::to_string(me->data[2]) + "]"; })
+        .def("x", [](KDL::Vector& v) -> double&
+             { return v[0]; })
+        .def("y", [](KDL::Vector& v) -> double&
+             { return v[1]; })
+        .def("z", [](KDL::Vector& v) -> double&
+             { return v[2]; })
         .def_static("Zero", &KDL::Vector::Zero);
 
     py::class_<KDL::RotationalInertia>(module, "KDLRotationalInertia")
@@ -858,7 +878,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("length", &TaskMap::length)
         .def_readonly("startJ", &TaskMap::start_jacobian)
         .def_readonly("lengthJ", &TaskMap::length_jacobian)
-        .def("task_space_dim", (int (TaskMap::*)()) & TaskMap::TaskSpaceDim)
+        .def("task_space_dim", (int (TaskMap::*)())&TaskMap::TaskSpaceDim)
         .def("task_space_jacobian_dim", &TaskMap::TaskSpaceJacobianDim);
 
     py::class_<TaskIndexing>(module, "TaskIndexing")
@@ -934,18 +954,19 @@ PYBIND11_MODULE(_pyexotica, module)
     task_space_vector.def("set_zero", &TaskSpaceVector::SetZero);
     task_space_vector.def_readonly("data", &TaskSpaceVector::data);
     task_space_vector.def("__sub__", &TaskSpaceVector::operator-, py::is_operator());
-    task_space_vector.def("__repr__", [](TaskSpaceVector* instance) { return ((std::ostringstream&)(std::ostringstream("") << "TaskSpaceVector (" << instance->data.transpose() << ")")).str(); });
+    task_space_vector.def("__repr__", [](TaskSpaceVector* instance)
+                          { return ((std::ostringstream&)(std::ostringstream("") << "TaskSpaceVector (" << instance->data.transpose() << ")")).str(); });
 
     py::class_<MotionSolver, std::shared_ptr<MotionSolver>, Object> motion_solver(module, "MotionSolver");
     motion_solver.def_property("max_iterations", &MotionSolver::GetNumberOfMaxIterations, &MotionSolver::SetNumberOfMaxIterations);
     motion_solver.def("get_planning_time", &MotionSolver::GetPlanningTime);
     motion_solver.def("specify_problem", &MotionSolver::SpecifyProblem, "Assign problem to the solver", py::arg("planning_problem"));
     motion_solver.def(
-        "solve", [](std::shared_ptr<MotionSolver> sol) {
+        "solve", [](std::shared_ptr<MotionSolver> sol)
+        {
             Eigen::MatrixXd ret;
             sol->Solve(ret);
-            return ret;
-        },
+            return ret; },
         "Solve the problem",
         // Pure C++: release the GIL so other Python threads keep running while
         // this solves (the return value is converted after it's re-acquired).
@@ -968,7 +989,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property("start_time", &PlanningProblem::GetStartTime, &PlanningProblem::SetStartTime)
         .def("get_number_of_problem_updates", &PlanningProblem::GetNumberOfProblemUpdates)
         .def("reset_number_of_problem_updates", &PlanningProblem::ResetNumberOfProblemUpdates)
-        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>>(PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
+        .def("get_cost_evolution", (std::pair<std::vector<double>, std::vector<double>> (PlanningProblem::*)() const) & PlanningProblem::GetCostEvolution)
         .def("get_number_of_iterations", &PlanningProblem::GetNumberOfIterations)
         .def("pre_update", &PlanningProblem::PreUpdate)
         .def("is_valid", &PlanningProblem::IsValid)
@@ -980,8 +1001,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<UnconstrainedTimeIndexedProblem, std::shared_ptr<UnconstrainedTimeIndexedProblem>, PlanningProblem> unconstrained_time_indexed_problem(prob, "UnconstrainedTimeIndexedProblem");
     unconstrained_time_indexed_problem.def("get_duration", &UnconstrainedTimeIndexedProblem::GetDuration);
-    unconstrained_time_indexed_problem.def("update", (void (UnconstrainedTimeIndexedProblem::*)(Eigen::VectorXdRefConst, int)) & UnconstrainedTimeIndexedProblem::Update);
-    unconstrained_time_indexed_problem.def("update", (void (UnconstrainedTimeIndexedProblem::*)(Eigen::VectorXdRefConst)) & UnconstrainedTimeIndexedProblem::Update);
+    unconstrained_time_indexed_problem.def("update", (void (UnconstrainedTimeIndexedProblem::*)(Eigen::VectorXdRefConst, int))&UnconstrainedTimeIndexedProblem::Update);
+    unconstrained_time_indexed_problem.def("update", (void (UnconstrainedTimeIndexedProblem::*)(Eigen::VectorXdRefConst))&UnconstrainedTimeIndexedProblem::Update);
     unconstrained_time_indexed_problem.def("set_goal", &UnconstrainedTimeIndexedProblem::SetGoal);
     unconstrained_time_indexed_problem.def("set_rho", &UnconstrainedTimeIndexedProblem::SetRho);
     unconstrained_time_indexed_problem.def("get_goal", &UnconstrainedTimeIndexedProblem::GetGoal);
@@ -1003,8 +1024,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<TimeIndexedProblem, std::shared_ptr<TimeIndexedProblem>, PlanningProblem> time_indexed_problem(prob, "TimeIndexedProblem");
     time_indexed_problem.def("get_duration", &TimeIndexedProblem::GetDuration);
-    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst, int)) & TimeIndexedProblem::Update);
-    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst)) & TimeIndexedProblem::Update);
+    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst, int))&TimeIndexedProblem::Update);
+    time_indexed_problem.def("update", (void (TimeIndexedProblem::*)(Eigen::VectorXdRefConst))&TimeIndexedProblem::Update);
     time_indexed_problem.def("set_goal", &TimeIndexedProblem::SetGoal);
     time_indexed_problem.def("set_rho", &TimeIndexedProblem::SetRho);
     time_indexed_problem.def("get_goal", &TimeIndexedProblem::GetGoal);
@@ -1034,14 +1055,14 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_problem.def("get_scalar_task_jacobian", &TimeIndexedProblem::GetScalarTaskJacobian);
     time_indexed_problem.def("get_scalar_transition_cost", &TimeIndexedProblem::GetScalarTransitionCost);
     time_indexed_problem.def("get_scalar_transition_jacobian", &TimeIndexedProblem::GetScalarTransitionJacobian);
-    time_indexed_problem.def("get_equality", (Eigen::VectorXd(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetEquality);
-    time_indexed_problem.def("get_equality", (Eigen::VectorXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetEquality);
-    time_indexed_problem.def("get_equality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetEqualityJacobian);
-    time_indexed_problem.def("get_equality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetEqualityJacobian);
-    time_indexed_problem.def("get_inequality", (Eigen::VectorXd(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequality);
-    time_indexed_problem.def("get_inequality", (Eigen::VectorXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequality);
-    time_indexed_problem.def("get_inequality_jacobian", (Eigen::SparseMatrix<double>(TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequalityJacobian);
-    time_indexed_problem.def("get_inequality_jacobian", (Eigen::MatrixXd(TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequalityJacobian);
+    time_indexed_problem.def("get_equality", (Eigen::VectorXd (TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetEquality);
+    time_indexed_problem.def("get_equality", (Eigen::VectorXd (TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetEquality);
+    time_indexed_problem.def("get_equality_jacobian", (Eigen::SparseMatrix<double> (TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetEqualityJacobian);
+    time_indexed_problem.def("get_equality_jacobian", (Eigen::MatrixXd (TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetEqualityJacobian);
+    time_indexed_problem.def("get_inequality", (Eigen::VectorXd (TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequality);
+    time_indexed_problem.def("get_inequality", (Eigen::VectorXd (TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequality);
+    time_indexed_problem.def("get_inequality_jacobian", (Eigen::SparseMatrix<double> (TimeIndexedProblem::*)() const) & TimeIndexedProblem::GetInequalityJacobian);
+    time_indexed_problem.def("get_inequality_jacobian", (Eigen::MatrixXd (TimeIndexedProblem::*)(int) const) & TimeIndexedProblem::GetInequalityJacobian);
     time_indexed_problem.def("get_bounds", &TimeIndexedProblem::GetBounds);
     time_indexed_problem.def("get_joint_velocity_limits", &TimeIndexedProblem::GetJointVelocityLimits);  // deprecated
     time_indexed_problem.def_readonly("cost", &TimeIndexedProblem::cost);
@@ -1050,8 +1071,8 @@ PYBIND11_MODULE(_pyexotica, module)
 
     py::class_<BoundedTimeIndexedProblem, std::shared_ptr<BoundedTimeIndexedProblem>, PlanningProblem> bounded_time_indexed_problem(prob, "BoundedTimeIndexedProblem");
     bounded_time_indexed_problem.def("get_duration", &BoundedTimeIndexedProblem::GetDuration);
-    bounded_time_indexed_problem.def("update", (void (BoundedTimeIndexedProblem::*)(Eigen::VectorXdRefConst, int)) & BoundedTimeIndexedProblem::Update);
-    bounded_time_indexed_problem.def("update", (void (BoundedTimeIndexedProblem::*)(Eigen::VectorXdRefConst)) & BoundedTimeIndexedProblem::Update);
+    bounded_time_indexed_problem.def("update", (void (BoundedTimeIndexedProblem::*)(Eigen::VectorXdRefConst, int))&BoundedTimeIndexedProblem::Update);
+    bounded_time_indexed_problem.def("update", (void (BoundedTimeIndexedProblem::*)(Eigen::VectorXdRefConst))&BoundedTimeIndexedProblem::Update);
     bounded_time_indexed_problem.def("set_goal", &BoundedTimeIndexedProblem::SetGoal);
     bounded_time_indexed_problem.def("set_rho", &BoundedTimeIndexedProblem::SetRho);
     bounded_time_indexed_problem.def("get_goal", &BoundedTimeIndexedProblem::GetGoal);
@@ -1084,7 +1105,8 @@ PYBIND11_MODULE(_pyexotica, module)
     unconstrained_end_pose_problem.def_readonly("num_tasks", &UnconstrainedEndPoseProblem::num_tasks);
     unconstrained_end_pose_problem.def_readonly("Phi", &UnconstrainedEndPoseProblem::Phi);
     unconstrained_end_pose_problem.def_readonly("jacobian", &UnconstrainedEndPoseProblem::jacobian);
-    unconstrained_end_pose_problem.def_property_readonly("ydiff", [](UnconstrainedEndPoseProblem* prob) { return prob->cost.ydiff; });
+    unconstrained_end_pose_problem.def_property_readonly("ydiff", [](UnconstrainedEndPoseProblem* prob)
+                                                         { return prob->cost.ydiff; });
     unconstrained_end_pose_problem.def_property("q_nominal", &UnconstrainedEndPoseProblem::GetNominalPose, &UnconstrainedEndPoseProblem::SetNominalPose);
     unconstrained_end_pose_problem.def("get_scalar_cost", &UnconstrainedEndPoseProblem::GetScalarCost);
     unconstrained_end_pose_problem.def("get_scalar_jacobian", &UnconstrainedEndPoseProblem::GetScalarJacobian);
@@ -1181,7 +1203,7 @@ PYBIND11_MODULE(_pyexotica, module)
     time_indexed_sampling_problem.def("set_rho_neq", &TimeIndexedSamplingProblem::SetRhoNEQ);
     time_indexed_sampling_problem.def("get_goal_neq", &TimeIndexedSamplingProblem::GetGoalNEQ);
     time_indexed_sampling_problem.def("get_rho_neq", &TimeIndexedSamplingProblem::GetRhoNEQ);
-    time_indexed_sampling_problem.def("is_valid", (bool (TimeIndexedSamplingProblem::*)(Eigen::VectorXdRefConst, const double&)) & TimeIndexedSamplingProblem::IsValid);
+    time_indexed_sampling_problem.def("is_valid", (bool (TimeIndexedSamplingProblem::*)(Eigen::VectorXdRefConst, const double&))&TimeIndexedSamplingProblem::IsValid);
 
     py::enum_<ControlCostLossTermType>(module, "ControlCostLossTermType")
         // BimodalHuber = 3, SuperHuber = 4, <-- skipped as not actively used right now.
@@ -1193,11 +1215,11 @@ PYBIND11_MODULE(_pyexotica, module)
         .export_values();
 
     py::class_<DynamicTimeIndexedShootingProblem, std::shared_ptr<DynamicTimeIndexedShootingProblem>, PlanningProblem>(prob, "DynamicTimeIndexedShootingProblem")
-        .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, Eigen::VectorXdRefConst, int)) & DynamicTimeIndexedShootingProblem::Update)
-        .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, int)) & DynamicTimeIndexedShootingProblem::Update)
+        .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, Eigen::VectorXdRefConst, int))&DynamicTimeIndexedShootingProblem::Update)
+        .def("update", (void (DynamicTimeIndexedShootingProblem::*)(Eigen::VectorXdRefConst, int))&DynamicTimeIndexedShootingProblem::Update)
         .def("update_terminal_state", &DynamicTimeIndexedShootingProblem::UpdateTerminalState)
-        .def_property("X", static_cast<const Eigen::MatrixXd& (DynamicTimeIndexedShootingProblem::*)(void)const>(&DynamicTimeIndexedShootingProblem::get_X), &DynamicTimeIndexedShootingProblem::set_X)
-        .def_property("U", static_cast<const Eigen::MatrixXd& (DynamicTimeIndexedShootingProblem::*)(void)const>(&DynamicTimeIndexedShootingProblem::get_U), &DynamicTimeIndexedShootingProblem::set_U)
+        .def_property("X", static_cast<const Eigen::MatrixXd& (DynamicTimeIndexedShootingProblem::*)(void) const>(&DynamicTimeIndexedShootingProblem::get_X), &DynamicTimeIndexedShootingProblem::set_X)
+        .def_property("U", static_cast<const Eigen::MatrixXd& (DynamicTimeIndexedShootingProblem::*)(void) const>(&DynamicTimeIndexedShootingProblem::get_U), &DynamicTimeIndexedShootingProblem::set_U)
         .def_property("X_star", &DynamicTimeIndexedShootingProblem::get_X_star, &DynamicTimeIndexedShootingProblem::set_X_star)
         .def_property_readonly("tau", &DynamicTimeIndexedShootingProblem::get_tau)
         .def_property("T", &DynamicTimeIndexedShootingProblem::get_T, &DynamicTimeIndexedShootingProblem::set_T)
@@ -1223,10 +1245,14 @@ PYBIND11_MODULE(_pyexotica, module)
     collision_proxy.def_readonly("normal_1", &CollisionProxy::normal1);
     collision_proxy.def_readonly("normal_2", &CollisionProxy::normal2);
     collision_proxy.def_readonly("distance", &CollisionProxy::distance);
-    collision_proxy.def_property_readonly("object_1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->segment.getName() : std::string(""); });
-    collision_proxy.def_property_readonly("object_2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->segment.getName() : std::string(""); });
-    collision_proxy.def_property_readonly("transform_1", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->frame : KDL::Frame(); });
-    collision_proxy.def_property_readonly("transform_2", [](CollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->frame : KDL::Frame(); });
+    collision_proxy.def_property_readonly("object_1", [](CollisionProxy* instance)
+                                          { return (instance->e1 && instance->e2) ? instance->e1->segment.getName() : std::string(""); });
+    collision_proxy.def_property_readonly("object_2", [](CollisionProxy* instance)
+                                          { return (instance->e1 && instance->e2) ? instance->e2->segment.getName() : std::string(""); });
+    collision_proxy.def_property_readonly("transform_1", [](CollisionProxy* instance)
+                                          { return (instance->e1 && instance->e2) ? instance->e1->frame : KDL::Frame(); });
+    collision_proxy.def_property_readonly("transform_2", [](CollisionProxy* instance)
+                                          { return (instance->e1 && instance->e2) ? instance->e2->frame : KDL::Frame(); });
     collision_proxy.def("__repr__", &CollisionProxy::Print);
 
     py::class_<ContinuousCollisionProxy, std::shared_ptr<ContinuousCollisionProxy>> continuous_collision_proxy(module, "ContinuousCollisionProxy");
@@ -1235,10 +1261,14 @@ PYBIND11_MODULE(_pyexotica, module)
     continuous_collision_proxy.def_readonly("contact_transform_2", &ContinuousCollisionProxy::contact_tf2);
     continuous_collision_proxy.def_readonly("in_collision", &ContinuousCollisionProxy::in_collision);
     continuous_collision_proxy.def_readonly("time_of_contact", &ContinuousCollisionProxy::time_of_contact);
-    continuous_collision_proxy.def_property_readonly("object_1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->segment.getName() : std::string(""); });
-    continuous_collision_proxy.def_property_readonly("object_2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->segment.getName() : std::string(""); });
-    continuous_collision_proxy.def_property_readonly("transform_1", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e1->frame : KDL::Frame(); });
-    continuous_collision_proxy.def_property_readonly("transform_2", [](ContinuousCollisionProxy* instance) { return (instance->e1 && instance->e2) ? instance->e2->frame : KDL::Frame(); });
+    continuous_collision_proxy.def_property_readonly("object_1", [](ContinuousCollisionProxy* instance)
+                                                     { return (instance->e1 && instance->e2) ? instance->e1->segment.getName() : std::string(""); });
+    continuous_collision_proxy.def_property_readonly("object_2", [](ContinuousCollisionProxy* instance)
+                                                     { return (instance->e1 && instance->e2) ? instance->e2->segment.getName() : std::string(""); });
+    continuous_collision_proxy.def_property_readonly("transform_1", [](ContinuousCollisionProxy* instance)
+                                                     { return (instance->e1 && instance->e2) ? instance->e1->frame : KDL::Frame(); });
+    continuous_collision_proxy.def_property_readonly("transform_2", [](ContinuousCollisionProxy* instance)
+                                                     { return (instance->e1 && instance->e2) ? instance->e2->frame : KDL::Frame(); });
     continuous_collision_proxy.def("__repr__", &ContinuousCollisionProxy::Print);
 
     py::class_<Scene, std::shared_ptr<Scene>, Object> scene(module, "Scene");
@@ -1249,7 +1279,7 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def_property_readonly("num_state_derivative", &Scene::get_num_state_derivative);
     scene.def_property_readonly("has_quaternion_floating_base", &Scene::get_has_quaternion_floating_base);
     scene.def("update", &Scene::Update, py::arg("x"), py::arg("t") = 0.0);
-    scene.def("get_controlled_joint_names", (std::vector<std::string>(Scene::*)()) & Scene::GetControlledJointNames);
+    scene.def("get_controlled_joint_names", (std::vector<std::string> (Scene::*)())&Scene::GetControlledJointNames);
     scene.def("get_controlled_link_names", &Scene::GetControlledLinkNames);
     scene.def("get_model_link_names", &Scene::GetModelLinkNames);
     scene.def("get_kinematic_tree", &Scene::GetKinematicTree, py::return_value_policy::reference_internal);
@@ -1258,91 +1288,94 @@ PYBIND11_MODULE(_pyexotica, module)
     scene.def("get_model_joint_names", &Scene::GetModelJointNames);
     scene.def("get_model_state", &Scene::GetModelState);
     scene.def("get_model_state_map", &Scene::GetModelStateMap);
-    scene.def("get_tree_names", [](Scene& scene) {
+    scene.def("get_tree_names", [](Scene& scene)
+              {
         std::vector<std::string> frame_names;
         for (const auto& m : scene.GetTreeMap())
         {
             frame_names.push_back(m.first);
         }
-        return frame_names;
-    });
-    scene.def("set_model_state", (void (Scene::*)(Eigen::VectorXdRefConst, double, bool)) & Scene::SetModelState, py::arg("x"), py::arg("t") = 0.0, py::arg("update_trajectory") = false);
-    scene.def("set_model_state_map", (void (Scene::*)(const std::map<std::string, double>&, double, bool)) & Scene::SetModelState, py::arg("x"), py::arg("t") = 0.0, py::arg("update_trajectory") = false);
+        return frame_names; });
+    scene.def("set_model_state", (void (Scene::*)(Eigen::VectorXdRefConst, double, bool))&Scene::SetModelState, py::arg("x"), py::arg("t") = 0.0, py::arg("update_trajectory") = false);
+    scene.def("set_model_state_map", (void (Scene::*)(const std::map<std::string, double>&, double, bool))&Scene::SetModelState, py::arg("x"), py::arg("t") = 0.0, py::arg("update_trajectory") = false);
     scene.def("get_controlled_state", &Scene::GetControlledState);
     scene.def("publish_scene", &Scene::PublishScene);
     scene.def("publish_proxies", &Scene::PublishProxies);
     scene.def("update_planning_scene", &Scene::UpdatePlanningScene);
     scene.def("load_scene",
-              (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::LoadScene,
+              (void (Scene::*)(const std::string&, const KDL::Frame&, bool))&Scene::LoadScene,
               py::arg("scene_string"),
               py::arg("offset_transform") = kdl_frame(),
               py::arg("update_collision_scene") = true);
     scene.def("load_scene_file",
-              (void (Scene::*)(const std::string&, const KDL::Frame&, bool)) & Scene::LoadSceneFile,
+              (void (Scene::*)(const std::string&, const KDL::Frame&, bool))&Scene::LoadSceneFile,
               py::arg("file_name"),
               py::arg("offset_transform") = kdl_frame(),
               py::arg("update_collision_scene") = true);
     scene.def("get_scene", &Scene::GetScene);
     scene.def("clean_scene", &Scene::CleanScene);
-    scene.def("is_state_valid", [](Scene* instance, bool self, double safe_distance) { return instance->GetCollisionScene()->IsStateValid(self, safe_distance); }, py::arg("check_self_collision") = true, py::arg("safe_distance") = 0.0);
-    scene.def("is_collision_free", [](Scene* instance, const std::string& o1, const std::string& o2, double safe_distance) { return instance->GetCollisionScene()->IsCollisionFree(o1, o2, safe_distance); }, py::arg("object_1"), py::arg("object_2"), py::arg("safe_distance") = 0.0);
-    scene.def("is_allowed_to_collide", [](Scene* instance, const std::string& o1, const std::string& o2, bool self) { return instance->GetCollisionScene()->IsAllowedToCollide(o1, o2, self); }, py::arg("object_1"), py::arg("object_2"), py::arg("check_self_collision") = true);
-    scene.def("get_collision_distance", [](Scene* instance, bool self) { return instance->GetCollisionScene()->GetCollisionDistance(self); }, py::arg("check_self_collision") = true);
-    scene.def("get_collision_distance", [](Scene* instance, const std::string& o1, const std::string& o2) { return instance->GetCollisionScene()->GetCollisionDistance(o1, o2); }, py::arg("object_1"), py::arg("object_2"));
-    scene.def("get_collision_distance",
-              [](Scene* instance, const std::string& o1, const bool& self) {
-                  return instance->GetCollisionScene()->GetCollisionDistance(o1, self);
-              },
-              py::arg("object_1"), py::arg("check_self_collision") = true);
-    scene.def("get_collision_distance",
-              [](Scene* instance, const std::vector<std::string>& objects, const bool& self) {
-                  return instance->GetCollisionScene()->GetCollisionDistance(objects, self);
-              },
-              py::arg("objects"), py::arg("check_self_collision") = true);
+    scene.def("is_state_valid", [](Scene* instance, bool self, double safe_distance)
+              { return instance->GetCollisionScene()->IsStateValid(self, safe_distance); }, py::arg("check_self_collision") = true, py::arg("safe_distance") = 0.0);
+    scene.def("is_collision_free", [](Scene* instance, const std::string& o1, const std::string& o2, double safe_distance)
+              { return instance->GetCollisionScene()->IsCollisionFree(o1, o2, safe_distance); }, py::arg("object_1"), py::arg("object_2"), py::arg("safe_distance") = 0.0);
+    scene.def("is_allowed_to_collide", [](Scene* instance, const std::string& o1, const std::string& o2, bool self)
+              { return instance->GetCollisionScene()->IsAllowedToCollide(o1, o2, self); }, py::arg("object_1"), py::arg("object_2"), py::arg("check_self_collision") = true);
+    scene.def("get_collision_distance", [](Scene* instance, bool self)
+              { return instance->GetCollisionScene()->GetCollisionDistance(self); }, py::arg("check_self_collision") = true);
+    scene.def("get_collision_distance", [](Scene* instance, const std::string& o1, const std::string& o2)
+              { return instance->GetCollisionScene()->GetCollisionDistance(o1, o2); }, py::arg("object_1"), py::arg("object_2"));
+    scene.def("get_collision_distance", [](Scene* instance, const std::string& o1, const bool& self)
+              { return instance->GetCollisionScene()->GetCollisionDistance(o1, self); }, py::arg("object_1"), py::arg("check_self_collision") = true);
+    scene.def("get_collision_distance", [](Scene* instance, const std::vector<std::string>& objects, const bool& self)
+              { return instance->GetCollisionScene()->GetCollisionDistance(objects, self); }, py::arg("objects"), py::arg("check_self_collision") = true);
     scene.def("update_planning_scene_world",
-              [](Scene* instance, moveit_msgs::msg::PlanningSceneWorld& world) {
+              [](Scene* instance, moveit_msgs::msg::PlanningSceneWorld& world)
+              {
                   moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr my_ptr(
                       new moveit_msgs::msg::PlanningSceneWorld(world));
                   instance->UpdatePlanningSceneWorld(my_ptr);
               });
     scene.def("update_collision_objects", &Scene::UpdateCollisionObjects);
-    scene.def("get_collision_robot_links", [](Scene* instance) { return instance->GetCollisionScene()->GetCollisionRobotLinks(); });
-    scene.def("get_collision_world_links", [](Scene* instance) { return instance->GetCollisionScene()->GetCollisionWorldLinks(); });
+    scene.def("get_collision_robot_links", [](Scene* instance)
+              { return instance->GetCollisionScene()->GetCollisionRobotLinks(); });
+    scene.def("get_collision_world_links", [](Scene* instance)
+              { return instance->GetCollisionScene()->GetCollisionWorldLinks(); });
     scene.def("get_root_frame_name", &Scene::GetRootFrameName);
     scene.def("get_root_joint_name", &Scene::GetRootJointName);
     scene.def("attach_object", &Scene::AttachObject);
-    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const KDL::Frame& pose)) & Scene::AttachObjectLocal);
-    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const Eigen::VectorXd& pose)) & Scene::AttachObjectLocal);
+    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const KDL::Frame& pose))&Scene::AttachObjectLocal);
+    scene.def("attach_object_local", (void (Scene::*)(const std::string& name, const std::string& parent, const Eigen::VectorXd& pose))&Scene::AttachObjectLocal);
     scene.def("detach_object", &Scene::DetachObject);
     scene.def("has_attached_object", &Scene::HasAttachedObject);
-    scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().FK(e1, o1, e2, o2); });
-    scene.def("fk", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->GetKinematicTree().FK(e1, KDL::Frame(), e2, KDL::Frame()); });
-    scene.def("fk", [](Scene* instance, const std::string& e1) { return instance->GetKinematicTree().FK(e1, KDL::Frame(), "", KDL::Frame()); });
-    scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().Jacobian(e1, o1, e2, o2); });
-    scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->GetKinematicTree().Jacobian(e1, KDL::Frame(), e2, KDL::Frame()); });
-    scene.def("jacobian", [](Scene* instance, const std::string& e1) { return instance->GetKinematicTree().Jacobian(e1, KDL::Frame(), "", KDL::Frame()); });
-    scene.def("hessian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2) { return instance->GetKinematicTree().Hessian(e1, o1, e2, o2); });
-    scene.def("hessian", [](Scene* instance, const std::string& e1, const std::string& e2) { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), e2, KDL::Frame()); });
-    scene.def("hessian", [](Scene* instance, const std::string& e1) { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), "", KDL::Frame()); });
+    scene.def("fk", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2)
+              { return instance->GetKinematicTree().FK(e1, o1, e2, o2); });
+    scene.def("fk", [](Scene* instance, const std::string& e1, const std::string& e2)
+              { return instance->GetKinematicTree().FK(e1, KDL::Frame(), e2, KDL::Frame()); });
+    scene.def("fk", [](Scene* instance, const std::string& e1)
+              { return instance->GetKinematicTree().FK(e1, KDL::Frame(), "", KDL::Frame()); });
+    scene.def("jacobian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2)
+              { return instance->GetKinematicTree().Jacobian(e1, o1, e2, o2); });
+    scene.def("jacobian", [](Scene* instance, const std::string& e1, const std::string& e2)
+              { return instance->GetKinematicTree().Jacobian(e1, KDL::Frame(), e2, KDL::Frame()); });
+    scene.def("jacobian", [](Scene* instance, const std::string& e1)
+              { return instance->GetKinematicTree().Jacobian(e1, KDL::Frame(), "", KDL::Frame()); });
+    scene.def("hessian", [](Scene* instance, const std::string& e1, const KDL::Frame& o1, const std::string& e2, const KDL::Frame& o2)
+              { return instance->GetKinematicTree().Hessian(e1, o1, e2, o2); });
+    scene.def("hessian", [](Scene* instance, const std::string& e1, const std::string& e2)
+              { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), e2, KDL::Frame()); });
+    scene.def("hessian", [](Scene* instance, const std::string& e1)
+              { return instance->GetKinematicTree().Hessian(e1, KDL::Frame(), "", KDL::Frame()); });
     scene.def("add_trajectory_from_file", &Scene::AddTrajectoryFromFile);
-    scene.def("add_trajectory", (void (Scene::*)(const std::string&, const std::string&)) & Scene::AddTrajectory);
-    scene.def("add_trajectory_from_array",
-              [](Scene* instance, const std::string& link, const Eigen::MatrixXd& data, double radius) {
-                  instance->AddTrajectory(link, std::shared_ptr<Trajectory>(new Trajectory(data, radius)));
-              },
-              py::arg("link"), py::arg("data"), py::arg("radius"));
-    scene.def("get_trajectory", [](Scene* instance, const std::string& link) { return instance->GetTrajectory(link)->ToString(); });
+    scene.def("add_trajectory", (void (Scene::*)(const std::string&, const std::string&))&Scene::AddTrajectory);
+    scene.def("add_trajectory_from_array", [](Scene* instance, const std::string& link, const Eigen::MatrixXd& data, double radius)
+              { instance->AddTrajectory(link, std::shared_ptr<Trajectory>(new Trajectory(data, radius))); }, py::arg("link"), py::arg("data"), py::arg("radius"));
+    scene.def("get_trajectory", [](Scene* instance, const std::string& link)
+              { return instance->GetTrajectory(link)->ToString(); });
     scene.def("remove_trajectory", &Scene::RemoveTrajectory);
     scene.def("update_scene_frames", &Scene::UpdateSceneFrames);
-    scene.def("add_object", [](Scene* instance, const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, const Eigen::Vector3d scale, const Eigen::Vector4d color, const bool update_collision_scene) { instance->AddObject(name, transform, parent, shape_resource_path, scale, KDL::RigidBodyInertia::Zero(), color, update_collision_scene); },
-              py::arg("name"),
-              py::arg("transform") = KDL::Frame(),
-              py::arg("parent") = "",
-              py::arg("shape_resource_path"),
-              py::arg("scale") = Eigen::Vector3d::Ones(),
-              py::arg("color") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0),
-              py::arg("update_collision_scene") = true);
-    scene.def("add_object", (void (Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, const Eigen::Vector4d&, const bool)) & Scene::AddObject,
+    scene.def("add_object", [](Scene* instance, const std::string& name, const KDL::Frame& transform, const std::string& parent, const std::string& shape_resource_path, const Eigen::Vector3d scale, const Eigen::Vector4d color, const bool update_collision_scene)
+              { instance->AddObject(name, transform, parent, shape_resource_path, scale, KDL::RigidBodyInertia::Zero(), color, update_collision_scene); }, py::arg("name"), py::arg("transform") = KDL::Frame(), py::arg("parent") = "", py::arg("shape_resource_path"), py::arg("scale") = Eigen::Vector3d::Ones(), py::arg("color") = Eigen::Vector4d(0.5, 0.5, 0.5, 1.0), py::arg("update_collision_scene") = true);
+    scene.def("add_object", (void (Scene::*)(const std::string&, const KDL::Frame&, const std::string&, shapes::ShapeConstPtr, const KDL::RigidBodyInertia&, const Eigen::Vector4d&, const bool))&Scene::AddObject,
               py::arg("name"),
               py::arg("transform") = KDL::Frame(),
               py::arg("parent") = std::string(),
@@ -1434,31 +1467,35 @@ PYBIND11_MODULE(_pyexotica, module)
     kinematic_tree.def("get_velocity_limits", &KinematicTree::GetVelocityLimits);
     kinematic_tree.def("has_acceleration_limits", &KinematicTree::HasAccelerationLimits);
     kinematic_tree.def("get_acceleration_limits", &KinematicTree::GetAccelerationLimits);
-    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
-    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
-    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
-    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&)) & KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
+    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&))&KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
+    kinematic_tree.def("set_floating_base_limits_pos_xyz_euler_zyx", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&))&KinematicTree::SetFloatingBaseLimitsPosXYZEulerZYX);
+    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&))&KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
+    kinematic_tree.def("set_planar_base_limits_pos_xy_euler_z", (void (KinematicTree::*)(const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&))&KinematicTree::SetPlanarBaseLimitsPosXYEulerZ);
     kinematic_tree.def("get_used_joint_limits", &KinematicTree::GetUsedJointLimits);
 
     // Get full tree
     kinematic_tree.def("get_model_tree", &KinematicTree::GetModelTree);
-    kinematic_tree.def("get_tree", [](KinematicTree* kt) {
+    kinematic_tree.def("get_tree", [](KinematicTree* kt)
+                       {
         auto tree_weak_ptr = kt->GetTree();
         std::vector<std::shared_ptr<KinematicElement>> tree_shared_ptr;
         tree_shared_ptr.reserve(tree_weak_ptr.size());
         for (auto e : tree_weak_ptr)
             tree_shared_ptr.emplace_back(e.lock());
-        return tree_shared_ptr;
-    });
+        return tree_shared_ptr; });
 
     // KinematicElement
     py::class_<KinematicElement, std::shared_ptr<KinematicElement>> kinematic_element(kin, "KinematicElement");
     kinematic_element.def("get_pose", &KinematicElement::GetPose);
     kinematic_element.def_readonly("id", &KinematicElement::id);
-    kinematic_element.def("get_segment_name", [](KinematicElement* element) { return element->segment.getName(); });
-    kinematic_element.def("get_joint_name", [](KinematicElement* element) { return element->segment.getJoint().getName(); });
-    kinematic_element.def("get_parent_name", [](KinematicElement* element) { auto parent = element->parent.lock(); if (parent) { return parent->segment.getName(); } else { return std::string("no_parent"); } });
-    kinematic_element.def("get_mass", [](KinematicElement* element) { return element->segment.getInertia().getMass(); });
+    kinematic_element.def("get_segment_name", [](KinematicElement* element)
+                          { return element->segment.getName(); });
+    kinematic_element.def("get_joint_name", [](KinematicElement* element)
+                          { return element->segment.getJoint().getName(); });
+    kinematic_element.def("get_parent_name", [](KinematicElement* element)
+                          { auto parent = element->parent.lock(); if (parent) { return parent->segment.getName(); } else { return std::string("no_parent"); } });
+    kinematic_element.def("get_mass", [](KinematicElement* element)
+                          { return element->segment.getInertia().getMass(); });
     kinematic_element.def_readonly("control_id", &KinematicElement::control_id);
     kinematic_element.def_readonly("is_controlled", &KinematicElement::is_controlled);
     kinematic_element.def_readonly("parent_name", &KinematicElement::parent_name);
@@ -1472,12 +1509,12 @@ PYBIND11_MODULE(_pyexotica, module)
 
     // KinematicResponse
     py::class_<KinematicResponse, std::shared_ptr<KinematicResponse>> kinematic_response(kin, "KinematicResponse");
-    kinematic_response.def_property_readonly("Phi", [](KinematicResponse* instance) {
+    kinematic_response.def_property_readonly("Phi", [](KinematicResponse* instance)
+                                             {
         std::vector<KDL::Frame> vec;
         for (unsigned int i = 0; i < instance->Phi.cols(); ++i)
             vec.push_back(instance->Phi(i));
-        return vec;
-    });
+        return vec; });
 
     py::enum_<Integrator>(module, "Integrator")
         .value("RK1", Integrator::RK1)
@@ -1502,7 +1539,7 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_property("integrator", &DynamicsSolver::get_integrator, &DynamicsSolver::set_integrator)
         .def("get_position", &DynamicsSolver::GetPosition)
         .def("simulate", &DynamicsSolver::Simulate)
-        .def("state_delta", (Eigen::VectorXd(DynamicsSolver::*)(const Eigen::VectorXd&, const Eigen::VectorXd&)) & DynamicsSolver::StateDelta)
+        .def("state_delta", (Eigen::VectorXd (DynamicsSolver::*)(const Eigen::VectorXd&, const Eigen::VectorXd&))&DynamicsSolver::StateDelta)
         .def("state_delta_derivative", &DynamicsSolver::dStateDelta)
         .def("state_delta_second_derivative", &DynamicsSolver::ddStateDelta)
         .def("compute_derivatives", &DynamicsSolver::ComputeDerivatives)
@@ -1510,11 +1547,11 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("get_Fu", &DynamicsSolver::get_Fu)
         .def("get_fx", &DynamicsSolver::get_fx)
         .def("get_fu", &DynamicsSolver::get_fu)
-        .def("integrate", [](DynamicsSolver* instance, Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, const double dt) {
+        .def("integrate", [](DynamicsSolver* instance, Eigen::VectorXdRefConst x, Eigen::VectorXdRefConst u, const double dt)
+             {
             Eigen::VectorXd xout(instance->get_num_positions() + instance->get_num_velocities());
             instance->Integrate(x, u, dt, xout);
-            return xout;
-        })
+            return xout; })
         .def_property_readonly("dt", &DynamicsSolver::get_dt, "dt");
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1571,22 +1608,20 @@ PYBIND11_MODULE(_pyexotica, module)
         .def("mergeVertices", &shapes::Mesh::mergeVertices)
         .def_readonly("vertex_count", &shapes::Mesh::vertex_count)
         .def_readonly("triangle_count", &shapes::Mesh::triangle_count)
-        .def_property_readonly("vertices", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->vertices, instance->vertex_count); })
-        .def_property_readonly("triangles", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>>(instance->triangles, instance->triangle_count); })
-        .def_property_readonly("triangle_normals", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->triangle_normals, instance->triangle_count); })
-        .def_property_readonly("vertex_normals", [](shapes::Mesh* instance) { return Eigen::Map<const Eigen::VectorXd>(instance->vertex_normals, instance->vertex_count); })
-        .def_static("createMeshFromResource", [](const std::string& resource) {
-            return shapes::createMeshFromResource("file://" + ParsePath(resource));
-        },
-                    py::arg("resource_path"), py::return_value_policy::take_ownership)
-        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices) {
-            return shapes::createMeshFromVertices(vertices);
-        },
-                    py::arg("vertices"), py::return_value_policy::take_ownership)
-        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices, const std::vector<unsigned int>& triangles) {
-            return shapes::createMeshFromVertices(vertices, triangles);
-        },
-                    py::arg("vertices"), py::arg("triangles"), py::return_value_policy::take_ownership);
+        .def_property_readonly("vertices", [](shapes::Mesh* instance)
+                               { return Eigen::Map<const Eigen::VectorXd>(instance->vertices, instance->vertex_count); })
+        .def_property_readonly("triangles", [](shapes::Mesh* instance)
+                               { return Eigen::Map<const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>>(instance->triangles, instance->triangle_count); })
+        .def_property_readonly("triangle_normals", [](shapes::Mesh* instance)
+                               { return Eigen::Map<const Eigen::VectorXd>(instance->triangle_normals, instance->triangle_count); })
+        .def_property_readonly("vertex_normals", [](shapes::Mesh* instance)
+                               { return Eigen::Map<const Eigen::VectorXd>(instance->vertex_normals, instance->vertex_count); })
+        .def_static("createMeshFromResource", [](const std::string& resource)
+                    { return shapes::createMeshFromResource("file://" + ParsePath(resource)); }, py::arg("resource_path"), py::return_value_policy::take_ownership)
+        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices)
+                    { return shapes::createMeshFromVertices(vertices); }, py::arg("vertices"), py::return_value_policy::take_ownership)
+        .def_static("createMeshFromVertices", [](const EigenSTL::vector_Vector3d& vertices, const std::vector<unsigned int>& triangles)
+                    { return shapes::createMeshFromVertices(vertices, triangles); }, py::arg("vertices"), py::arg("triangles"), py::return_value_policy::take_ownership);
 
     py::class_<shapes::OcTree, shapes::Shape, std::shared_ptr<shapes::OcTree>>(module, "OcTree")
         .def(py::init())
@@ -1621,28 +1656,27 @@ PYBIND11_MODULE(_pyexotica, module)
         .def_readonly("clamped_idx", &BoxQPSolution::clamped_idx);
 
     module.def("box_qp",
-               (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
-                                 const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
-                                 const Eigen::VectorXd& x_init, const double gamma,
-                                 const int max_iterations, const double epsilon, const double lambda,
-                                 bool use_polynomial_linesearch,
-                                 bool use_cholesky_factorization)) &
-                   BoxQP,
+               (BoxQPSolution (*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                  const Eigen::VectorXd& x_init, const double gamma,
+                                  const int max_iterations, const double epsilon, const double lambda,
+                                  bool use_polynomial_linesearch,
+                                  bool use_cholesky_factorization))&BoxQP,
                py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = true, py::arg("use_cholesky_factorization") = true);
 
     module.def("box_qp_old",
-               (BoxQPSolution(*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
-                                 const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
-                                 const Eigen::VectorXd& x_init, const double gamma,
-                                 const int max_iterations, const double epsilon, const double lambda,
-                                 bool use_polynomial_linesearch,
-                                 bool use_cholesky_factorization)) &
-                   ExoticaBoxQP,
+               (BoxQPSolution (*)(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
+                                  const Eigen::VectorXd& b_low, const Eigen::VectorXd& b_high,
+                                  const Eigen::VectorXd& x_init, const double gamma,
+                                  const int max_iterations, const double epsilon, const double lambda,
+                                  bool use_polynomial_linesearch,
+                                  bool use_cholesky_factorization))&ExoticaBoxQP,
                py::arg("H"), py::arg("q"), py::arg("b_low"), py::arg("b_high"), py::arg("x_init"), py::arg("gamma"), py::arg("max_iterations"), py::arg("epsilon"), py::arg("lambda"), py::arg("use_polynomial_linesearch") = false, py::arg("use_cholesky_factorization") = false);
 
     AddInitializers(module);
 
-    auto cleanup_exotica = []() {
+    auto cleanup_exotica = []()
+    {
         known_initializers.clear();
         Setup::Destroy();
     };

@@ -43,11 +43,10 @@ void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi)
 }
 
 void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi,
-    Eigen::MatrixXdRef jacobian)
+                       Eigen::MatrixXdRef jacobian)
 {
     if (phi.rows() != static_cast<int>(joint_map_.size())) ThrowNamed("Wrong size of Phi!");
-    if (jacobian.rows() != static_cast<int>(joint_map_.size())
-            || jacobian.cols() != num_controlled_joints_)
+    if (jacobian.rows() != static_cast<int>(joint_map_.size()) || jacobian.cols() != num_controlled_joints_)
         ThrowNamed("Wrong size of jacobian! " << num_controlled_joints_);
     for (std::size_t i = 0; i < joint_map_.size(); ++i)
     {
@@ -57,7 +56,7 @@ void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi,
 }
 
 void JointPose::Update(Eigen::VectorXdRefConst q, Eigen::VectorXdRef phi,
-    Eigen::MatrixXdRef jacobian, HessianRef hessian)
+                       Eigen::MatrixXdRef jacobian, HessianRef hessian)
 {
     // Hessian is 0
     Update(q, phi, jacobian);
@@ -81,11 +80,13 @@ void JointPose::Initialize()
         {
             if (parameters_.JointMap(i) >= num_controlled_joints_)
                 ThrowPretty("JointMap index (" << parameters_.JointMap(i)
-                    << ") is greater than number of controlled joints ("
-                    << num_controlled_joints_ << ")!");
+                                               << ") is greater than number of controlled joints ("
+                                               << num_controlled_joints_ << ")!");
             joint_map_[i] = parameters_.JointMap(i);
         }
-    } else if (parameters_.JointNames.size() > 0) {
+    }
+    else if (parameters_.JointNames.size() > 0)
+    {
         joint_map_.resize(parameters_.JointNames.size());
         const auto& controlled_joints = scene_->GetKinematicTree().GetControlledJointNames();
         for (std::size_t i = 0; i < parameters_.JointNames.size(); ++i)
@@ -100,10 +101,12 @@ void JointPose::Initialize()
                 }
             }
             if (index < 0) ThrowPretty("Could not find joint " << parameters_.JointNames[i]
-                << " in the kinematic tree!");
+                                                               << " in the kinematic tree!");
             joint_map_[i] = index;
         }
-    } else {
+    }
+    else
+    {
         joint_map_.resize(num_controlled_joints_);
         for (int i = 0; i < num_controlled_joints_; ++i)
         {
@@ -116,8 +119,10 @@ void JointPose::Initialize()
         joint_ref_ = parameters_.JointRef;
         if (joint_ref_.rows() != static_cast<int>(joint_map_.size()))
             ThrowNamed("Invalid joint reference size! Expecting " << joint_map_.size()
-                << " but received " << joint_ref_.rows());
-    } else {
+                                                                  << " but received " << joint_ref_.rows());
+    }
+    else
+    {
         joint_ref_ = Eigen::VectorXd::Zero(joint_map_.size());
     }
 }
@@ -143,7 +148,7 @@ void JointPose::set_joint_ref(Eigen::VectorXdRefConst ref)
         joint_ref_ = ref;
     else
         ThrowPretty("Wrong size - expected " << joint_ref_.size() << ", but received "
-            << ref.size());
+                                             << ref.size());
 }
 
 }  // namespace exotica

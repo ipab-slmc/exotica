@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_JOINT_VELOCITY_LIMIT_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/joint_velocity_limit_initializer.h>
 
 namespace exotica

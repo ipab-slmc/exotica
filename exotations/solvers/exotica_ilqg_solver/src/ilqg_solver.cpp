@@ -132,12 +132,10 @@ void ILQGSolver::BackwardPass()
         }
 
         // fix for large values
-        S = S.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-            return std::min(std::max(x, min_clamp_), max_clamp_);
-        });
-        s = s.unaryExpr([min_clamp_, max_clamp_](double x) -> double {
-            return std::min(std::max(x, min_clamp_), max_clamp_);
-        });
+        S = S.unaryExpr([min_clamp_, max_clamp_](double x) -> double
+                        { return std::min(std::max(x, min_clamp_), max_clamp_); });
+        s = s.unaryExpr([min_clamp_, max_clamp_](double x) -> double
+                        { return std::min(std::max(x, min_clamp_), max_clamp_); });
         s0 = std::min(std::max(s0, min_clamp_), max_clamp_);
     }
 }

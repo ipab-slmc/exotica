@@ -27,9 +27,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <tf2_kdl/tf2_kdl.hpp>
-
 #include <exotica_core/server.h>
+
+#include <tf2_kdl/tf2_kdl.hpp>
 
 namespace
 {

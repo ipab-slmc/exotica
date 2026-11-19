@@ -25,13 +25,12 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-//v
+// v
 
 #ifndef EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H_
 #define EXOTICA_CORE_TASK_MAPS_EFF_VELOCITY_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/eff_velocity_initializer.h>
 
 namespace exotica

@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_EFF_BOX_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/eff_box_initializer.h>
 #include <exotica_core_task_maps/frame_with_box_limits_initializer.h>
 
@@ -58,10 +57,10 @@ public:
     Eigen::Vector3d GetUpperLimit(const int eff_id) const;
 
 private:
-    Eigen::VectorXd eff_lower_;   ///< End-effector lower x, y, z limit.
-    Eigen::VectorXd eff_upper_;   ///< End-effector upper x, y, z limit.
-    int n_effs_;                  ///< Number of end-effectors.
-    int three_times_n_effs_;      ///> Three multiplied by the number of end-effectors.
+    Eigen::VectorXd eff_lower_;                                                       ///< End-effector lower x, y, z limit.
+    Eigen::VectorXd eff_upper_;                                                       ///< End-effector upper x, y, z limit.
+    int n_effs_;                                                                      ///< Number of end-effectors.
+    int three_times_n_effs_;                                                          ///> Three multiplied by the number of end-effectors.
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pub_markers_;  ///< publish marker for RViz
 };
 }  // namespace exotica

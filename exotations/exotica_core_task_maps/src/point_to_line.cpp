@@ -37,7 +37,7 @@ namespace exotica
 PointToLine::PointToLine() = default;
 PointToLine::~PointToLine() = default;
 
-Eigen::Vector3d PointToLine::Direction(const Eigen::Vector3d &point)
+Eigen::Vector3d PointToLine::Direction(const Eigen::Vector3d& point)
 {
     // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
     // let:
@@ -74,7 +74,7 @@ Eigen::Vector3d PointToLine::GetEndPoint()
     return line_end_;
 }
 
-void PointToLine::SetEndPoint(const Eigen::Vector3d &point)
+void PointToLine::SetEndPoint(const Eigen::Vector3d& point)
 {
     line_end_ = point;
     line_ = line_end_ - line_start_;
@@ -225,7 +225,7 @@ void PointToLine::Update(Eigen::VectorXdRefConst x, Eigen::VectorXdRef phi, Eige
     }
 }
 
-void PointToLine::Instantiate(const PointToLineInitializer &init)
+void PointToLine::Instantiate(const PointToLineInitializer& init)
 {
     link_name_ = frames_[0].frame_A_link_name;
     base_name_ = frames_[0].frame_B_link_name;

@@ -27,13 +27,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <type_traits>
-
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
 #include <exotica_core/server.h>
 #include <exotica_core/setup.h>
 #include <exotica_core/tools.h>
+
+#include <type_traits>
 
 namespace exotica
 {

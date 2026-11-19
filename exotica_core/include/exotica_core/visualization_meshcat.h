@@ -30,11 +30,11 @@
 #ifndef EXOTICA_CORE_VISUALIZATION_MESHCAT_H_
 #define EXOTICA_CORE_VISUALIZATION_MESHCAT_H_
 
-#include <memory>
-#include <zmq.hpp>
-
 #include <exotica_core/scene.h>
 #include <exotica_core/tools/uncopyable.h>
+
+#include <memory>
+#include <zmq.hpp>
 
 namespace exotica
 {

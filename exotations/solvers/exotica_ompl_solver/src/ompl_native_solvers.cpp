@@ -27,6 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <exotica_ompl_solver/ompl_native_solvers.h>
 #include <ompl/geometric/planners/cforest/CForest.h>
 #include <ompl/geometric/planners/est/EST.h>
 #include <ompl/geometric/planners/kpiece/BKPIECE1.h>
@@ -38,8 +39,6 @@
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
-
-#include <exotica_ompl_solver/ompl_native_solvers.h>
 
 REGISTER_MOTIONSOLVER_TYPE("RRTSolver", exotica::RRTSolver)
 REGISTER_MOTIONSOLVER_TYPE("RRTConnectSolver", exotica::RRTConnectSolver)
@@ -55,38 +54,42 @@ namespace exotica
 {
 RRTStarSolver::RRTStarSolver() = default;
 
-void RRTStarSolver::Instantiate(const RRTStarSolverInitializer &init)
+void RRTStarSolver::Instantiate(const RRTStarSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(RRTStarSolverInitializer(init));
     algorithm_ = "Exotica_RRTStar";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::RRTstar>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::RRTstar>(si, name); };
 }
 
 LBTRRTSolver::LBTRRTSolver() = default;
 
-void LBTRRTSolver::Instantiate(const LBTRRTSolverInitializer &init)
+void LBTRRTSolver::Instantiate(const LBTRRTSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(LBTRRTSolverInitializer(init));
     algorithm_ = "Exotica_LBTRRT";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::LBTRRT>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::LBTRRT>(si, name); };
 }
 
 RRTSolver::RRTSolver() = default;
 
-void RRTSolver::Instantiate(const RRTSolverInitializer &init)
+void RRTSolver::Instantiate(const RRTSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(RRTSolverInitializer(init));
     algorithm_ = "Exotica_RRT";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::RRT>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::RRT>(si, name); };
 }
 
 RRTConnectSolver::RRTConnectSolver() = default;
 
-void RRTConnectSolver::Instantiate(const RRTConnectSolverInitializer &init)
+void RRTConnectSolver::Instantiate(const RRTConnectSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(RRTConnectSolverInitializer(init));
     algorithm_ = "Exotica_RRTConnect";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::RRTConnect>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::RRTConnect>(si, name); };
 }
 
 void RRTConnectSolver::SetRange(double range)
@@ -103,38 +106,42 @@ double RRTConnectSolver::GetRange()
 
 ESTSolver::ESTSolver() = default;
 
-void ESTSolver::Instantiate(const ESTSolverInitializer &init)
+void ESTSolver::Instantiate(const ESTSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(ESTSolverInitializer(init));
     algorithm_ = "Exotica_EST";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::EST>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::EST>(si, name); };
 }
 
 KPIECESolver::KPIECESolver() = default;
 
-void KPIECESolver::Instantiate(const KPIECESolverInitializer &init)
+void KPIECESolver::Instantiate(const KPIECESolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(KPIECESolverInitializer(init));
     algorithm_ = "Exotica_KPIECE";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::KPIECE1>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::KPIECE1>(si, name); };
 }
 
 BKPIECESolver::BKPIECESolver() = default;
 
-void BKPIECESolver::Instantiate(const BKPIECESolverInitializer &init)
+void BKPIECESolver::Instantiate(const BKPIECESolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(BKPIECESolverInitializer(init));
     algorithm_ = "Exotica_BKPIECE";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::BKPIECE1>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::BKPIECE1>(si, name); };
 }
 
 PRMSolver::PRMSolver() = default;
 
-void PRMSolver::Instantiate(const PRMSolverInitializer &init)
+void PRMSolver::Instantiate(const PRMSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(PRMSolverInitializer(init));
     algorithm_ = "Exotica_PRM";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::PRM>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::PRM>(si, name); };
     multi_query_ = init.MultiQuery;
 }
 
@@ -193,11 +200,12 @@ void PRMSolver::SetMultiQuery(bool val)
 
 LazyPRMSolver::LazyPRMSolver() = default;
 
-void LazyPRMSolver::Instantiate(const LazyPRMSolverInitializer &init)
+void LazyPRMSolver::Instantiate(const LazyPRMSolverInitializer& init)
 {
     init_ = OMPLSolverInitializer(LazyPRMSolverInitializer(init));
     algorithm_ = "Exotica_LazyPRM";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return AllocatePlanner<ompl::geometric::LazyPRM>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return AllocatePlanner<ompl::geometric::LazyPRM>(si, name); };
     multi_query_ = init.MultiQuery;
 }
 

@@ -90,7 +90,8 @@ void OMPLControlSolver::Setup()
     oc::SpaceInformationPtr si = setup_->getSpaceInformation();
 
     si->setPropagationStepSize(dt);
-    setup_->setStateValidityChecker([this, si](const ob::State *state) { return isStateValid(si, state); });
+    setup_->setStateValidityChecker([this, si](const ob::State* state)
+                                    { return isStateValid(si, state); });
 
     std::shared_ptr<OMPLStatePropagator> propagator(std::make_shared<OMPLStatePropagator>(si, dynamics_solver_));
 
@@ -122,7 +123,7 @@ void OMPLControlSolver::Setup()
     propagator->setIntegrationTimeStep(si->getPropagationStepSize());
 }
 
-void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
+void OMPLControlSolver::Solve(Eigen::MatrixXd& solution)
 {
     if (!prob_) ThrowNamed("Solver has not been initialized!");
     Timer planning_timer, backward_pass_timer, line_search_timer;
@@ -139,8 +140,8 @@ void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
 
     if (solved)
     {
-        std::vector<oc::Control *> controls = setup_->getSolutionPath().getControls();
-        std::vector<ob::State *> states = setup_->getSolutionPath().getStates();
+        std::vector<oc::Control*> controls = setup_->getSolutionPath().getControls();
+        std::vector<ob::State*> states = setup_->getSolutionPath().getStates();
         std::vector<double> durations = setup_->getSolutionPath().getControlDurations();
 
         Eigen::VectorXd sol_goal_state = Eigen::Map<Eigen::VectorXd>(
@@ -173,7 +174,7 @@ void OMPLControlSolver::Solve(Eigen::MatrixXd &solution)
         int t = 0;
         for (std::size_t i = 0; i < controls.size(); ++i)
         {
-            double *oc_u = controls[i]->as<oc::RealVectorControlSpace::ControlType>()->values;
+            double* oc_u = controls[i]->as<oc::RealVectorControlSpace::ControlType>()->values;
             Eigen::VectorXd u = Eigen::Map<Eigen::VectorXd>(oc_u, NU);
 
             for (int k = 0; k < static_cast<int>(durations[i] / dt); ++k)

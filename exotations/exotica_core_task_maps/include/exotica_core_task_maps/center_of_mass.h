@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_COM_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/center_of_mass_initializer.h>
 
 #include <visualization_msgs/msg/marker.hpp>

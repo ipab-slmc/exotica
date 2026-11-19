@@ -30,11 +30,12 @@
 #ifndef EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
 #define EXOTICA_OMPL_SOLVER_OMPL_SOLVER_H_
 
-#include <functional>
 #include <exotica_core/motion_solver.h>
 #include <exotica_ompl_solver/ompl_exo.h>
 
-typedef std::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr &si, const std::string &name)> ConfiguredPlannerAllocator;
+#include <functional>
+
+typedef std::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr& si, const std::string& name)> ConfiguredPlannerAllocator;
 
 template <class T, class T1>
 std::shared_ptr<T> ompl_cast(std::shared_ptr<T1> ptr)
@@ -53,7 +54,7 @@ public:
     OMPLSolver();
     virtual ~OMPLSolver();
 
-    void Solve(Eigen::MatrixXd &solution) override;
+    void Solve(Eigen::MatrixXd& solution) override;
     void SpecifyProblem(PlanningProblemPtr pointer) override;
 
     int GetRandomSeed() const;
@@ -67,7 +68,7 @@ public:
 
 protected:
     template <typename T>
-    static ompl::base::PlannerPtr AllocatePlanner(const ompl::base::SpaceInformationPtr &si, const std::string &new_name)
+    static ompl::base::PlannerPtr AllocatePlanner(const ompl::base::SpaceInformationPtr& si, const std::string& new_name)
     {
         ompl::base::PlannerPtr planner(new T(si));
         if (!new_name.empty())
@@ -78,7 +79,7 @@ protected:
     void SetGoalState(Eigen::VectorXdRefConst qT, const double eps = 0);
     void PreSolve();
     void PostSolve();
-    void GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc);
+    void GetPath(Eigen::MatrixXd& traj, ompl::base::PlannerTerminationCondition& ptc);
     OMPLSolverInitializer init_;
     std::shared_ptr<ProblemType> prob_;
     ompl::geometric::SimpleSetupPtr ompl_simple_setup_;

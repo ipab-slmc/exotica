@@ -27,8 +27,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <rclcpp/rclcpp.hpp>
 #include <exotica_core/exotica_core.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 using namespace exotica;
 
@@ -95,7 +96,7 @@ void run()
     // All classes will be destroyed at this point.
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("example_cpp_planner_node");

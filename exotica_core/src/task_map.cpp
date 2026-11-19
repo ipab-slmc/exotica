@@ -27,9 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <exotica_core/task_map.h>
-
 #include <exotica_core/frame_initializer.h>
+#include <exotica_core/task_map.h>
 #include <exotica_core/task_map_initializer.h>
 
 namespace exotica

@@ -30,9 +30,6 @@
 #ifndef EXOTICA_CORE_SETUP_H_
 #define EXOTICA_CORE_SETUP_H_
 
-#include <memory>
-#include <vector>
-
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/factory.h>
 #include <exotica_core/motion_solver.h>
@@ -40,7 +37,9 @@
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/property.h>
 
+#include <memory>
 #include <pluginlib/class_loader.hpp>
+#include <vector>
 
 namespace exotica
 {

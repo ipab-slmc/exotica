@@ -12,7 +12,7 @@ find_package(rclcpp REQUIRED)
 # Helper to add an example executable
 function(add_example target src)
   add_executable(${target} ${src})
-  ament_target_dependencies(${target} PUBLIC exotica_core rclcpp)
+  target_link_libraries(${target} PUBLIC exotica_core::exotica_core rclcpp::rclcpp)
   install(TARGETS ${target} DESTINATION lib/${PROJECT_NAME})
 endfunction()
 
@@ -37,10 +37,10 @@ if(BUILD_TESTING)
   install(DIRECTORY test/resources/ DESTINATION share/${PROJECT_NAME}/test/resources)
 
   ament_add_gtest(test_initializers test/test_initializers.cpp)
-  ament_target_dependencies(test_initializers exotica_core rclcpp)
+  target_link_libraries(test_initializers exotica_core::exotica_core rclcpp::rclcpp)
 
   ament_add_gtest(test_problems test/test_problems.cpp)
-  ament_target_dependencies(test_problems exotica_core)
+  target_link_libraries(test_problems exotica_core::exotica_core)
 endif()
 
 ament_package()

@@ -32,7 +32,6 @@
 
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
-
 #include <exotica_double_integrator_dynamics_solver/double_integrator_dynamics_solver_initializer.h>
 
 namespace exotica

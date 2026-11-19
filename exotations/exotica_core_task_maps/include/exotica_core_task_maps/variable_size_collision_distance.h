@@ -30,12 +30,12 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_VARIABLE_SIZE_COLLISION_DISTANCE_H_
 #define EXOTICA_CORE_TASK_MAPS_VARIABLE_SIZE_COLLISION_DISTANCE_H_
 
+#include <exotica_core/task_map.h>
+#include <exotica_core_task_maps/variable_size_collision_distance_initializer.h>
+
 #include <algorithm>
 #include <cmath>
 #include <limits>
-
-#include <exotica_core/task_map.h>
-#include <exotica_core_task_maps/variable_size_collision_distance_initializer.h>
 
 namespace exotica
 {

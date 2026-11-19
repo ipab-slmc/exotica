@@ -10,10 +10,10 @@
 #ifndef EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H_
 #define EIGEN_FINITEDIFF_CHAIN_JACOBIAN_H_
 
-#include <functional>
-
 #include <exotica_core/tools/finitediff_common.h>
 #include <exotica_core/tools/functor.h>
+
+#include <functional>
 
 namespace Eigen
 {
@@ -36,48 +36,49 @@ public:
     typedef Matrix<Scalar, JacobianInputsAtCompileTime, 1> InputJacobianRowType;
     typedef typename JacobianType::Index Index;
 
-    typedef std::function<void(const InputJacobianRowType &, InputType &)> UpdateFunctionCallbackType;
+    typedef std::function<void(const InputJacobianRowType&, InputType&)> UpdateFunctionCallbackType;
 
-    UpdateFunctionCallbackType update_ = [](const InputJacobianRowType &jx, InputType &x) { x = jx; };
+    UpdateFunctionCallbackType update_ = [](const InputJacobianRowType& jx, InputType& x)
+    { x = jx; };
     Scalar epsfcn_;
 
     FiniteDiffChainJacobian(Scalar epsfcn = 0.) : Functor(), epsfcn_(epsfcn) {}
-    FiniteDiffChainJacobian(const Functor &f, Scalar epsfcn = 0.) : Functor(f), epsfcn_(epsfcn) {}
-    FiniteDiffChainJacobian(const Functor &f, UpdateFunctionCallbackType update, Scalar epsfcn = 0.) : Functor(f), update_(update), epsfcn_(epsfcn) {}
+    FiniteDiffChainJacobian(const Functor& f, Scalar epsfcn = 0.) : Functor(f), epsfcn_(epsfcn) {}
+    FiniteDiffChainJacobian(const Functor& f, UpdateFunctionCallbackType update, Scalar epsfcn = 0.) : Functor(f), update_(update), epsfcn_(epsfcn) {}
 // forward constructors
 #if EIGEN_HAS_VARIADIC_TEMPLATES
     template <typename... T>
-    FiniteDiffChainJacobian(Scalar epsfcn = 0., const T &... Values) : Functor(Values...), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(Scalar epsfcn = 0., const T&... Values) : Functor(Values...), epsfcn_(epsfcn)
     {
     }
     template <typename... T>
-    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T &... Values) : Functor(Values...), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T&... Values) : Functor(Values...), update_(update), epsfcn_(epsfcn)
     {
     }
 #else
     template <typename T0>
-    FiniteDiffChainJacobian(const T0 &a0, Scalar epsfcn = 0.) : Functor(a0), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(const T0& a0, Scalar epsfcn = 0.) : Functor(a0), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1>
-    FiniteDiffChainJacobian(const T0 &a0, const T1 &a1, Scalar epsfcn = 0.) : Functor(a0, a1), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(const T0& a0, const T1& a1, Scalar epsfcn = 0.) : Functor(a0, a1), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1, typename T2>
-    FiniteDiffChainJacobian(const T0 &a0, const T1 &a1, const T2 &a2, Scalar epsfcn = 0.) : Functor(a0, a1, a2), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(const T0& a0, const T1& a1, const T2& a2, Scalar epsfcn = 0.) : Functor(a0, a1, a2), epsfcn_(epsfcn)
     {
     }
 
     template <typename T0>
-    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0 &a0) : Functor(a0), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0& a0) : Functor(a0), update_(update), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1>
-    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0 &a0, const T1 &a1) : Functor(a0, a1), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0& a0, const T1& a1) : Functor(a0, a1), update_(update), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1, typename T2>
-    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0 &a0, const T1 &a1, const T2 &a2) : Functor(a0, a1, a2), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainJacobian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0& a0, const T1& a1, const T2& a2) : Functor(a0, a1, a2), update_(update), epsfcn_(epsfcn)
     {
     }
 #endif
@@ -86,7 +87,7 @@ public:
     // Some compilers don't accept variadic parameters after a default parameter,
     // i.e., we can't just write _jac=0 but we need to overload operator():
     EIGEN_STRONG_INLINE
-    int operator()(const InputJacobianRowType &_jx, ValueType &v) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v) const
     {
         InputType x;
         update_(_jx, x);
@@ -95,7 +96,7 @@ public:
     }
 
     template <typename... ParamsType>
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, const ParamsType &... Params) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, const ParamsType&... Params) const
     {
         InputType x;
         update_(_jx, x);
@@ -104,10 +105,10 @@ public:
     }
 
     template <typename... ParamsType>
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac, const ParamsType &... Params) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, JacobianType& jac, const ParamsType&... Params) const
 #else
     EIGEN_STRONG_INLINE
-    int operator()(const InputJacobianRowType &_jx, ValueType &v) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v) const
     {
         InputType x;
         update_(_jx, x);
@@ -115,7 +116,7 @@ public:
         return 1;
     }
 
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, JacobianType& jac) const
 #endif
     {
         using std::abs;

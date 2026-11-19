@@ -31,9 +31,8 @@
 #define EXOTICA_CORE_UNCONSTRAINED_TIME_INDEXED_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
-#include <exotica_core/tasks.h>
-
 #include <exotica_core/problems/abstract_time_indexed_problem.h>
+#include <exotica_core/tasks.h>
 #include <exotica_core/unconstrained_time_indexed_problem_initializer.h>
 
 namespace exotica

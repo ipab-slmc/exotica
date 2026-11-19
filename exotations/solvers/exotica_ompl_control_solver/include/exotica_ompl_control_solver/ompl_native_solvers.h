@@ -30,12 +30,11 @@
 #ifndef EXOTICA_OMPL_CONTROL_SOLVER_OMPL_NATIVE_SOLVERS_H_
 #define EXOTICA_OMPL_CONTROL_SOLVER_OMPL_NATIVE_SOLVERS_H_
 
+#include <exotica_ompl_control_solver/control_kpiece_solver_initializer.h>
+#include <exotica_ompl_control_solver/control_rrt_solver_initializer.h>
 #include <exotica_ompl_control_solver/ompl_control_solver.h>
 #include <ompl/control/planners/kpiece/KPIECE1.h>
 #include <ompl/control/planners/rrt/RRT.h>
-
-#include <exotica_ompl_control_solver/control_kpiece_solver_initializer.h>
-#include <exotica_ompl_control_solver/control_rrt_solver_initializer.h>
 
 namespace exotica
 {

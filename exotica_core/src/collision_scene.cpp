@@ -28,9 +28,8 @@
 //
 
 #include <exotica_core/collision_scene.h>
-#include <exotica_core/scene.h>
-
 #include <exotica_core/collision_scene_initializer.h>
+#include <exotica_core/scene.h>
 
 namespace exotica
 {

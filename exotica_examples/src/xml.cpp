@@ -27,10 +27,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <chrono>
-#include <rclcpp/rclcpp.hpp>
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
+
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace exotica;
 
@@ -89,7 +90,7 @@ void run()
     // All classes will be destroyed at this point.
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("example_cpp_init_xml_node");

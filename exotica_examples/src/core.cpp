@@ -31,7 +31,7 @@
 
 using namespace exotica;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     HIGHLIGHT("Exotica version: " << exotica::version);
     Setup::PrintSupportedClasses();

@@ -32,13 +32,12 @@
 
 #define MSGPACK_USE_DEFINE_MAP
 
-#include <iostream>
-#include <msgpack.hpp>
-
-#include <geometric_shapes/shapes.h>
-
 #include <exotica_core/scene.h>
 #include <exotica_core/tools.h>
+#include <geometric_shapes/shapes.h>
+
+#include <iostream>
+#include <msgpack.hpp>
 
 // Backwards compatibility switch 16.04 with meshpack version < 2.0.0
 #if (MSGPACK_VERSION_MAJOR >= 2)
@@ -89,7 +88,7 @@ std::string generate_uuid()
 struct Base
 {
     Base() = default;
-    Base(const std::string& type_in, const std::string& path_in) : type(type_in), path(path_in){};
+    Base(const std::string& type_in, const std::string& path_in) : type(type_in), path(path_in) {};
     std::string type;
     std::string path;
 };
@@ -97,8 +96,8 @@ struct Base
 template <typename T>
 struct Property : Base
 {
-    Property() : Base("set_property", ""){};
-    Property(const std::string& path_in, const std::string& property_in, const T& value_in) : Base("set_property", path_in), property(property_in), value(value_in){};
+    Property() : Base("set_property", "") {};
+    Property(const std::string& path_in, const std::string& property_in, const T& value_in) : Base("set_property", path_in), property(property_in), value(value_in) {};
     std::string property;
     T value;
     MSGPACK_DEFINE(type, path, property, value);
@@ -107,7 +106,7 @@ struct Property : Base
 struct MetaData
 {
     MetaData() = default;
-    MetaData(double version_in, const std::string& type_in) : version(version_in), type(type_in){};
+    MetaData(double version_in, const std::string& type_in) : version(version_in), type(type_in) {};
     double version;
     std::string type;
     MSGPACK_DEFINE(version, type);
@@ -140,7 +139,7 @@ struct ObjectData
 {
     ObjectData() = default;
     ObjectData(const std::string& type_in, const std::string& uuid_in,
-               const std::string& geometry_in, const std::string& material_in) : type(type_in), uuid(uuid_in), geometry(geometry_in), material(material_in){};
+               const std::string& geometry_in, const std::string& material_in) : type(type_in), uuid(uuid_in), geometry(geometry_in), material(material_in) {};
     std::string type;
     std::string uuid;
     std::string geometry;
@@ -173,7 +172,7 @@ template <typename T>
 struct SetObjectType
 {
     SetObjectType() = default;
-    SetObjectType(const std::string& path_in, const T& object_in) : type("set_object"), path(path_in), object(object_in){};
+    SetObjectType(const std::string& path_in, const T& object_in) : type("set_object"), path(path_in), object(object_in) {};
     std::string type;
     std::string path;
     T object;
@@ -199,8 +198,8 @@ struct Geometry
 
 struct GeometryBox : Geometry
 {
-    GeometryBox() : Geometry("BoxGeometry", ""){};
-    GeometryBox(double width_in, double height_in, double depth_in, const std::string& uuid_in = "") : Geometry("BoxGeometry", uuid_in), width(width_in), height(height_in), depth(depth_in){};
+    GeometryBox() : Geometry("BoxGeometry", "") {};
+    GeometryBox(double width_in, double height_in, double depth_in, const std::string& uuid_in = "") : Geometry("BoxGeometry", uuid_in), width(width_in), height(height_in), depth(depth_in) {};
     double width;
     double height;
     double depth;
@@ -209,8 +208,8 @@ struct GeometryBox : Geometry
 
 struct GeometryCylinder : Geometry
 {
-    GeometryCylinder() : Geometry("CylinderGeometry", ""){};
-    GeometryCylinder(double radius_in, double height_in, int radialSegments_in = 50, const std::string& uuid_in = "") : Geometry("CylinderGeometry", uuid_in), radiusTop(radius_in), radiusBottom(radius_in), height(height_in), radialSegments(radialSegments_in){};
+    GeometryCylinder() : Geometry("CylinderGeometry", "") {};
+    GeometryCylinder(double radius_in, double height_in, int radialSegments_in = 50, const std::string& uuid_in = "") : Geometry("CylinderGeometry", uuid_in), radiusTop(radius_in), radiusBottom(radius_in), height(height_in), radialSegments(radialSegments_in) {};
     double height;
     double radiusTop;
     double radiusBottom;
@@ -220,8 +219,8 @@ struct GeometryCylinder : Geometry
 
 struct GeometrySphere : Geometry
 {
-    GeometrySphere() : Geometry("SphereGeometry", ""){};
-    GeometrySphere(double radius_in, int widthSegments_in = 50, int heightSegments_in = 50, const std::string& uuid_in = "") : Geometry("SphereGeometry", uuid_in), radius(radius_in), heightSegments(heightSegments_in), widthSegments(widthSegments_in){};
+    GeometrySphere() : Geometry("SphereGeometry", "") {};
+    GeometrySphere(double radius_in, int widthSegments_in = 50, int heightSegments_in = 50, const std::string& uuid_in = "") : Geometry("SphereGeometry", uuid_in), radius(radius_in), heightSegments(heightSegments_in), widthSegments(widthSegments_in) {};
     double radius;
     int widthSegments;
     int heightSegments;
@@ -230,7 +229,7 @@ struct GeometrySphere : Geometry
 
 struct GeometryMesh : Geometry
 {
-    GeometryMesh() : Geometry("_meshfile_geometry", ""){};
+    GeometryMesh() : Geometry("_meshfile_geometry", "") {};
 
     GeometryMesh(const std::string& file_name_in, const std::string& url_in = "", const std::string& format_in = "", const std::string& uuid_in = "") : Geometry("_meshfile_geometry", uuid_in), format(format_in)
     {
@@ -375,7 +374,7 @@ struct GeometryMeshBufferData
 
 struct GeometryMeshBuffer : Geometry
 {
-    GeometryMeshBuffer() : Geometry("BufferGeometry", ""){};
+    GeometryMeshBuffer() : Geometry("BufferGeometry", "") {};
 
     GeometryMeshBuffer(shapes::ShapePtr shape_in, const std::string& uuid_in = "") : Geometry("BufferGeometry", uuid_in)
     {
@@ -412,7 +411,7 @@ MeshObject<T> CreateMeshObject(const T& geometry_in, const Material& material_in
 struct SetTransform
 {
     SetTransform() = default;
-    SetTransform(const std::string& path_in, const std::vector<double>& matrix_in) : type("set_transform"), path(path_in), matrix(matrix_in){};
+    SetTransform(const std::string& path_in, const std::vector<double>& matrix_in) : type("set_transform"), path(path_in), matrix(matrix_in) {};
     std::string type;
     std::string path;
     std::vector<double> matrix;
@@ -422,7 +421,7 @@ struct SetTransform
 struct Key
 {
     Key() = default;
-    Key(double time_in, const std::vector<double>& value_in) : time(time_in), value(value_in){};
+    Key(double time_in, const std::vector<double>& value_in) : time(time_in), value(value_in) {};
     double time;
     std::vector<double> value;
     MSGPACK_DEFINE(time, value);
@@ -431,7 +430,7 @@ struct Key
 struct Track
 {
     Track() = default;
-    Track(const std::string& name_in, const std::string& type_in) : name(name_in), type(type_in){};
+    Track(const std::string& name_in, const std::string& type_in) : name(name_in), type(type_in) {};
     std::string name;
     std::string type;
     std::vector<Key> keys;
@@ -441,7 +440,7 @@ struct Track
 struct Clip
 {
     Clip() = default;
-    Clip(double fps_in, const std::string& name_in) : fps(fps_in), name(name_in){};
+    Clip(double fps_in, const std::string& name_in) : fps(fps_in), name(name_in) {};
     double fps;
     std::string name;
     std::vector<Track> tracks;
@@ -451,7 +450,7 @@ struct Clip
 struct Animation
 {
     Animation() = default;
-    Animation(const std::string& path_in) : path(path_in){};
+    Animation(const std::string& path_in) : path(path_in) {};
     std::string path;
     Clip clip;
     MSGPACK_DEFINE(path, clip);
@@ -478,7 +477,7 @@ struct SetAnimation
 struct Delete
 {
     Delete() = default;
-    Delete(const std::string& path_in) : path(path_in){};
+    Delete(const std::string& path_in) : path(path_in) {};
     std::string type = "delete";
     std::string path = "";
     MSGPACK_DEFINE(type, path);

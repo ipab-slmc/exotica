@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_DISTANCE_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/distance_initializer.h>
 
 namespace exotica

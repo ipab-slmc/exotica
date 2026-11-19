@@ -31,6 +31,7 @@
 #define EXOTICA_CORE_TOOLS_SPARSE_COSTS_H_
 
 #include <exotica_core/tools/exception.h>
+
 #include <Eigen/Dense>
 #include <vector>
 

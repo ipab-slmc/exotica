@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_POINT_TO_LINE_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/point_to_line_initializer.h>
 
 #include <visualization_msgs/msg/marker_array.hpp>

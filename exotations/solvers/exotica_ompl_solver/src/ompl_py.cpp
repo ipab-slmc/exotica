@@ -28,11 +28,10 @@
 //
 
 #undef NDEBUG
+#include <exotica_ompl_solver/ompl_native_solvers.h>
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-
-#include <exotica_ompl_solver/ompl_native_solvers.h>
 
 using namespace exotica;
 namespace py = pybind11;

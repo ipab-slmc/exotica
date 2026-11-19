@@ -32,7 +32,6 @@
 
 #include <exotica_core/motion_solver.h>
 #include <exotica_core/problems/unconstrained_end_pose_problem.h>
-
 #include <exotica_ik_solver/ik_solver_initializer.h>
 
 namespace exotica

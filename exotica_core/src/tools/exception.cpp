@@ -33,7 +33,7 @@ namespace exotica
 {
 Exception::ReportingType Exception::reporting_ = Exception::Message | Exception::FileName | Exception::FunctionName | Exception::LineNumber | Exception::ObjectName;
 
-Exception::Exception(const std::string &msg, const char *file, const char *func, int line, const std::string &object)
+Exception::Exception(const std::string& msg, const char* file, const char* func, int line, const std::string& object)
 {
     std::string tmp;
     if (Exception::reporting_ | FileName) tmp += "In " + std::string(file) + "\n";
@@ -44,7 +44,7 @@ Exception::Exception(const std::string &msg, const char *file, const char *func,
     msg_ = tmp;
 }
 
-const char *Exception::what() const noexcept
+const char* Exception::what() const noexcept
 {
     return msg_.c_str();
 }

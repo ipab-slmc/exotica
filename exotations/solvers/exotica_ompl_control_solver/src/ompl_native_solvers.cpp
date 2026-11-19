@@ -37,7 +37,7 @@ namespace exotica
 // ControlRRTSolver
 ControlRRTSolver::ControlRRTSolver() = default;
 
-void ControlRRTSolver::Instantiate(const ControlRRTSolverInitializer &init)
+void ControlRRTSolver::Instantiate(const ControlRRTSolverInitializer& init)
 {
     init_ = OMPLControlSolverInitializer(ControlRRTSolverInitializer(init));
     algorithm_ = "ControlRRTSolver";
@@ -47,7 +47,7 @@ void ControlRRTSolver::Instantiate(const ControlRRTSolverInitializer &init)
 // ControlKPIECESolver
 ControlKPIECESolver::ControlKPIECESolver() = default;
 
-void ControlKPIECESolver::Instantiate(const ControlKPIECESolverInitializer &init)
+void ControlKPIECESolver::Instantiate(const ControlKPIECESolverInitializer& init)
 {
     init_ = OMPLControlSolverInitializer(ControlKPIECESolverInitializer(init));
     algorithm_ = "ControlKPIECESolver";

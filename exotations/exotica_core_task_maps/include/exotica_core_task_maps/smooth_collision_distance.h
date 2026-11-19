@@ -30,12 +30,11 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_
 #define EXOTICA_CORE_TASK_MAPS_SMOOTH_COLLISION_DISTANCE_H_
 
+#include <exotica_core/task_map.h>
+#include <exotica_core_task_maps/smooth_collision_distance_initializer.h>
+
 #include <algorithm>
 #include <cmath>
-
-#include <exotica_core/task_map.h>
-
-#include <exotica_core_task_maps/smooth_collision_distance_initializer.h>
 
 namespace exotica
 {

@@ -28,11 +28,11 @@
 //
 
 #ifdef MSGPACK_FOUND
-#include <chrono>
-#include <regex>
-
 #include <exotica_core/visualization_meshcat.h>
 #include <exotica_core/visualization_meshcat_types.h>
+
+#include <chrono>
+#include <regex>
 
 // Timeout in ms
 #define TIMEOUT 10000

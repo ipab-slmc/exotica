@@ -27,9 +27,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <exotica_core/exotica_core.h>
+
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
-#include <exotica_core/exotica_core.h>
 
 using namespace exotica;
 
@@ -111,7 +112,7 @@ void run()
     // All classes will be destroyed at this point.
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("example_cpp_init_generic_node");

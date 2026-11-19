@@ -32,7 +32,6 @@
 
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
-
 #include <exotica_core/time_indexed_sampling_problem_initializer.h>
 
 namespace exotica

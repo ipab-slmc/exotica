@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_DISTANCE_TO_LINE_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/distance_to_line_2d_initializer.h>
 
 #include <visualization_msgs/msg/marker_array.hpp>

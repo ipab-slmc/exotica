@@ -27,11 +27,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include <rclcpp/rclcpp.hpp>
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/test_helpers.h>
 #include <gtest/gtest.h>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace exotica;
 

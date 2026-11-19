@@ -66,19 +66,18 @@ target_include_directories(${PROJECT_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(${PROJECT_NAME}
-  exotica_core
-  tf2_kdl
-  tf2_eigen
-  visualization_msgs
-  geometry_msgs
+target_link_libraries(${PROJECT_NAME}
+  exotica_core::exotica_core
+  tf2_kdl::tf2_kdl
+  tf2_eigen::tf2_eigen
+  ${visualization_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
 )
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 # Python bindings module
 pybind11_add_module(exotica_core_task_maps_py MODULE src/task_map_py.cpp)
-ament_target_dependencies(exotica_core_task_maps_py PUBLIC exotica_core exotica_python)
-target_link_libraries(exotica_core_task_maps_py PUBLIC ${PROJECT_NAME})
+target_link_libraries(exotica_core_task_maps_py PUBLIC ${PROJECT_NAME} exotica_core::exotica_core)
 
 install(TARGETS ${PROJECT_NAME}
   EXPORT export_${PROJECT_NAME}

@@ -27,10 +27,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <tinyxml2.h>
-
 #include <exotica_core/loaders/xml_loader.h>
 #include <exotica_core/setup.h>
+#include <tinyxml2.h>
 
 namespace exotica
 {
@@ -85,7 +84,7 @@ void appendChildXML(Initializer& parent, std::string& name, bool isAttribute, ti
                 }
                 else
                 {
-                    //HIGHLIGHT(prefix<<". Adding parsed vector element "<<name<<" to " << parent.GetName());
+                    // HIGHLIGHT(prefix<<". Adding parsed vector element "<<name<<" to " << parent.GetName());
                 }
                 child_tag = child_tag.NextSibling();
             }
@@ -99,7 +98,7 @@ bool parseXML(tinyxml2::XMLHandle& tag, Initializer& parent, const std::string& 
 {
     // Get the name
     std::string name = std::string(tag.ToElement()->Name());
-    //HIGHLIGHT(prefix<<name<<" added");
+    // HIGHLIGHT(prefix<<name<<" added");
     parent.SetName("exotica/" + name);
 
     // Parse values stored in attributes
@@ -124,7 +123,7 @@ bool parseXML(tinyxml2::XMLHandle& tag, Initializer& parent, const std::string& 
         appendChildXML(parent, member_name, false, member_tag, prefix + "- ");
         member_tag = member_tag.NextSibling();
     }
-    //HIGHLIGHT(prefix<<name<<" finished parsing");
+    // HIGHLIGHT(prefix<<name<<" finished parsing");
     return true;
 }
 

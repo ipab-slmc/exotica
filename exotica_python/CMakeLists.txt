@@ -14,13 +14,13 @@ find_package(pybind11 REQUIRED)
 
 # Build the _pyexotica C extension
 pybind11_add_module(_pyexotica MODULE src/pyexotica.cpp)
-ament_target_dependencies(_pyexotica PUBLIC
-  exotica_core
-  geometry_msgs
-  moveit_msgs
-  shape_msgs
-  rclcpp
-  ament_index_cpp
+target_link_libraries(_pyexotica PUBLIC
+  exotica_core::exotica_core
+  ${geometry_msgs_TARGETS}
+  ${moveit_msgs_TARGETS}
+  ${shape_msgs_TARGETS}
+  rclcpp::rclcpp
+  ament_index_cpp::ament_index_cpp
 )
 target_compile_options(_pyexotica PRIVATE -Wno-deprecated-declarations)
 

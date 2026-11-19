@@ -30,14 +30,12 @@
 #ifndef EXOTICA_COLLISION_SCENE_FCL_LATEST_COLLISION_SCENE_FCL_LATEST_H_
 #define EXOTICA_COLLISION_SCENE_FCL_LATEST_COLLISION_SCENE_FCL_LATEST_H_
 
-#include <iostream>
-
+#include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest_initializer.h>
 #include <exotica_core/collision_scene.h>
 #include <exotica_core/tools/conversions.h>
-
-#include <exotica_collision_scene_fcl_latest/collision_scene_fcl_latest_initializer.h>
-
 #include <fcl/fcl.h>  // FCL 0.6 as provided by fcl_catkin
+
+#include <iostream>
 
 namespace exotica
 {

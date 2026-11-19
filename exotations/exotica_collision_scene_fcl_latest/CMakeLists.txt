@@ -18,8 +18,7 @@ target_include_directories(${PROJECT_NAME}
     $<INSTALL_INTERFACE:include>
 )
 
-ament_target_dependencies(${PROJECT_NAME} exotica_core geometric_shapes)
-target_link_libraries(${PROJECT_NAME} fcl)
+target_link_libraries(${PROJECT_NAME} exotica_core::exotica_core geometric_shapes::geometric_shapes fcl)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 install(TARGETS ${PROJECT_NAME}

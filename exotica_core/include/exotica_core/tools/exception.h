@@ -60,8 +60,8 @@ public:
         ObjectName = 16
     };
 
-    explicit Exception(const std::string &msg, const char *file, const char *func, int line, const std::string &object = std::string());
-    virtual const char *what() const noexcept;
+    explicit Exception(const std::string& msg, const char* file, const char* func, int line, const std::string& object = std::string());
+    virtual const char* what() const noexcept;
 
     std::string msg_;
 

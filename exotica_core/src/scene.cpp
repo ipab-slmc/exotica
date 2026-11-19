@@ -27,24 +27,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <geometric_shapes/mesh_operations.h>
-#include <geometric_shapes/shape_operations.h>
-
-#include <exotica_core/dynamics_solver.h>
-#include <exotica_core/scene.h>
-#include <exotica_core/server.h>
-#include <exotica_core/setup.h>
-
 #include <exotica_core/attach_link_initializer.h>
 #include <exotica_core/box_shape_initializer.h>
 #include <exotica_core/collision_scene_initializer.h>
 #include <exotica_core/cylinder_shape_initializer.h>
+#include <exotica_core/dynamics_solver.h>
 #include <exotica_core/link_initializer.h>
 #include <exotica_core/mesh_shape_initializer.h>
 #include <exotica_core/octree_shape_initializer.h>
+#include <exotica_core/scene.h>
+#include <exotica_core/server.h>
+#include <exotica_core/setup.h>
 #include <exotica_core/shape_initializer.h>
 #include <exotica_core/sphere_shape_initializer.h>
 #include <exotica_core/trajectory_initializer.h>
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
 
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 
@@ -419,9 +417,12 @@ visualization_msgs::msg::Marker Scene::ProxyToMarker(const std::vector<Collision
         KDL::Vector n1 = KDL::Vector(proxies[i].normal1(0), proxies[i].normal1(1), proxies[i].normal1(2));
         KDL::Vector n2 = KDL::Vector(proxies[i].normal2(0), proxies[i].normal2(1), proxies[i].normal2(2));
         // Convert KDL::Vector to geometry_msgs::msg::Point
-        auto kdl_to_point = [](const KDL::Vector& v) {
+        auto kdl_to_point = [](const KDL::Vector& v)
+        {
             geometry_msgs::msg::Point p;
-            p.x = v.x(); p.y = v.y(); p.z = v.z();
+            p.x = v.x();
+            p.y = v.y();
+            p.z = v.z();
             return p;
         };
         ret.points[i * 6] = kdl_to_point(c1);

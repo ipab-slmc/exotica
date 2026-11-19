@@ -28,6 +28,7 @@
 //
 
 #include <gtest/gtest.h>
+
 #include <Eigen/Dense>
 
 #if EIGEN_VERSION_AT_LEAST(3, 3, 0)
@@ -63,7 +64,7 @@ struct Function1 : public FunctorType
     };
 
     template <typename T>
-    void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1> &x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> &y) const
+    void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1>& x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1>& y) const
     {
         Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> tmp(y.rows());
         // Always cast known scalar type matrices/vectors into the templated type <T>.
@@ -90,7 +91,7 @@ struct Function2 : public FunctorType
     };
 
     template <typename T>
-    void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1> &x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> &y) const
+    void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1>& x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1>& y) const
     {
         Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> tmp(y.rows());
         for (int i = 0; i < 4; ++i)
@@ -113,7 +114,7 @@ struct Function3 : public FunctorType
     };
 
     template <typename T>
-    void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1> &x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> &y) const
+    void operator()(const Eigen::Matrix<T, FunctorType::InputType::RowsAtCompileTime, 1>& x, Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1>& y) const
     {
         Eigen::Matrix<T, FunctorType::ValueType::RowsAtCompileTime, 1> tmp(y.rows());
         for (int i = 0; i < 4; ++i)
@@ -141,8 +142,8 @@ struct TestingBase
 template <class T>
 struct JacobianFull : public T
 {
-    void operator()(const typename T::InputType &x, typename T::ValueType &y,
-                    typename T::JacobianType &j)
+    void operator()(const typename T::InputType& x, typename T::ValueType& y,
+                    typename T::JacobianType& j)
     {
         typename T::Function f;
         typename T::Diff autoj(f);
@@ -161,8 +162,8 @@ struct JacobianFull : public T
 template <class T>
 struct JacobianCompound : public T
 {
-    void operator()(const typename T::InputType &x, typename T::ValueType &y,
-                    typename T::JacobianType &j, const typename T::Diff::InputJacobianType &ij)
+    void operator()(const typename T::InputType& x, typename T::ValueType& y,
+                    typename T::JacobianType& j, const typename T::Diff::InputJacobianType& ij)
     {
         typename T::Function f;
         typename T::Diff autoj(f);
@@ -184,8 +185,8 @@ struct JacobianFullFinite : public T
 {
     typedef Eigen::FiniteDiffChainJacobian<typename T::Function, mode> diff;
 
-    int operator()(const typename T::InputType &x, typename T::ValueType &y,
-                   typename T::JacobianType &j)
+    int operator()(const typename T::InputType& x, typename T::ValueType& y,
+                   typename T::JacobianType& j)
     {
         typename T::Function f;
         diff autoj(f);
@@ -209,12 +210,13 @@ struct JacobianCompoundFinite : public T
     typedef Eigen::FiniteDiffChainJacobian<typename T::Function, mode> diff;
     typedef typename T2::Function F2;
 
-    int operator()(const typename diff::InputJacobianRowType &x, typename T::ValueType &y,
-                   typename T::JacobianType &j)
+    int operator()(const typename diff::InputJacobianRowType& x, typename T::ValueType& y,
+                   typename T::JacobianType& j)
     {
         typename T::Function f;
 
-        auto compute_intermediate = [](const typename diff::InputJacobianRowType &jx, typename T::InputType &_x) {
+        auto compute_intermediate = [](const typename diff::InputJacobianRowType& jx, typename T::InputType& _x)
+        {
             if (T::InputType::RowsAtCompileTime == Eigen::Dynamic) _x.resize(F2::Values);
             F2 f;
             // This is where the chaining of the functions happens
@@ -236,8 +238,8 @@ struct JacobianCompoundFinite : public T
 template <class T>
 struct HessianFull : public T
 {
-    void operator()(const typename T::InputType &x, typename T::ValueType &y,
-                    typename T::JacobianType &j, typename T::Diff::HessianType &hess)
+    void operator()(const typename T::InputType& x, typename T::ValueType& y,
+                    typename T::JacobianType& j, typename T::Diff::HessianType& hess)
     {
         typename T::Function f;
         typename T::Diff autoj(f);
@@ -265,9 +267,9 @@ struct HessianFull : public T
 template <class T>
 struct HessianCompound : public T
 {
-    void operator()(const typename T::InputType &x, typename T::ValueType &y,
-                    typename T::JacobianType &j, typename T::Diff::HessianType &hess,
-                    const typename T::Diff::InputJacobianType &ij, const typename T::Diff::InputHessianType &ihess)
+    void operator()(const typename T::InputType& x, typename T::ValueType& y,
+                    typename T::JacobianType& j, typename T::Diff::HessianType& hess,
+                    const typename T::Diff::InputJacobianType& ij, const typename T::Diff::InputHessianType& ihess)
     {
         typename T::Function f;
         typename T::Diff autoj(f);
@@ -298,8 +300,8 @@ struct HessianFullFinite : public T
 {
     typedef Eigen::FiniteDiffChainHessian<typename T::Function, mode> diff;
 
-    int operator()(const typename T::InputType &x, typename T::ValueType &y,
-                   typename T::JacobianType &j, typename T::Diff::HessianType &hess)
+    int operator()(const typename T::InputType& x, typename T::ValueType& y,
+                   typename T::JacobianType& j, typename T::Diff::HessianType& hess)
     {
         typename T::Function f;
         diff autoj(f);
@@ -332,12 +334,13 @@ struct HessianCompoundFinite : public T
     typedef Eigen::FiniteDiffChainHessian<typename T::Function, mode> diff;
     typedef typename T2::Function F2;
 
-    int operator()(const typename diff::InputJacobianRowType &x, typename T::ValueType &y,
-                   typename T::JacobianType &j, typename T::Diff::HessianType &hess)
+    int operator()(const typename diff::InputJacobianRowType& x, typename T::ValueType& y,
+                   typename T::JacobianType& j, typename T::Diff::HessianType& hess)
     {
         typename T::Function f;
 
-        auto compute_intermediate = [](const typename diff::InputJacobianRowType &jx, typename T::InputType &_x) {
+        auto compute_intermediate = [](const typename diff::InputJacobianRowType& jx, typename T::InputType& _x)
+        {
             if (T::InputType::RowsAtCompileTime == Eigen::Dynamic) _x.resize(F2::Values);
             F2 f;
             // This is where the chaining of the functions happens
@@ -527,7 +530,7 @@ void TestJacobiansSparse()
 // Hessian norm
 // TODO: define a better norm
 template <typename HessianType1, typename HessianType2>
-double diffNorm(const HessianType1 &A, const HessianType2 &B)
+double diffNorm(const HessianType1& A, const HessianType2& B)
 {
     double ret = 0;
     double tmp;
@@ -782,7 +785,7 @@ TEST(AutoDiffHessianSparse, HessianComputationTemplatedMatrix)
 
 #endif
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
     int ret = RUN_ALL_TESTS();

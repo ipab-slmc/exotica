@@ -18,12 +18,11 @@ find_package(visualization_msgs REQUIRED)
 find_package(octomap_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(orocos_kdl_vendor REQUIRED)
+find_package(orocos_kdl REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(ZMQ REQUIRED libzmq)
 find_path(MSGPACK_INCLUDE_DIR msgpack.hpp REQUIRED)
-find_package(tinyxml2_vendor REQUIRED)
 find_package(TinyXML2 REQUIRED)
 find_package(geometric_shapes REQUIRED)
 
@@ -76,27 +75,25 @@ target_include_directories(${PROJECT_NAME}
     ${ZMQ_INCLUDE_DIRS}
 )
 
-ament_target_dependencies(${PROJECT_NAME}
-  rclcpp
-  ament_index_cpp
-  moveit_core
-  moveit_ros_planning
-  moveit_msgs
-  tf2_ros
-  tf2_eigen_kdl
-  tf2_kdl
-  kdl_parser
-  pluginlib
-  geometry_msgs
-  std_msgs
-  visualization_msgs
-  octomap_msgs
-  shape_msgs
-  sensor_msgs
-  orocos_kdl_vendor
-  geometric_shapes
-)
 target_link_libraries(${PROJECT_NAME}
+  rclcpp::rclcpp
+  ament_index_cpp::ament_index_cpp
+  moveit_core::moveit_robot_model
+  moveit_ros_planning::moveit_robot_model_loader
+  ${moveit_msgs_TARGETS}
+  tf2_ros::tf2_ros
+  tf2_eigen_kdl::tf2_eigen_kdl
+  tf2_kdl::tf2_kdl
+  kdl_parser::kdl_parser
+  pluginlib::pluginlib
+  ${geometry_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  ${octomap_msgs_TARGETS}
+  ${shape_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  orocos-kdl
+  geometric_shapes::geometric_shapes
   ${ZMQ_LIBRARIES}
   tinyxml2::tinyxml2
 )
@@ -163,7 +160,7 @@ ament_export_dependencies(
   rclcpp ament_index_cpp moveit_core moveit_ros_planning moveit_msgs
   tf2_ros tf2_eigen_kdl tf2_kdl kdl_parser pluginlib
   geometry_msgs std_msgs visualization_msgs octomap_msgs
-  shape_msgs sensor_msgs orocos_kdl_vendor geometric_shapes
+  shape_msgs sensor_msgs orocos_kdl geometric_shapes
 )
 
 # Export cmake extras so downstream packages get AddInitializer / GenInitializers

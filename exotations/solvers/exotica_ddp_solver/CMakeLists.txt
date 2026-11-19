@@ -37,7 +37,7 @@ target_include_directories(${PROJECT_NAME}
     $<INSTALL_INTERFACE:include>
 )
 
-ament_target_dependencies(${PROJECT_NAME} PUBLIC exotica_core)
+target_link_libraries(${PROJECT_NAME} PUBLIC exotica_core::exotica_core)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 
 python3_add_library(${PROJECT_NAME}_py MODULE src/ddp_solver_py.cpp)

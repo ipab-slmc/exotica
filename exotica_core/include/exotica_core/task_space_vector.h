@@ -31,6 +31,7 @@
 #define EXOTICA_CORE_TASK_SPACE_VECTOR_H_
 
 #include <exotica_core/tools/conversions.h>
+
 #include <Eigen/Dense>
 #include <kdl/frames.hpp>
 #include <vector>

@@ -32,6 +32,7 @@
 
 #include <exotica_ddp_solver/abstract_ddp_solver.h>
 #include <exotica_ddp_solver/control_limited_ddp_solver_initializer.h>
+
 #include <unsupported/Eigen/CXX11/Tensor>
 
 namespace exotica

@@ -31,6 +31,7 @@
 #define EXOTICA_CORE_TRAJECTORY_H_
 
 #include <exotica_core/tools/conversions.h>
+
 #include <Eigen/Dense>
 #include <kdl/trajectory_composite.hpp>
 #include <memory>

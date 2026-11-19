@@ -27,26 +27,25 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <algorithm>
-#include <iostream>
-#include <queue>
-#include <set>
-
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-#include <geometric_shapes/mesh_operations.h>
-#include <geometric_shapes/shape_operations.h>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <moveit/robot_model/robot_model.h>
-#include <octomap_msgs/msg/octomap.hpp>
-#include <octomap_msgs/conversions.h>
-#include <rclcpp/rclcpp.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
-#include <kdl/frames_io.hpp>
-#include <kdl_parser/kdl_parser.hpp>
-
 #include <exotica_core/kinematic_tree.h>
 #include <exotica_core/server.h>
 #include <exotica_core/tools.h>
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
+#include <moveit/robot_model/robot_model.h>
+#include <octomap_msgs/conversions.h>
+
+#include <algorithm>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <iostream>
+#include <kdl/frames_io.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+#include <octomap_msgs/msg/octomap.hpp>
+#include <queue>
+#include <rclcpp/rclcpp.hpp>
+#include <set>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 // Helper to convert KDL::Frame to geometry_msgs::msg::TransformStamped
 static geometry_msgs::msg::TransformStamped KDLToTransformStamped(

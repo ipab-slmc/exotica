@@ -35,7 +35,7 @@ REGISTER_MOTIONSOLVER_TYPE("TimeIndexedRRTConnectSolver", exotica::TimeIndexedRR
 
 namespace exotica
 {
-OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblemPtr &prob, TimeIndexedRRTConnectSolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob)
+OMPLTimeIndexedRNStateSpace::OMPLTimeIndexedRNStateSpace(TimeIndexedSamplingProblemPtr& prob, TimeIndexedRRTConnectSolverInitializer init) : ompl::base::CompoundStateSpace(), prob_(prob)
 {
     setName("OMPLTimeIndexedRNStateSpace");
     unsigned int dim = prob->N;
@@ -56,34 +56,34 @@ ompl::base::StateSamplerPtr OMPLTimeIndexedRNStateSpace::allocDefaultStateSample
 {
     return CompoundStateSpace::allocDefaultStateSampler();
 }
-void OMPLTimeIndexedRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, const double &t, ompl::base::State *state) const
+void OMPLTimeIndexedRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd& q, const double& t, ompl::base::State* state) const
 {
-    OMPLTimeIndexedRNStateSpace::StateType *ss = static_cast<OMPLTimeIndexedRNStateSpace::StateType *>(state);
+    OMPLTimeIndexedRNStateSpace::StateType* ss = static_cast<OMPLTimeIndexedRNStateSpace::StateType*>(state);
     memcpy(ss->getRNSpace().values, q.data(), sizeof(double) * q.rows());
     ss->getTime().position = t;
 }
-void OMPLTimeIndexedRNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q, double &t) const
+void OMPLTimeIndexedRNStateSpace::OMPLToExoticaState(const ompl::base::State* state, Eigen::VectorXd& q, double& t) const
 {
-    const OMPLTimeIndexedRNStateSpace::StateType *ss = static_cast<const OMPLTimeIndexedRNStateSpace::StateType *>(state);
+    const OMPLTimeIndexedRNStateSpace::StateType* ss = static_cast<const OMPLTimeIndexedRNStateSpace::StateType*>(state);
     if (q.rows() != prob_->N) q.resize(prob_->N);
     memcpy(q.data(), ss->getRNSpace().values, sizeof(double) * prob_->N);
     t = ss->getTime().position;
 }
-void OMPLTimeIndexedRNStateSpace::StateDebug(const Eigen::VectorXd &q) const
+void OMPLTimeIndexedRNStateSpace::StateDebug(const Eigen::VectorXd& q) const
 {
 }
 
-OMPLTimeIndexedStateValidityChecker::OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const TimeIndexedSamplingProblemPtr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
+OMPLTimeIndexedStateValidityChecker::OMPLTimeIndexedStateValidityChecker(const ompl::base::SpaceInformationPtr& si, const TimeIndexedSamplingProblemPtr& prob) : ompl::base::StateValidityChecker(si), prob_(prob)
 {
 }
 
-bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state) const
+bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State* state) const
 {
     double tmp;
     return isValid(state, tmp);
 }
 
-bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state, double &dist) const
+bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State* state, double& dist) const
 {
     Eigen::VectorXd q(prob_->N);
     double t;
@@ -98,11 +98,12 @@ bool OMPLTimeIndexedStateValidityChecker::isValid(const ompl::base::State *state
 }
 
 // The solver
-void TimeIndexedRRTConnectSolver::Instantiate(const TimeIndexedRRTConnectSolverInitializer &init)
+void TimeIndexedRRTConnectSolver::Instantiate(const TimeIndexedRRTConnectSolverInitializer& init)
 {
     this->parameters_ = init;
     algorithm_ = "Exotica_TimeIndexedRRTConnect";
-    planner_allocator_ = [](const ompl::base::SpaceInformationPtr &si, const std::string &name) { return allocatePlanner<OMPLTimeIndexedRRTConnect>(si, name); };
+    planner_allocator_ = [](const ompl::base::SpaceInformationPtr& si, const std::string& name)
+    { return allocatePlanner<OMPLTimeIndexedRRTConnect>(si, name); };
 
     if (this->parameters_.RandomSeed > -1)
     {
@@ -119,7 +120,8 @@ void TimeIndexedRRTConnectSolver::SpecifyProblem(PlanningProblemPtr pointer)
     state_space_.reset(new OMPLTimeIndexedRNStateSpace(prob_, this->parameters_));
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLTimeIndexedStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
-    ompl_simple_setup_->setPlannerAllocator([this](const ompl::base::SpaceInformationPtr &si) { return planner_allocator_(si, "Exotica_" + algorithm_); });
+    ompl_simple_setup_->setPlannerAllocator([this](const ompl::base::SpaceInformationPtr& si)
+                                            { return planner_allocator_(si, "Exotica_" + algorithm_); });
     ompl_simple_setup_->getSpaceInformation()->setStateValidityCheckingResolution(this->parameters_.ValidityCheckResolution);
 
     ompl_simple_setup_->getSpaceInformation()->setup();
@@ -149,7 +151,7 @@ void TimeIndexedRRTConnectSolver::PostSolve()
     ptc_.reset();
 }
 
-void TimeIndexedRRTConnectSolver::SetGoalState(const Eigen::VectorXd &qT, const double t, const double eps)
+void TimeIndexedRRTConnectSolver::SetGoalState(const Eigen::VectorXd& qT, const double t, const double eps)
 {
     ompl::base::ScopedState<> gs(state_space_);
     state_space_->as<OMPLTimeIndexedRNStateSpace>()->ExoticaToOMPLState(qT, t, gs.get());
@@ -173,10 +175,10 @@ void TimeIndexedRRTConnectSolver::SetGoalState(const Eigen::VectorXd &qT, const 
     ompl_simple_setup_->setGoalState(gs, eps);
 }
 
-void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc)
+void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd& traj, ompl::base::PlannerTerminationCondition& ptc)
 {
     ompl::geometric::PathSimplifierPtr psf_ = ompl_simple_setup_->getPathSimplifier();
-    const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
+    const ompl::base::SpaceInformationPtr& si = ompl_simple_setup_->getSpaceInformation();
 
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
     if (this->parameters_.Smooth)
@@ -203,7 +205,7 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
             }
         }
     }
-    std::vector<ompl::base::State *> &states = pg.getStates();
+    std::vector<ompl::base::State*>& states = pg.getStates();
     unsigned int length = 0;
 
     if (this->parameters_.TrajectoryPointsPerSecond <= 0)
@@ -233,12 +235,12 @@ void TimeIndexedRRTConnectSolver::GetPath(Eigen::MatrixXd &traj, ompl::base::Pla
     if (this->parameters_.AddTimeIntoSolution) traj.col(0) = ts;
 }
 
-void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
+void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd& solution)
 {
     Timer timer;
 
     // Reset bounds on time space
-    ompl::base::TimeStateSpace *time_space = ompl_simple_setup_->getStateSpace()->as<ompl::base::CompoundStateSpace>()->getSubspace(1)->as<ompl::base::TimeStateSpace>();
+    ompl::base::TimeStateSpace* time_space = ompl_simple_setup_->getStateSpace()->as<ompl::base::CompoundStateSpace>()->getSubspace(1)->as<ompl::base::TimeStateSpace>();
     time_space->setBounds(prob_->GetStartTime(), prob_->GetGoalTime());
 
     // Set goal state
@@ -263,12 +265,12 @@ void TimeIndexedRRTConnectSolver::Solve(Eigen::MatrixXd &solution)
     planning_time_ = timer.GetDuration();
 }
 
-void TimeIndexedRRTConnectSolver::SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition> &ptc)
+void TimeIndexedRRTConnectSolver::SetPlannerTerminationCondition(const std::shared_ptr<ompl::base::PlannerTerminationCondition>& ptc)
 {
     ptc_ = ptc;
 }
 
-OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr &si) : base::Planner(si, "OMPLTimeIndexedRRTConnect")
+OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformationPtr& si) : base::Planner(si, "OMPLTimeIndexedRRTConnect")
 {
     specs_.recognizedGoal = base::GOAL_SAMPLEABLE_REGION;
     specs_.directed = true;
@@ -276,7 +278,7 @@ OMPLTimeIndexedRRTConnect::OMPLTimeIndexedRRTConnect(const base::SpaceInformatio
     maxDistance_ = 0.0;
 
     Planner::declareParam<double>("range", this, &OMPLTimeIndexedRRTConnect::setRange, &OMPLTimeIndexedRRTConnect::getRange, "0.:1.:10000.");
-    connectionPoint_ = std::make_pair<base::State *, base::State *>(nullptr, nullptr);
+    connectionPoint_ = std::make_pair<base::State*, base::State*>(nullptr, nullptr);
 }
 
 OMPLTimeIndexedRRTConnect::~OMPLTimeIndexedRRTConnect()
@@ -290,15 +292,17 @@ void OMPLTimeIndexedRRTConnect::setup()
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
 
-    if (!tStart_) tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
-    if (!tGoal_) tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
-    tStart_->setDistanceFunction([this](const Motion *a, const Motion *b) { return reverseTimeDistance(a, b); });
-    tGoal_->setDistanceFunction([this](const Motion *a, const Motion *b) { return forwardTimeDistance(a, b); });
+    if (!tStart_) tStart_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion*>(this));
+    if (!tGoal_) tGoal_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion*>(this));
+    tStart_->setDistanceFunction([this](const Motion* a, const Motion* b)
+                                 { return reverseTimeDistance(a, b); });
+    tGoal_->setDistanceFunction([this](const Motion* a, const Motion* b)
+                                { return forwardTimeDistance(a, b); });
 }
 
 void OMPLTimeIndexedRRTConnect::freeMemory()
 {
-    std::vector<Motion *> motions;
+    std::vector<Motion*> motions;
 
     if (tStart_)
     {
@@ -328,13 +332,13 @@ void OMPLTimeIndexedRRTConnect::clear()
     freeMemory();
     if (tStart_) tStart_->clear();
     if (tGoal_) tGoal_->clear();
-    connectionPoint_ = std::make_pair<base::State *, base::State *>(nullptr, nullptr);
+    connectionPoint_ = std::make_pair<base::State*, base::State*>(nullptr, nullptr);
 }
 
-OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeData &tree, TreeGrowingInfo &tgi, Motion *rmotion)
+OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeData& tree, TreeGrowingInfo& tgi, Motion* rmotion)
 {
     // find closest state in the tree
-    Motion *nmotion = tree->nearest(rmotion);
+    Motion* nmotion = tree->nearest(rmotion);
 
     bool changed = false;
     if (!correctTime(nmotion, rmotion, !tgi.start, changed)) return TRAPPED;
@@ -343,7 +347,7 @@ OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeDat
     bool reach = !changed;
 
     // find state to add
-    base::State *dstate = rmotion->state;
+    base::State* dstate = rmotion->state;
     double d = si_->distance(nmotion->state, rmotion->state);
     if (d > maxDistance_)
     {
@@ -359,7 +363,7 @@ OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeDat
     if (validMotion)
     {
         // create a motion
-        Motion *motion = new Motion(si_);
+        Motion* motion = new Motion(si_);
         si_->copyState(motion->state, dstate);
         motion->parent = nmotion;
         motion->root = nmotion->root;
@@ -379,10 +383,10 @@ OMPLTimeIndexedRRTConnect::GrowState OMPLTimeIndexedRRTConnect::growTree(TreeDat
         return TRAPPED;
 }
 
-ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTerminationCondition &ptc)
+ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTerminationCondition& ptc)
 {
     checkValidity();
-    base::GoalSampleableRegion *goal = dynamic_cast<base::GoalSampleableRegion *>(pdef_->getGoal().get());
+    base::GoalSampleableRegion* goal = dynamic_cast<base::GoalSampleableRegion*>(pdef_->getGoal().get());
 
     if (!goal)
     {
@@ -393,9 +397,9 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
     // const base::State *check_st = pdef_->getStartState(0);
     // std::cout << "isValid: in OMPLTimeIndexedRRTConnect: " << si_->isValid(check_st) << std::endl;
 
-    while (const base::State *st = pis_.nextStart())
+    while (const base::State* st = pis_.nextStart())
     {
-        Motion *motion = new Motion(si_);
+        Motion* motion = new Motion(si_);
         si_->copyState(motion->state, st);
         motion->root = motion->state;
         tStart_->add(motion);
@@ -420,24 +424,24 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
     TreeGrowingInfo tgi;
     tgi.xstate = si_->allocState();
 
-    Motion *rmotion = new Motion(si_);
-    base::State *rstate = rmotion->state;
+    Motion* rmotion = new Motion(si_);
+    base::State* rstate = rmotion->state;
     bool startTree = true;
     bool solved = false;
 
     while (ptc == false)
     {
-        TreeData &tree = startTree ? tStart_ : tGoal_;
+        TreeData& tree = startTree ? tStart_ : tGoal_;
         tgi.start = startTree;
         startTree = !startTree;
-        TreeData &otherTree = startTree ? tStart_ : tGoal_;
+        TreeData& otherTree = startTree ? tStart_ : tGoal_;
 
         if (tGoal_->size() == 0 || pis_.getSampledGoalsCount() < tGoal_->size() / 2)
         {
-            const base::State *st = tGoal_->size() == 0 ? pis_.nextGoal(ptc) : pis_.nextGoal();
+            const base::State* st = tGoal_->size() == 0 ? pis_.nextGoal(ptc) : pis_.nextGoal();
             if (st)
             {
-                Motion *motion = new Motion(si_);
+                Motion* motion = new Motion(si_);
                 si_->copyState(motion->state, st);
                 motion->root = motion->state;
                 tGoal_->add(motion);
@@ -458,7 +462,7 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
         if (gs != TRAPPED)
         {
             // remember which motion was just added
-            Motion *addedMotion = tgi.xmotion;
+            Motion* addedMotion = tgi.xmotion;
 
             // attempt to connect trees
 
@@ -474,8 +478,8 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
                 gsc = growTree(otherTree, tgi, rmotion);
             }
 
-            Motion *startMotion = startTree ? tgi.xmotion : addedMotion;
-            Motion *goalMotion = startTree ? addedMotion : tgi.xmotion;
+            Motion* startMotion = startTree ? tgi.xmotion : addedMotion;
+            Motion* goalMotion = startTree ? addedMotion : tgi.xmotion;
 
             // if we connected the trees in a valid way (start and goal pair is valid)
             if (gsc == REACHED && goal->isStartGoalPairValid(startMotion->root, goalMotion->root))
@@ -491,8 +495,8 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
                 connectionPoint_ = std::make_pair(startMotion->state, goalMotion->state);
 
                 // construct the solution path
-                Motion *solution = startMotion;
-                std::vector<Motion *> mpath1;
+                Motion* solution = startMotion;
+                std::vector<Motion*> mpath1;
                 while (solution != nullptr)
                 {
                     mpath1.push_back(solution);
@@ -500,14 +504,14 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
                 }
 
                 solution = goalMotion;
-                std::vector<Motion *> mpath2;
+                std::vector<Motion*> mpath2;
                 while (solution != nullptr)
                 {
                     mpath2.push_back(solution);
                     solution = solution->parent;
                 }
 
-                ompl::geometric::PathGeometric *path = new ompl::geometric::PathGeometric(si_);
+                ompl::geometric::PathGeometric* path = new ompl::geometric::PathGeometric(si_);
                 path->getStates().reserve(mpath1.size() + mpath2.size());
                 for (int i = mpath1.size() - 1; i >= 0; --i)
                     path->append(mpath1[i]->state);
@@ -529,11 +533,11 @@ ompl::base::PlannerStatus OMPLTimeIndexedRRTConnect::solve(const base::PlannerTe
     return solved ? base::PlannerStatus::EXACT_SOLUTION : base::PlannerStatus::TIMEOUT;
 }
 
-void OMPLTimeIndexedRRTConnect::getPlannerData(base::PlannerData &data) const
+void OMPLTimeIndexedRRTConnect::getPlannerData(base::PlannerData& data) const
 {
     Planner::getPlannerData(data);
 
-    std::vector<Motion *> motions;
+    std::vector<Motion*> motions;
     if (tStart_) tStart_->list(motions);
 
     for (unsigned int i = 0; i < motions.size(); ++i)

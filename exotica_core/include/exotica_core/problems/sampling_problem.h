@@ -31,9 +31,8 @@
 #define EXOTICA_CORE_SAMPLING_PROBLEM_H_
 
 #include <exotica_core/planning_problem.h>
-#include <exotica_core/tasks.h>
-
 #include <exotica_core/sampling_problem_initializer.h>
+#include <exotica_core/tasks.h>
 
 namespace exotica
 {

@@ -30,13 +30,12 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
 #define EXOTICA_CORE_TASK_MAPS_EFF_AXIS_ALIGNMENT_H_
 
-#include <rclcpp/rclcpp.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
-
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/eff_axis_alignment_initializer.h>
 #include <exotica_core_task_maps/frame_with_axis_and_direction_initializer.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 namespace exotica
 {

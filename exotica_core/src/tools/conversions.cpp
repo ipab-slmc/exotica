@@ -27,11 +27,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-#include <algorithm>
-
 #include <exotica_core/tools/conversions.h>
 #include <exotica_core/tools/printable.h>
+
+#include <algorithm>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 
 namespace Eigen
 {

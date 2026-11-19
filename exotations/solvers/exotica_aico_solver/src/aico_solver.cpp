@@ -408,7 +408,7 @@ void AICOSolver::UpdateTimestep(int t, bool update_fwd, bool update_bwd,
 
         UpdateTaskMessage(t, b.at(t), 0., max_step_size);
 
-        //optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
+        // optional reUpdate fwd or bwd message (if the Dynamics might have changed...)
         if (update_fwd) UpdateFwdMessage(t);
         if (update_bwd) UpdateBwdMessage(t);
 
@@ -477,11 +477,11 @@ double AICOSolver::Step()
     int t;
     switch (sweep_mode_)
     {
-        //NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
+        // NOTE: the dependence on (Sweep?..:..) could perhaps be replaced by (DampingReference.N?..:..)
         case FORWARD:
             for (t = 1; t < prob_->GetT(); ++t)
             {
-                UpdateTimestep(t, true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd Sweep
+                UpdateTimestep(t, true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  // relocate once on fwd Sweep
             }
             for (t = prob_->GetT() - 2; t > 0; t--)
             {
@@ -492,7 +492,7 @@ double AICOSolver::Step()
             // WARNING("Updating forward, iteration_count_ "<<iteration_count_);
             for (t = 1; t < prob_->GetT(); ++t)
             {
-                UpdateTimestep(t, true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  //relocate once on fwd & bwd Sweep
+                UpdateTimestep(t, true, false, 1, minimum_step_tolerance_, !iteration_count_, 1.);  // relocate once on fwd & bwd Sweep
             }
             // WARNING("Updating backward, iteration_count_ "<<iteration_count_);
             for (t = prob_->GetT() - 2; t > 0; t--)
@@ -503,7 +503,7 @@ double AICOSolver::Step()
         case LOCAL_GAUSS_NEWTON:
             for (t = 1; t < prob_->GetT(); ++t)
             {
-                UpdateTimestep(t, true, false, (iteration_count_ ? 5 : 1), minimum_step_tolerance_, !iteration_count_, 1.);  //relocate iteratively on
+                UpdateTimestep(t, true, false, (iteration_count_ ? 5 : 1), minimum_step_tolerance_, !iteration_count_, 1.);  // relocate iteratively on
             }
             for (t = prob_->GetT() - 2; t > 0; t--)
             {
@@ -514,7 +514,7 @@ double AICOSolver::Step()
             for (t = 1; t < prob_->GetT(); ++t)
             {
                 UpdateTimestepGaussNewton(t, true, false, (iteration_count_ ? 5 : 1),
-                                          minimum_step_tolerance_, 1.);  //GaussNewton in fwd & bwd Sweep
+                                          minimum_step_tolerance_, 1.);  // GaussNewton in fwd & bwd Sweep
             }
             for (t = prob_->GetT() - 2; t > 0; t--)
             {

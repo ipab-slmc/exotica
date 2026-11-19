@@ -27,19 +27,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include "exotica_core/tools.h"
+
 #include <cxxabi.h>  // The demangler for gcc... this makes this system dependent!
+#include <geometric_shapes/shapes.h>
+#include <octomap/OcTree.h>
+
+#include <ament_index_cpp/get_package_prefix.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <fstream>
 #include <iostream>
 #include <random>
 #include <regex>
 #include <typeinfo>  // The run-time type information (RTTI) Functionality of C++
-
-#include <geometric_shapes/shapes.h>
-#include <octomap/OcTree.h>
-#include "exotica_core/tools.h"
-
-#include <ament_index_cpp/get_package_prefix.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace exotica
 {

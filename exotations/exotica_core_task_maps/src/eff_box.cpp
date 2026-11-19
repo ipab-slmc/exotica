@@ -154,7 +154,7 @@ void EffBox::Instantiate(const EffBoxInitializer& init)
     {
         pub_markers_ = Server::Advertise<visualization_msgs::msg::MarkerArray>("eff_box_objects", 1, true);
         visualization_msgs::msg::Marker md;  // delete previous markers
-        md.action = 3;                  // DELETEALL
+        md.action = 3;                       // DELETEALL
         visualization_msgs::msg::MarkerArray ma;
         ma.markers.reserve(1);
         ma.markers.emplace_back(md);

@@ -19,24 +19,24 @@ class AutoDiffChainJacobianSparse : public Functor
 {
 public:
     AutoDiffChainJacobianSparse() : Functor() {}
-    AutoDiffChainJacobianSparse(const Functor &f) : Functor(f) {}
+    AutoDiffChainJacobianSparse(const Functor& f) : Functor(f) {}
 // forward constructors
 #if EIGEN_HAS_VARIADIC_TEMPLATES
     template <typename... T>
-    AutoDiffChainJacobianSparse(const T &... Values) : Functor(Values...)
+    AutoDiffChainJacobianSparse(const T&... Values) : Functor(Values...)
     {
     }
 #else
     template <typename T0>
-    AutoDiffChainJacobianSparse(const T0 &a0) : Functor(a0)
+    AutoDiffChainJacobianSparse(const T0& a0) : Functor(a0)
     {
     }
     template <typename T0, typename T1>
-    AutoDiffChainJacobianSparse(const T0 &a0, const T1 &a1) : Functor(a0, a1)
+    AutoDiffChainJacobianSparse(const T0& a0, const T1& a1) : Functor(a0, a1)
     {
     }
     template <typename T0, typename T1, typename T2>
-    AutoDiffChainJacobianSparse(const T0 &a0, const T1 &a1, const T2 &a2) : Functor(a0, a1, a2)
+    AutoDiffChainJacobianSparse(const T0& a0, const T1& a1, const T2& a2) : Functor(a0, a1, a2)
     {
     }
 #endif
@@ -68,52 +68,52 @@ public:
     // Some compilers don't accept variadic parameters after a default parameter,
     // i.e., we can't just write _jac=0 but we need to overload operator():
     EIGEN_STRONG_INLINE
-    void operator()(const InputType &x, ValueType &v) const
+    void operator()(const InputType& x, ValueType& v) const
     {
         this->operator()(x, v);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, const ParamsType&... Params) const
     {
         this->operator()(x, v, Params...);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const ParamsType&... Params) const
     {
         this->operator()(x, v, jac, nullptr, Params...);
     }
 
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const InputJacobianType &ijac,
-                    const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const InputJacobianType& ijac,
+                    const ParamsType&... Params) const
     {
         this->operator()(x, v, jac, &ijac, Params...);
     }
 
     // Optional parameter InputJacobian (_ijac)
     template <typename... ParamsType>
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const InputJacobianType *_ijac = 0,
-                    const ParamsType &... Params) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const InputJacobianType* _ijac = 0,
+                    const ParamsType&... Params) const
 #else
     EIGEN_STRONG_INLINE
-    void operator()(const InputType &x, ValueType &v) const
+    void operator()(const InputType& x, ValueType& v) const
     {
         this->operator()(x, v);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac) const
     {
         this->operator()(x, v, jac, nullptr);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac, const InputJacobianType &ijac) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac, const InputJacobianType& ijac) const
     {
         this->operator()(x, v, jac, &ijac);
     }
 
-    void operator()(const InputType &x, ValueType &v, JacobianType &jac = 0, const InputJacobianType *_ijac = 0) const
+    void operator()(const InputType& x, ValueType& v, JacobianType& jac = 0, const InputJacobianType* _ijac = 0) const
 #endif
     {
         ActiveInput ax = x.template cast<ActiveScalar>();
@@ -134,7 +134,7 @@ public:
         else
         {
             // If specified, copy derivatives from InputJacobian
-            const InputJacobianType &ijac = *_ijac;
+            const InputJacobianType& ijac = *_ijac;
 
             for (Index j = 0; j < jac.rows(); ++j)
                 av[j].derivatives().resize(ijac.cols());

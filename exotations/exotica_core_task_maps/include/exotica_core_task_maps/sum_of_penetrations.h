@@ -30,12 +30,11 @@
 #ifndef EXOTICA_CORE_TASK_MAPS_SUM_OF_PENETRATIONS_H_
 #define EXOTICA_CORE_TASK_MAPS_SUM_OF_PENETRATIONS_H_
 
+#include <exotica_core/task_map.h>
+#include <exotica_core_task_maps/sum_of_penetrations_initializer.h>
+
 #include <algorithm>
 #include <cmath>
-
-#include <exotica_core/task_map.h>
-
-#include <exotica_core_task_maps/sum_of_penetrations_initializer.h>
 
 namespace exotica
 {

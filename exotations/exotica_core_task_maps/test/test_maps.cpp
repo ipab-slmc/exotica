@@ -27,11 +27,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <gtest/gtest.h>
-#include <rclcpp/rclcpp.hpp>
-
 #include <exotica_core/exotica_core.h>
 #include <exotica_core/tools/test_helpers.h>
+#include <gtest/gtest.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 // TODO(#437): Activate once solution for pointer casting/dynamic loading is found.
 // #include <exotica_core_task_maps/JointAccelerationBackwardDifference.h>

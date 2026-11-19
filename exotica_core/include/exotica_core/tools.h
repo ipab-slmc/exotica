@@ -30,11 +30,6 @@
 #ifndef EXOTICA_CORE_TOOLS_H_
 #define EXOTICA_CORE_TOOLS_H_
 
-#include <Eigen/Dense>
-#include <boost/shared_ptr.hpp>
-#include <kdl/frames.hpp>
-#include <string>
-
 #include <exotica_core/tools/conversions.h>
 #include <exotica_core/tools/exception.h>
 #include <exotica_core/tools/printable.h>
@@ -42,7 +37,11 @@
 #include <exotica_core/tools/uncopyable.h>
 #include <exotica_core/version.h>
 
+#include <Eigen/Dense>
+#include <boost/shared_ptr.hpp>
+#include <kdl/frames.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
+#include <string>
 
 // Forward declarations
 namespace octomap
@@ -63,9 +62,9 @@ class Shape;
 namespace exotica
 {
 /**
-   * @brief RandomColor Generates random opaque color.
-   * @return Random color
-   */
+ * @brief RandomColor Generates random opaque color.
+ * @return Random color
+ */
 std_msgs::msg::ColorRGBA RandomColor();
 inline std_msgs::msg::ColorRGBA GetColor(double r, double g, double b, double a = 1.0)
 {
@@ -88,11 +87,11 @@ inline std_msgs::msg::ColorRGBA GetColor(const Eigen::Vector4d& rgba)
 }
 
 /**
-   * @brief LoadOBJ Loads mesh data from an OBJ file
-   * @param file_name File name
-   * @param tri Returned vertex indices of triangles
-   * @param vert Vertex positions
-   */
+ * @brief LoadOBJ Loads mesh data from an OBJ file
+ * @param file_name File name
+ * @param tri Returned vertex indices of triangles
+ * @param vert Vertex positions
+ */
 void LoadOBJ(const std::string& data, Eigen::VectorXi& tri,
              Eigen::VectorXd& vert);
 

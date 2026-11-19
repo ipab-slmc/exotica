@@ -30,13 +30,12 @@
 #ifndef EXOTICA_CORE_PRINTABLE_H_
 #define EXOTICA_CORE_PRINTABLE_H_
 
+#include <Eigen/Geometry>
 #include <iomanip>
 #include <iostream>
+#include <kdl/frames.hpp>
 #include <map>
 #include <vector>
-
-#include <Eigen/Geometry>
-#include <kdl/frames.hpp>
 
 /// \brief A set of debugging tools: basically these provide easy ways of checking code execution through std::cout prints
 #ifndef __PRETTY_FUNCTION__
@@ -48,14 +47,14 @@
 #define INDICATE_FAILURE std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\033[0m\n";  //!< With endline
 #define WARNING(x) std::cout << "\033[1;32m[EXOTica]:\033[0m \033[33mWarning in " << __PRETTY_FUNCTION__ << ": " << x << "\033[0m\n";                                                           //!< With endline
 #define EXOTICA_ERROR(x) std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" \
-                           << x << "\033[0m\n";                                                                   // With endline
+                                   << x << "\033[0m\n";                                                           // With endline
 #define INFO(x) std::clog << "\033[1;32m[EXOTica]:\033[0m Info in " << __PRETTY_FUNCTION__ << ": " << x << "\n";  // With endline
 #else
 #define CHECK_EXECUTION                                                                                                                                                                         // No operation
 #define INDICATE_FAILURE std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\033[0m\n";  //!< With endline
 #define WARNING(x) std::cout << "\033[1;32m[EXOTica]:\033[0m \033[33mWarning in " << __PRETTY_FUNCTION__ << ": " << x << "\033[0m\n";                                                           //!< With endline
 #define EXOTICA_ERROR(x) std::cerr << "\033[1;32m[EXOTica]:\033[0m \033[1;31mFailed in " << __FILE__ << " at line " << __LINE__ << " within function " << __PRETTY_FUNCTION__ << ".\n" \
-                           << x << "\033[0m\n";  // With endline
+                                   << x << "\033[0m\n";  // With endline
 #define INFO(x)
 #endif
 #define HIGHLIGHT(x) std::cout << "\033[1;32m[EXOTica]:\033[0m \033[36m" << x << "\033[0m\n";

@@ -30,21 +30,20 @@
 #ifndef EXOTICA_CORE_KINEMATIC_TREE_H_
 #define EXOTICA_CORE_KINEMATIC_TREE_H_
 
-#include <map>
-#include <random>
-#include <string>
-#include <vector>
-
+#include <exotica_core/kinematic_element.h>
 #include <moveit/robot_model/robot_model.h>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
-#include <octomap_msgs/msg/octomap.hpp>
-#include <rclcpp/rclcpp.hpp>
+
 #include <Eigen/Eigen>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <kdl/jacobian.hpp>
 #include <kdl/tree.hpp>
-
-#include <exotica_core/kinematic_element.h>
+#include <map>
+#include <octomap_msgs/msg/octomap.hpp>
+#include <random>
+#include <rclcpp/rclcpp.hpp>
+#include <string>
+#include <vector>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 namespace exotica
 {
@@ -69,7 +68,7 @@ enum JointLimitType
     LIMIT_POSITION_UPPER = 1
 };
 
-constexpr double inf = 1e20;  //std::numeric_limits<double>::infinity();
+constexpr double inf = 1e20;  // std::numeric_limits<double>::infinity();
 constexpr double pi = M_PI;
 
 inline KinematicRequestFlags operator|(KinematicRequestFlags a, KinematicRequestFlags b)

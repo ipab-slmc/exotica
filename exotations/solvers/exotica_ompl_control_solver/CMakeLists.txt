@@ -22,7 +22,7 @@ target_include_directories(${PROJECT_NAME}
     $<INSTALL_INTERFACE:include>
 )
 
-ament_target_dependencies(${PROJECT_NAME} PUBLIC exotica_core)
+target_link_libraries(${PROJECT_NAME} PUBLIC exotica_core::exotica_core)
 target_link_libraries(${PROJECT_NAME} PUBLIC ompl::ompl)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_initializers)
 

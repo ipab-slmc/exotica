@@ -31,7 +31,6 @@
 #define EXOTICA_CORE_TASK_MAPS_SPHERE_COLLISION_H_
 
 #include <exotica_core/task_map.h>
-
 #include <exotica_core_task_maps/sphere_collision_initializer.h>
 #include <exotica_core_task_maps/sphere_initializer.h>
 

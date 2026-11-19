@@ -10,11 +10,11 @@
 #ifndef EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_
 #define EIGEN_FINITEDIFF_CHAIN_HESSIAN_H_
 
-#include <functional>
-
 #include <exotica_core/tools/finitediff_chain_jacobian.h>
 #include <exotica_core/tools/finitediff_common.h>
 #include <exotica_core/tools/functor.h>
+
+#include <functional>
 
 namespace Eigen
 {
@@ -38,48 +38,49 @@ public:
     typedef Array<Matrix<Scalar, JacobianInputsAtCompileTime, JacobianInputsAtCompileTime>, ValuesAtCompileTime, 1> HessianType;
     typedef typename JacobianType::Index Index;
 
-    typedef std::function<void(const InputJacobianRowType &, InputType &)> UpdateFunctionCallbackType;
+    typedef std::function<void(const InputJacobianRowType&, InputType&)> UpdateFunctionCallbackType;
 
-    UpdateFunctionCallbackType update_ = [](const InputJacobianRowType &jx, InputType &x) { x = jx; };
+    UpdateFunctionCallbackType update_ = [](const InputJacobianRowType& jx, InputType& x)
+    { x = jx; };
     Scalar epsfcn_;
 
     FiniteDiffChainHessian(Scalar epsfcn = 0.) : Functor(), epsfcn_(epsfcn) {}
-    FiniteDiffChainHessian(const Functor &f, Scalar epsfcn = 0.) : Functor(f), epsfcn_(epsfcn) {}
-    FiniteDiffChainHessian(const Functor &f, UpdateFunctionCallbackType update, Scalar epsfcn = 0.) : Functor(f), update_(update), epsfcn_(epsfcn) {}
+    FiniteDiffChainHessian(const Functor& f, Scalar epsfcn = 0.) : Functor(f), epsfcn_(epsfcn) {}
+    FiniteDiffChainHessian(const Functor& f, UpdateFunctionCallbackType update, Scalar epsfcn = 0.) : Functor(f), update_(update), epsfcn_(epsfcn) {}
 // forward constructors
 #if EIGEN_HAS_VARIADIC_TEMPLATES
     template <typename... T>
-    FiniteDiffChainHessian(Scalar epsfcn = 0., const T &... Values) : Functor(Values...), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(Scalar epsfcn = 0., const T&... Values) : Functor(Values...), epsfcn_(epsfcn)
     {
     }
     template <typename... T>
-    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T &... Values) : Functor(Values...), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T&... Values) : Functor(Values...), update_(update), epsfcn_(epsfcn)
     {
     }
 #else
     template <typename T0>
-    FiniteDiffChainHessian(const T0 &a0, Scalar epsfcn = 0.) : Functor(a0), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(const T0& a0, Scalar epsfcn = 0.) : Functor(a0), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1>
-    FiniteDiffChainHessian(const T0 &a0, const T1 &a1, Scalar epsfcn = 0.) : Functor(a0, a1), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(const T0& a0, const T1& a1, Scalar epsfcn = 0.) : Functor(a0, a1), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1, typename T2>
-    FiniteDiffChainHessian(const T0 &a0, const T1 &a1, const T2 &a2, Scalar epsfcn = 0.) : Functor(a0, a1, a2), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(const T0& a0, const T1& a1, const T2& a2, Scalar epsfcn = 0.) : Functor(a0, a1, a2), epsfcn_(epsfcn)
     {
     }
 
     template <typename T0>
-    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0 &a0) : Functor(a0), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0& a0) : Functor(a0), update_(update), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1>
-    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0 &a0, const T1 &a1) : Functor(a0, a1), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0& a0, const T1& a1) : Functor(a0, a1), update_(update), epsfcn_(epsfcn)
     {
     }
     template <typename T0, typename T1, typename T2>
-    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0 &a0, const T1 &a1, const T2 &a2) : Functor(a0, a1, a2), update_(update), epsfcn_(epsfcn)
+    FiniteDiffChainHessian(UpdateFunctionCallbackType update, Scalar epsfcn = 0., const T0& a0, const T1& a1, const T2& a2) : Functor(a0, a1, a2), update_(update), epsfcn_(epsfcn)
     {
     }
 #endif
@@ -88,7 +89,7 @@ public:
     // Some compilers don't accept variadic parameters after a default parameter,
     // i.e., we can't just write _jac=0 but we need to overload operator():
     EIGEN_STRONG_INLINE
-    int operator()(const InputJacobianRowType &_jx, ValueType &v) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v) const
     {
         InputType x;
         update_(_jx, x);
@@ -97,7 +98,7 @@ public:
     }
 
     template <typename... ParamsType>
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, const ParamsType &... Params) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, const ParamsType&... Params) const
     {
         InputType x;
         update_(_jx, x);
@@ -106,17 +107,17 @@ public:
     }
 
     template <typename... ParamsType>
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac, const ParamsType &... Params) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, JacobianType& jac, const ParamsType&... Params) const
     {
-        FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor *>(this), update_, epsfcn_);
+        FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor*>(this), update_, epsfcn_);
         return autoj(_jx, v, jac, Params...);
     }
 
     template <typename... ParamsType>
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac, HessianType &hess, const ParamsType &... Params) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, JacobianType& jac, HessianType& hess, const ParamsType&... Params) const
 #else
     EIGEN_STRONG_INLINE
-    int operator()(const InputJacobianRowType &_jx, ValueType &v) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v) const
     {
         InputType x;
         update_(_jx, x);
@@ -124,19 +125,19 @@ public:
         return 1;
     }
 
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, JacobianType& jac) const
     {
-        FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor *>(this), update_, epsfcn_);
+        FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor*>(this), update_, epsfcn_);
         return autoj(_jx, v, jac);
     }
 
-    int operator()(const InputJacobianRowType &_jx, ValueType &v, JacobianType &jac, HessianType &hess) const
+    int operator()(const InputJacobianRowType& _jx, ValueType& v, JacobianType& jac, HessianType& hess) const
 #endif
     {
         using std::abs;
         using std::sqrt;
         // Local variables
-        FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor *>(this), update_, epsfcn_);
+        FiniteDiffChainJacobian<Functor, mode> autoj(*static_cast<const Functor*>(this), update_, epsfcn_);
         Scalar h;
         int nfev = 0;
         const typename InputJacobianRowType::Index n = _jx.size();

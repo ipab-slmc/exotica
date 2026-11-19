@@ -30,12 +30,11 @@
 #ifndef EXOTICA_CORE_DYNAMICS_SOLVER_H_
 #define EXOTICA_CORE_DYNAMICS_SOLVER_H_
 
+#include <exotica_core/dynamics_solver_initializer.h>
 #include <exotica_core/factory.h>
 #include <exotica_core/object.h>
 #include <exotica_core/property.h>
 #include <exotica_core/tools.h>
-
-#include <exotica_core/dynamics_solver_initializer.h>
 
 #define REGISTER_DYNAMICS_SOLVER_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::DynamicsSolver, TYPE, DERIV)
 

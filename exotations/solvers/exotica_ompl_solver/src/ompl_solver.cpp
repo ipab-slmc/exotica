@@ -28,7 +28,6 @@
 //
 
 #include <exotica_ompl_solver/ompl_solver.h>
-
 #include <ompl/util/Console.h>
 #include <ompl/util/RandomNumbers.h>
 
@@ -60,7 +59,8 @@ void OMPLSolver<ProblemType>::SpecifyProblem(PlanningProblemPtr pointer)
         ThrowNamed("Unsupported base type " << prob_->GetScene()->GetKinematicTree().GetControlledBaseType());
     ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(state_space_));
     ompl_simple_setup_->setStateValidityChecker(ompl::base::StateValidityCheckerPtr(new OMPLStateValidityChecker(ompl_simple_setup_->getSpaceInformation(), prob_)));
-    ompl_simple_setup_->setPlannerAllocator([this](const ompl::base::SpaceInformationPtr &si) { return planner_allocator_(si, algorithm_); });
+    ompl_simple_setup_->setPlannerAllocator([this](const ompl::base::SpaceInformationPtr& si)
+                                            { return planner_allocator_(si, algorithm_); });
 
     if (init_.Projection.rows() > 0)
     {
@@ -140,10 +140,10 @@ void OMPLSolver<ProblemType>::SetGoalState(Eigen::VectorXdRefConst qT, const dou
 }
 
 template <class ProblemType>
-void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::PlannerTerminationCondition &ptc)
+void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd& traj, ompl::base::PlannerTerminationCondition& ptc)
 {
     ompl::geometric::PathSimplifierPtr psf = ompl_simple_setup_->getPathSimplifier();
-    const ompl::base::SpaceInformationPtr &si = ompl_simple_setup_->getSpaceInformation();
+    const ompl::base::SpaceInformationPtr& si = ompl_simple_setup_->getSpaceInformation();
 
     ompl::geometric::PathGeometric pg = ompl_simple_setup_->getSolutionPath();
     if (init_.Smooth)
@@ -167,7 +167,7 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
             }
         }
     }
-    std::vector<ompl::base::State *> &states = pg.getStates();
+    std::vector<ompl::base::State*>& states = pg.getStates();
     unsigned int length = 0;
     if (init_.FinalInterpolationLength > 3)
     {
@@ -192,7 +192,7 @@ void OMPLSolver<ProblemType>::GetPath(Eigen::MatrixXd &traj, ompl::base::Planner
 }
 
 template <class ProblemType>
-void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd &solution)
+void OMPLSolver<ProblemType>::Solve(Eigen::MatrixXd& solution)
 {
     // Set log level
     ompl::msg::setLogLevel(debug_ ? ompl::msg::LogLevel::LOG_DEBUG : ompl::msg::LogLevel::LOG_WARN);

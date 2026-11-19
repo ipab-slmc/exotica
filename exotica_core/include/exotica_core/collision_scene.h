@@ -30,17 +30,16 @@
 #ifndef EXOTICA_CORE_COLLISION_SCENE_H_
 #define EXOTICA_CORE_COLLISION_SCENE_H_
 
-#include <Eigen/Dense>
+#include <exotica_core/factory.h>
+#include <exotica_core/kinematic_element.h>
+#include <exotica_core/object.h>
 
+#include <Eigen/Dense>
 #include <sstream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
-
-#include <exotica_core/factory.h>
-#include <exotica_core/kinematic_element.h>
-#include <exotica_core/object.h>
 
 #define REGISTER_COLLISION_SCENE_TYPE(TYPE, DERIV) EXOTICA_CORE_REGISTER(exotica::CollisionScene, TYPE, DERIV)
 namespace exotica
@@ -49,7 +48,7 @@ class Scene;
 
 /**
  * @brief The AllowedCollisionMatrix is a data structure containing links for which a detected collision does not result in a state to be considered invalid/in-collision. This can exclude links that are in collision by default, neighbouring links, or links that could never be possibly in collision (e.g. if out of reach).
- * 
+ *
  */
 class AllowedCollisionMatrix
 {

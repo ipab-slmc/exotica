@@ -30,10 +30,10 @@
 #ifndef EXOTICA_CORE_ABSTRACT_TIME_INDEXED_PROBLEM_H_
 #define EXOTICA_CORE_ABSTRACT_TIME_INDEXED_PROBLEM_H_
 
-#include <Eigen/Sparse>
-
 #include <exotica_core/planning_problem.h>
 #include <exotica_core/tasks.h>
+
+#include <Eigen/Sparse>
 
 namespace exotica
 {

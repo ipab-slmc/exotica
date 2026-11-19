@@ -27,15 +27,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/rdf_loader/rdf_loader.h>
-
 #include <exotica_core/server.h>
 #include <exotica_core/tools.h>
+#include <moveit/rdf_loader/rdf_loader.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include <typeinfo>
 #include <boost/any.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <typeinfo>
 
 exotica::ServerPtr exotica::Server::singleton_server_ = nullptr;
 namespace exotica

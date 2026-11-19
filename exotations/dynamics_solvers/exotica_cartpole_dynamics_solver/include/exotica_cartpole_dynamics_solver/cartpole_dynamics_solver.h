@@ -30,10 +30,9 @@
 #ifndef EXOTICA_CARTPOLE_DYNAMICS_SOLVER_CARTPOLE_DYNAMICS_SOLVER_H_
 #define EXOTICA_CARTPOLE_DYNAMICS_SOLVER_CARTPOLE_DYNAMICS_SOLVER_H_
 
+#include <exotica_cartpole_dynamics_solver/cartpole_dynamics_solver_initializer.h>
 #include <exotica_core/dynamics_solver.h>
 #include <exotica_core/scene.h>
-
-#include <exotica_cartpole_dynamics_solver/cartpole_dynamics_solver_initializer.h>
 
 namespace exotica
 {

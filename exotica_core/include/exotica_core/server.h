@@ -30,18 +30,17 @@
 #ifndef EXOTICA_CORE_SERVER_H_
 #define EXOTICA_CORE_SERVER_H_
 
-#include <map>
-#include <thread>
-#include <vector>
+#include <exotica_core/tools/exception.h>
+#include <exotica_core/tools/uncopyable.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <map>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/transform_broadcaster.h>
-
-#include <exotica_core/tools/exception.h>
-#include <exotica_core/tools/uncopyable.h>
+#include <tf2_ros/transform_broadcaster.hpp>
+#include <thread>
+#include <vector>
 
 namespace exotica
 {
@@ -60,17 +59,17 @@ public:
     /// \brief Check if a robot model exist
     /// @param path Robot model name
     /// @return True if exist, false otherwise
-    bool HasModel(const std::string &path);
+    bool HasModel(const std::string& path);
 
     /// \brief Get robot model
     /// @param path Robot model name
     /// @param model Robot model
-    void GetModel(const std::string &path, moveit::core::RobotModelPtr &model, const std::string &urdf = "", const std::string &srdf = "");
+    void GetModel(const std::string& path, moveit::core::RobotModelPtr& model, const std::string& urdf = "", const std::string& srdf = "");
 
     /// \brief Get robot model
     /// @param path Robot model name
     /// @return robot model
-    moveit::core::RobotModelConstPtr GetModel(const std::string &path, const std::string &urdf = "", const std::string &srdf = "");
+    moveit::core::RobotModelConstPtr GetModel(const std::string& path, const std::string& urdf = "", const std::string& srdf = "");
 
     /// \brief Get the name of the server
     /// @return Server name
@@ -81,7 +80,8 @@ public:
         Instance()->nh_ = node;
         Instance()->executor_ = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
         Instance()->executor_->add_node(node);
-        Instance()->spinner_thread_ = std::thread([&]() { Instance()->executor_->spin(); });
+        Instance()->spinner_thread_ = std::thread([&]()
+                                                  { Instance()->executor_->spin(); });
         Instance()->tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(node);
     }
 
@@ -96,7 +96,7 @@ public:
     }
 
     template <typename T>
-    static bool GetParam(const std::string &name, T &param)
+    static bool GetParam(const std::string& name, T& param)
     {
         if (!IsRos()) return false;
         auto node = GetNode();
@@ -106,7 +106,7 @@ public:
             {
                 node->declare_parameter<T>(name);
             }
-            catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException &)
+            catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException&)
             {
             }
         }
@@ -117,7 +117,7 @@ public:
     }
 
     template <typename T>
-    static void SetParam(const std::string &name, T &param)
+    static void SetParam(const std::string& name, T& param)
     {
         if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
         auto node = GetNode();
@@ -127,14 +127,14 @@ public:
             {
                 node->declare_parameter<T>(name, param);
             }
-            catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException &)
+            catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException&)
             {
             }
         }
         node->set_parameter(rclcpp::Parameter(name, param));
     }
 
-    inline bool static HasParam(const std::string &name)
+    inline bool static HasParam(const std::string& name)
     {
         if (IsRos())
         {
@@ -147,7 +147,7 @@ public:
     }
 
     template <typename T>
-    static typename rclcpp::Publisher<T>::SharedPtr Advertise(const std::string &topic, int depth = 1, bool latch = false)
+    static typename rclcpp::Publisher<T>::SharedPtr Advertise(const std::string& topic, int depth = 1, bool latch = false)
     {
         if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
         rclcpp::QoS qos(depth);
@@ -156,19 +156,19 @@ public:
     }
 
     template <typename T, typename CallbackT>
-    static typename rclcpp::Subscription<T>::SharedPtr Subscribe(const std::string &topic, CallbackT &&callback, int depth = 1)
+    static typename rclcpp::Subscription<T>::SharedPtr Subscribe(const std::string& topic, CallbackT&& callback, int depth = 1)
     {
         if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
         return GetNode()->create_subscription<T>(topic, depth, std::forward<CallbackT>(callback));
     }
 
-    static void SendTransform(const geometry_msgs::msg::TransformStamped &transform)
+    static void SendTransform(const geometry_msgs::msg::TransformStamped& transform)
     {
         if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
         Instance()->tf_broadcaster_->sendTransform(transform);
     }
 
-    static void SendTransform(const std::vector<geometry_msgs::msg::TransformStamped> &transforms)
+    static void SendTransform(const std::vector<geometry_msgs::msg::TransformStamped>& transforms)
     {
         if (!IsRos()) ThrowPretty("EXOTica server not initialized as ROS node!");
         Instance()->tf_broadcaster_->sendTransform(transforms);
@@ -180,9 +180,9 @@ private:
     Server();
     static std::shared_ptr<Server> singleton_server_;
     ///	\brief	Make sure the singleton does not get copied
-    Server(Server const &) = delete;
-    void operator=(Server const &) = delete;
-    moveit::core::RobotModelPtr LoadModel(const std::string &name, const std::string &urdf = "", const std::string &srdf = "");
+    Server(Server const&) = delete;
+    void operator=(Server const&) = delete;
+    moveit::core::RobotModelPtr LoadModel(const std::string& name, const std::string& urdf = "", const std::string& srdf = "");
 
     /// \brief	The name of this server
     std::string name_;

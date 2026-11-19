@@ -30,17 +30,16 @@
 #ifndef EXOTICA_CORE_TASK_MAP_H_
 #define EXOTICA_CORE_TASK_MAP_H_
 
-#include <map>
-#include <string>
-#include <vector>
-
-#include <Eigen/Dense>  // Generally dense manipulations should be enough
-
 #include <exotica_core/factory.h>  // The Factory template
 #include <exotica_core/object.h>   // The EXOTica base class
 #include <exotica_core/property.h>
 #include <exotica_core/scene.h>
 #include <exotica_core/task_space_vector.h>
+
+#include <Eigen/Dense>  // Generally dense manipulations should be enough
+#include <map>
+#include <string>
+#include <vector>
 
 ///
 /// \brief Convenience registrar for the TaskMap Type

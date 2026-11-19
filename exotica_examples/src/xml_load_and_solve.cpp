@@ -27,12 +27,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <rclcpp/rclcpp.hpp>
 #include <exotica_core/exotica_core.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 using namespace exotica;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     if (argc != 2) ThrowPretty("No file argument provided.");
 

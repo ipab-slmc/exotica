@@ -31,17 +31,17 @@
 
 namespace exotica
 {
-OMPLStateValidityChecker::OMPLStateValidityChecker(const ompl::base::SpaceInformationPtr &si, const SamplingProblemPtr &prob) : ompl::base::StateValidityChecker(si), prob_(prob)
+OMPLStateValidityChecker::OMPLStateValidityChecker(const ompl::base::SpaceInformationPtr& si, const SamplingProblemPtr& prob) : ompl::base::StateValidityChecker(si), prob_(prob)
 {
 }
 
-bool OMPLStateValidityChecker::isValid(const ompl::base::State *state) const
+bool OMPLStateValidityChecker::isValid(const ompl::base::State* state) const
 {
     double tmp = 0.0;
     return isValid(state, tmp);
 }
 
-bool OMPLStateValidityChecker::isValid(const ompl::base::State *state, double &dist) const
+bool OMPLStateValidityChecker::isValid(const ompl::base::State* state, double& dist) const
 {
     Eigen::VectorXd q(prob_->N);
     std::static_pointer_cast<OMPLStateSpace>(si_->getStateSpace())->OMPLToExoticaState(state, q);
@@ -64,7 +64,7 @@ ompl::base::StateSamplerPtr OMPLRNStateSpace::allocDefaultStateSampler() const
     return CompoundStateSpace::allocDefaultStateSampler();
 }
 
-void OMPLRNStateSpace::SetBounds(SamplingProblemPtr &prob)
+void OMPLRNStateSpace::SetBounds(SamplingProblemPtr& prob)
 {
     unsigned int dim = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::RealVectorStateSpace(dim)), 1.0);
@@ -80,7 +80,7 @@ void OMPLRNStateSpace::SetBounds(SamplingProblemPtr &prob)
     lock();
 }
 
-void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const
+void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd& q, ompl::base::State* state) const
 {
     if (!state)
     {
@@ -93,7 +93,7 @@ void OMPLRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::
     memcpy(state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values, q.data(), sizeof(double) * q.rows());
 }
 
-void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const
+void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State* state, Eigen::VectorXd& q) const
 {
     if (!state)
     {
@@ -104,7 +104,7 @@ void OMPLRNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen:
     memcpy(q.data(), state->as<OMPLRNStateSpace::StateType>()->getRNSpace().values, sizeof(double) * q.rows());
 }
 
-void OMPLRNStateSpace::StateDebug(const Eigen::VectorXd &q) const
+void OMPLRNStateSpace::StateDebug(const Eigen::VectorXd& q) const
 {
     //  TODO
 }
@@ -119,7 +119,7 @@ ompl::base::StateSamplerPtr OMPLSE3RNStateSpace::allocDefaultStateSampler() cons
     return CompoundStateSpace::allocDefaultStateSampler();
 }
 
-void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
+void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr& prob)
 {
     dim_ = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE3StateSpace()), 1.0);
@@ -156,19 +156,19 @@ void OMPLSE3RNStateSpace::SetBounds(SamplingProblemPtr &prob)
     else
     {
         EXOTICA_ERROR("State space bounds were not specified!\n"
-              << bounds.size() << " " << dim_);
+                      << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
 
-void OMPLSE3RNStateSpace::StateDebug(const Eigen::VectorXd &q) const
+void OMPLSE3RNStateSpace::StateDebug(const Eigen::VectorXd& q) const
 {
 }
 
-void OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const
+void OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd& q, ompl::base::State* state) const
 {
-    OMPLSE3RNStateSpace::StateType *statetype = static_cast<OMPLSE3RNStateSpace::StateType *>(state);
+    OMPLSE3RNStateSpace::StateType* statetype = static_cast<OMPLSE3RNStateSpace::StateType*>(state);
     statetype->SE3StateSpace().setXYZ(q(0), q(1), q(2));
     KDL::Rotation tmp = KDL::Rotation::RPY(q(3), q(4), q(5));
     tmp.GetQuaternion(statetype->SE3StateSpace().rotation().x, statetype->SE3StateSpace().rotation().y, statetype->SE3StateSpace().rotation().z, statetype->SE3StateSpace().rotation().w);
@@ -179,10 +179,10 @@ void OMPLSE3RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::bas
     }
 }
 
-void OMPLSE3RNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const
+void OMPLSE3RNStateSpace::OMPLToExoticaState(const ompl::base::State* state, Eigen::VectorXd& q) const
 {
     q.setZero(getDimension());
-    const OMPLSE3RNStateSpace::StateType *statetype = static_cast<const OMPLSE3RNStateSpace::StateType *>(state);
+    const OMPLSE3RNStateSpace::StateType* statetype = static_cast<const OMPLSE3RNStateSpace::StateType*>(state);
     q(0) = statetype->SE3StateSpace().getX();
     q(1) = statetype->SE3StateSpace().getY();
     q(2) = statetype->SE3StateSpace().getZ();
@@ -206,7 +206,7 @@ ompl::base::StateSamplerPtr OMPLSE2RNStateSpace::allocDefaultStateSampler() cons
     return CompoundStateSpace::allocDefaultStateSampler();
 }
 
-void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
+void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr& prob)
 {
     dim_ = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::SE2StateSpace()), 1.0);
@@ -241,19 +241,19 @@ void OMPLSE2RNStateSpace::SetBounds(SamplingProblemPtr &prob)
     else
     {
         EXOTICA_ERROR("State space bounds were not specified!" << std::endl
-                                                       << bounds.size() << " " << dim_);
+                                                               << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
 
-void OMPLSE2RNStateSpace::StateDebug(const Eigen::VectorXd &q) const
+void OMPLSE2RNStateSpace::StateDebug(const Eigen::VectorXd& q) const
 {
 }
 
-void OMPLSE2RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const
+void OMPLSE2RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd& q, ompl::base::State* state) const
 {
-    OMPLSE2RNStateSpace::StateType *statetype = static_cast<OMPLSE2RNStateSpace::StateType *>(state);
+    OMPLSE2RNStateSpace::StateType* statetype = static_cast<OMPLSE2RNStateSpace::StateType*>(state);
     statetype->SE2StateSpace().setXY(q(0), q(1));
     statetype->SE2StateSpace().setYaw(q(2));
 
@@ -263,10 +263,10 @@ void OMPLSE2RNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::bas
     }
 }
 
-void OMPLSE2RNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const
+void OMPLSE2RNStateSpace::OMPLToExoticaState(const ompl::base::State* state, Eigen::VectorXd& q) const
 {
     q.setZero(getDimension());
-    const OMPLSE2RNStateSpace::StateType *statetype = static_cast<const OMPLSE2RNStateSpace::StateType *>(state);
+    const OMPLSE2RNStateSpace::StateType* statetype = static_cast<const OMPLSE2RNStateSpace::StateType*>(state);
     q(0) = statetype->SE2StateSpace().getX();
     q(1) = statetype->SE2StateSpace().getY();
     q(2) = statetype->SE2StateSpace().getYaw();
@@ -287,7 +287,7 @@ ompl::base::StateSamplerPtr OMPLDubinsRNStateSpace::allocDefaultStateSampler() c
     return CompoundStateSpace::allocDefaultStateSampler();
 }
 
-void OMPLDubinsRNStateSpace::SetBounds(SamplingProblemPtr &prob)
+void OMPLDubinsRNStateSpace::SetBounds(SamplingProblemPtr& prob)
 {
     dim_ = prob->N;
     addSubspace(ompl::base::StateSpacePtr(new ompl::base::DubinsStateSpace(init_.DubinsStateSpaceTurningRadius, init_.DubinsStateSpaceIsSymmetric)), 1.0);
@@ -322,19 +322,19 @@ void OMPLDubinsRNStateSpace::SetBounds(SamplingProblemPtr &prob)
     else
     {
         EXOTICA_ERROR("State space bounds were not specified!" << std::endl
-                                                       << bounds.size() << " " << dim_);
+                                                               << bounds.size() << " " << dim_);
     }
     setLongestValidSegmentFraction(init_.LongestValidSegmentFraction);
     lock();
 }
 
-void OMPLDubinsRNStateSpace::StateDebug(const Eigen::VectorXd &q) const
+void OMPLDubinsRNStateSpace::StateDebug(const Eigen::VectorXd& q) const
 {
 }
 
-void OMPLDubinsRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::base::State *state) const
+void OMPLDubinsRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd& q, ompl::base::State* state) const
 {
-    OMPLDubinsRNStateSpace::StateType *statetype = static_cast<OMPLDubinsRNStateSpace::StateType *>(state);
+    OMPLDubinsRNStateSpace::StateType* statetype = static_cast<OMPLDubinsRNStateSpace::StateType*>(state);
     statetype->DubinsStateSpace().setXY(q(0), q(1));
     statetype->DubinsStateSpace().setYaw(q(2));
 
@@ -344,10 +344,10 @@ void OMPLDubinsRNStateSpace::ExoticaToOMPLState(const Eigen::VectorXd &q, ompl::
     }
 }
 
-void OMPLDubinsRNStateSpace::OMPLToExoticaState(const ompl::base::State *state, Eigen::VectorXd &q) const
+void OMPLDubinsRNStateSpace::OMPLToExoticaState(const ompl::base::State* state, Eigen::VectorXd& q) const
 {
     q.setZero(getDimension());
-    const OMPLDubinsRNStateSpace::StateType *statetype = static_cast<const OMPLDubinsRNStateSpace::StateType *>(state);
+    const OMPLDubinsRNStateSpace::StateType* statetype = static_cast<const OMPLDubinsRNStateSpace::StateType*>(state);
     q(0) = statetype->DubinsStateSpace().getX();
     q(1) = statetype->DubinsStateSpace().getY();
     q(2) = statetype->DubinsStateSpace().getYaw();

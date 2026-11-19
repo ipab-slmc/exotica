@@ -28,10 +28,6 @@
 //
 
 #undef NDEBUG
-#include <pybind11/eigen.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <exotica_core_task_maps/center_of_mass.h>
 #include <exotica_core_task_maps/collision_distance.h>
 #include <exotica_core_task_maps/control_regularization.h>
@@ -51,6 +47,9 @@
 #include <exotica_core_task_maps/joint_velocity_limit_constraint.h>
 #include <exotica_core_task_maps/point_to_line.h>
 #include <exotica_core_task_maps/sphere_collision.h>
+#include <pybind11/eigen.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 using namespace exotica;
 namespace py = pybind11;
@@ -112,14 +111,13 @@ PYBIND11_MODULE(exotica_core_task_maps_py, module)
     py::class_<InteractionMesh, std::shared_ptr<InteractionMesh>, TaskMap>(module, "InteractionMesh")
         .def_property("W", &InteractionMesh::GetWeights, &InteractionMesh::SetWeights)
         .def("set_weight", &InteractionMesh::SetWeight)
-        .def_static("compute_goal_laplace", [](const std::vector<KDL::Frame>& nodes, Eigen::MatrixXdRefConst weights) {
+        .def_static("compute_goal_laplace", [](const std::vector<KDL::Frame>& nodes, Eigen::MatrixXdRefConst weights)
+                    {
             Eigen::VectorXd goal;
             InteractionMesh::ComputeGoalLaplace(nodes, goal, weights);
-            return goal;
-        })
-        .def_static("compute_laplace", [](Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights) {
-            return InteractionMesh::ComputeLaplace(eff_phi, weights);
-        });
+            return goal; })
+        .def_static("compute_laplace", [](Eigen::VectorXdRefConst eff_phi, Eigen::MatrixXdRefConst weights)
+                    { return InteractionMesh::ComputeLaplace(eff_phi, weights); });
 
     py::class_<JointLimit, std::shared_ptr<JointLimit>, TaskMap>(module, "JointLimit");
 
